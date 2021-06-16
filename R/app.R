@@ -14,7 +14,10 @@ myApp <- function(...) {
       shinyDirButton("inputdir", "Input directory", "Select folder with data to be processed"),
       verbatimTextOutput("inputdir", placeholder = TRUE),
       shinyDirButton("outputdir", "Output directory", "Select folder where output should be stored"),
-      verbatimTextOutput("outputdir", placeholder = TRUE)  
+      verbatimTextOutput("outputdir", placeholder = TRUE),
+      actionButton("analyse", "Analyse data"),
+      textOutput("nfiles"),
+      textOutput("result")
     ))
   
   server <- function(input, output) {
@@ -53,6 +56,24 @@ myApp <- function(...) {
                    global$data_out <-
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
                  })
+    
+    x1 <- reactive(length(dir(global$data_in)))
+    output$nfiles <- renderText({
+      paste0("There are ",x1()," files in the input folder")
+    })
+    
+    x2 <- eventReactive(input$analyse, {
+      mytool(inputdir = global$data_in, outputdir=global$data_out)
+      file.exists(paste0(global$data_out,"/results.csv"))
+    })
+   
+    output$result <- renderText({
+      if (x2() == TRUE) {
+        message = paste0("Procesing succesful")
+      } else if (x2() == FALSE) {
+        message = paste0("Procesing unsuccesful")
+      }
+    })
   }
   
   
