@@ -1,7 +1,7 @@
 library(shiny)
 library(shinyFiles)
 
-# pkgload::load_all(".")
+# pkgload::load_all("."); HabitusGUI::myApp()
 # myApp()
 # OR AFTER BUILDING IT
 # HabitusGUI::myApp()
@@ -10,16 +10,37 @@ library(shinyFiles)
 
 myApp <- function(...) {
   ui <- fluidPage( # Application title
-    mainPanel(
-      shinyDirButton("inputdir", "Input directory", "Select folder with data to be processed"),
-      verbatimTextOutput("inputdir", placeholder = TRUE),
-      shinyDirButton("outputdir", "Output directory", "Select folder where output should be stored"),
-      verbatimTextOutput("outputdir", placeholder = TRUE),
-      actionButton("analyse", "Analyse data"),
-      textOutput("nfiles"),
-      textOutput("result")
-    ))
-  
+    titlePanel("HabitusGUI"),
+    fluidRow(
+      column(6,
+             selectInput("tool", label = "Select processing tool: ", choices=c("mytool", "GGIR", "Habitus", "PALMSplus"))
+      )
+    ),
+    fluidRow(
+      column(6,
+        tags$h5(strong("Select folder with data to be processed:")),
+        shinyDirButton("inputdir", label = "Input directory", title = "Select folder with data to be processed"),
+        verbatimTextOutput("inputdir", placeholder = TRUE),
+        textOutput("nfiles"),
+      )
+    ),
+    headerPanel(""),
+    fluidRow(
+      column(6,
+             tags$h5(strong("Select folder where output should be stored:")),
+             shinyDirButton("outputdir", "Output directory", "Select folder where output should be stored"),
+             verbatimTextOutput("outputdir", placeholder = TRUE),
+      )
+    ),
+    headerPanel(""),
+    fluidRow(
+      column(6,
+             tags$h5(strong("Ready to analyse data?")),
+             actionButton("analyse", "Analyse data"),
+             textOutput("result")
+      )
+    )
+  )
   server <- function(input, output) {
     shinyDirChoose(input, 'inputdir',  roots = c(home = '~'))
     shinyDirChoose(input, 'outputdir',  roots = c(home = '~'))
@@ -57,16 +78,18 @@ myApp <- function(...) {
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
                  })
     
-    x1 <- reactive(length(dir(global$data_in)))
+    x1 <- reactive(length(grep(pattern = "[.]csv", x = dir(global$data_in))))
     output$nfiles <- renderText({
-      paste0("There are ",x1()," files in the input folder")
+      paste0("There are ",x1()," .csv files in this folder")
     })
     
     x2 <- eventReactive(input$analyse, {
-      mytool(inputdir = global$data_in, outputdir=global$data_out)
-      file.exists(paste0(global$data_out,"/results.csv"))
+      if (input$tool == "mytool") {
+        mytool(inputdir = global$data_in, outputdir=global$data_out)
+        file.exists(paste0(global$data_out,"/results.csv"))
+      }
     })
-   
+    
     output$result <- renderText({
       if (x2() == TRUE) {
         message = paste0("Procesing succesful")
