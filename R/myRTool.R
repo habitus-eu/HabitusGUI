@@ -1,4 +1,4 @@
-mytool = function(inputdir, outputdir, config) {
+myRTool = function(inputdir, outputdir, config) {
   filenames = dir(path = inputdir, full.names = TRUE)
   N = length(filenames)
   results = data.frame(ID=character(N), maxx=numeric(N), maxy=numeric(N))
