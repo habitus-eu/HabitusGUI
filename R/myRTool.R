@@ -8,7 +8,7 @@ myRTool = function(inputdir, outputdir, config) {
     results$ID[i] = unlist(strsplit(basename(filenames[i])," "))[1]
     results$maxx[i] = max(D$x)
     results$maxy[i] = max(D$y)
-    Sys.sleep(1)
+    Sys.sleep(0.5)
   }
   write.csv(x = results, file = paste0(outputdir,"/results.csv"), row.names = FALSE)
 }
