@@ -17,6 +17,7 @@
 # Old namespace file content: export(myApp)
 
 myApp <- function(...) {
+  options(shiny.launch.browser = .rs.invokeShinyWindowExternal)  
   ui <- fluidPage( # Application title
     titlePanel("HabitusGUI"),
     fluidRow(
