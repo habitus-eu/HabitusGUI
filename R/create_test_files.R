@@ -1,3 +1,11 @@
+#' create_test_files
+#'
+#' @param dir Directory where test files should be created
+#' @param Nfiles Number of files to create
+#' @param Nobs Number of observations
+#' @return no object is returned, function only writes file.
+#' @export
+
 create_test_files = function(dir=c(), Nfiles=10, Nobs = 10) {
   new_file_names = paste0(sample(x = 1:Nfiles, size = Nfiles, replace = FALSE)," recording.csv")
   for (i in 1:length(new_file_names)) {

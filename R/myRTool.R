@@ -1,3 +1,11 @@
+#' myRTool 
+#'
+#' @param inputdir Path to input directory
+#' @param outputdir Path to output directory
+#' @param config Config object
+#' @return no object is returned, only a new file is created in the output directory
+#' @export
+
 myRTool = function(inputdir, outputdir, config) {
   filenames = dir(path = inputdir, full.names = TRUE)
   N = length(filenames)

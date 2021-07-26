@@ -1,19 +1,27 @@
-library(shiny)
-library(shinyFiles)
+#' myApp
+#'
+#' @param ... No input needed, function runs the app
+#' @return no object is returned, just an app
+#' @export
+
+# library(shiny)
+# library(shinyFiles)
 
 # pkgload::load_all("."); HabitusGUI::myApp()
 # myApp()
 # OR AFTER BUILDING IT
 # HabitusGUI::myApp()
+# roxygen2::roxygenise()
 # create_test_files(dir="~/projects/fontys/testfolder", Nfiles=10, Nobs = 10)
 # mytool(inputdir="~/projects/fontys/testfolder", outputdir="~/projects/fontys", config=c())
+# Old namespace file content: export(myApp)
 
 myApp <- function(...) {
   ui <- fluidPage( # Application title
     titlePanel("HabitusGUI"),
     fluidRow(
       column(6,
-             selectInput("tool", label = "Select processing tool: ", choices=c("myRTool", "myPyTool"))
+             shiny::selectInput("tool", label = "Select processing tool: ", choices=c("myRTool", "myPyTool"))
       )
     ),
     fluidRow(
