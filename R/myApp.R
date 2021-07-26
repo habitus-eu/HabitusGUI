@@ -1,5 +1,6 @@
 #' myApp
 #'
+#'@param homedir character to specify home directory
 #' @param ... No input needed, function runs the app
 #' @return no object is returned, just an app
 #' @export
@@ -16,7 +17,7 @@
 # mytool(inputdir="~/projects/fontys/testfolder", outputdir="~/projects/fontys", config=c())
 # Old namespace file content: export(myApp)
 
-myApp <- function(...) {
+myApp <- function(homedir=getwd(), ...) {
   ui <- fluidPage( # Application title
     titlePanel("HabitusGUI"),
     fluidRow(
@@ -52,9 +53,9 @@ myApp <- function(...) {
   )
   server <- function(input, output) {
     timer = reactiveTimer(500)
-    shinyDirChoose(input, 'inputdir',  roots = c(home = '~/projects/fontys'))
-    shinyDirChoose(input, 'outputdir',  roots = c(home = '~/projects/fontys'))
-    global <- reactiveValues(data_in = getwd(), data_out = getwd())
+    shinyDirChoose(input, 'inputdir',  roots = c(home = homedir))
+    shinyDirChoose(input, 'outputdir',  roots = c(home = homedir))
+    global <- reactiveValues(data_in = homedir, data_out = homedir)
     
     inputdir <- reactive(input$inputdir)
     outputdir <- reactive(input$outputdir)
@@ -72,7 +73,7 @@ myApp <- function(...) {
                  },
                  handlerExpr = {
                    if (!"path" %in% names(inputdir())) return()
-                   home <- normalizePath("~/projects/fontys")
+                   home <- normalizePath(homedir)
                    global$data_in <-
                      file.path(home, paste(unlist(inputdir()$path[-1]), collapse = .Platform$file.sep))
                  })
@@ -83,7 +84,7 @@ myApp <- function(...) {
                  },
                  handlerExpr = {
                    if (!"path" %in% names(outputdir())) return()
-                   home <- normalizePath("~/projects/fontys")
+                   home <- normalizePath(homedir)
                    global$data_out <-
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
                  })

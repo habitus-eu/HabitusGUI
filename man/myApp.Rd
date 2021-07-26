@@ -4,9 +4,11 @@
 \alias{myApp}
 \title{myApp}
 \usage{
-myApp(...)
+myApp(homedir = getwd(), ...)
 }
 \arguments{
+\item{homedir}{character to specify home directory}
+
 \item{...}{No input needed, function runs the app}
 }
 \value{
