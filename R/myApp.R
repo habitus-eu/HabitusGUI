@@ -7,14 +7,8 @@
 
 # library(shiny)
 # library(shinyFiles)
-
-# pkgload::load_all("."); HabitusGUI::myApp()
-# myApp()
-# OR AFTER BUILDING IT
-# HabitusGUI::myApp()
+# pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys")
 # roxygen2::roxygenise()
-# create_test_files(dir="~/projects/fontys/testfolder", Nfiles=10, Nobs = 10)
-# mytool(inputdir="~/projects/fontys/testfolder", outputdir="~/projects/fontys", config=c())
 # Old namespace file content: export(myApp)
 
 myApp <- function(homedir=getwd(), ...) {
@@ -36,6 +30,14 @@ myApp <- function(homedir=getwd(), ...) {
     headerPanel(""),
     fluidRow(
       column(6,
+             tags$h5(strong("Create dummy file?")),
+             actionButton("simdata", "Create dummy files"),
+             textOutput("sim_message"),
+      )
+    ),
+    headerPanel(""),
+    fluidRow(
+      column(6,
              tags$h5(strong("Select folder where output should be stored:")),
              shinyDirButton("outputdir", "Output directory", "Select folder where output should be stored"),
              verbatimTextOutput("outputdir", placeholder = TRUE),
@@ -47,7 +49,7 @@ myApp <- function(homedir=getwd(), ...) {
       column(6,
              tags$h5(strong("Ready to analyse data?")),
              actionButton("analyse", "Analyse data"),
-             textOutput("result")
+             textOutput("analyse_message")
       )
     )
   )
@@ -106,7 +108,25 @@ myApp <- function(homedir=getwd(), ...) {
       paste0("There are ",x3()," .csv files in this folder")
     })
     
+    
+    x4 <- eventReactive(input$simdata, {
+      print("simulatedate")
+      Nbefore = length(dir(path = global$data_in, full.names = FALSE))
+      create_test_files(dir = global$data_in, Nfiles = 10, Nobs = 10)
+      Nafter = length(dir(path = global$data_in, full.names = FALSE))
+      test = Nafter > Nbefore
+      return(test)
+    })
+    output$sim_message <- renderText({
+      if (x4() == TRUE) {
+        message = paste0("New files created ",Sys.time())
+      } else if (x4() == FALSE) {
+        message = paste0("No files created ",Sys.time())
+      }
+    })
+
     x2 <- eventReactive(input$analyse, {
+      print("analyse")
       if (input$tool == "myRTool") {
         myRTool(inputdir = global$data_in, outputdir=global$data_out)
         test = file.exists(paste0(global$data_out,"/results.csv"))
@@ -117,7 +137,7 @@ myApp <- function(homedir=getwd(), ...) {
       }
       return(test)
     })
-    output$result <- renderText({
+    output$analyse_message <- renderText({
       if (x2() == TRUE) {
         message = paste0("Procesing succesful ",Sys.time())
       } else if (x2() == FALSE) {
