@@ -18,5 +18,8 @@ myRTool = function(inputdir, outputdir, config) {
     results$maxy[i] = max(D$y)
     Sys.sleep(0.5)
   }
+  if (!is.null(config)) {
+    print(paste0("Configure file: ", config))
+  }
   write.csv(x = results, file = paste0(outputdir,"/results.csv"), row.names = FALSE)
 }

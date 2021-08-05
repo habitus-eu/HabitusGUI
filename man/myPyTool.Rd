@@ -4,7 +4,7 @@
 \alias{myPyTool}
 \title{myPyTool}
 \usage{
-myPyTool(inputdir, outputdir)
+myPyTool(inputdir, outputdir, sleepdiary)
 }
 \arguments{
 \item{inputdir}{Path to input directory}

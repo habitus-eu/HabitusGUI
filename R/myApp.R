@@ -8,26 +8,30 @@
 # library(shiny)
 # library(shinyFiles)
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys")
+# pkgload::load_all("."); myApp(homedir="~/projects/fontys")
 # roxygen2::roxygenise()
 # Old namespace file content: export(myApp)
 
 myApp <- function(homedir=getwd(), ...) {
-  ui <- fluidPage( # Application title
+  ui <- fluidPage(
     titlePanel("HabitusGUI"),
+    # Select tool -----------------------------------------
     fluidRow(
       column(6,
              shiny::selectInput("tool", label = "Select processing tool: ", choices=c("myRTool", "myPyTool"))
       )
     ),
+    # Select input folder -----------------------------------
     fluidRow(
       column(6,
-        tags$h5(strong("Select folder with data to be processed:")),
-        shinyDirButton("inputdir", label = "Input directory", title = "Select folder with data to be processed"),
-        verbatimTextOutput("inputdir", placeholder = TRUE),
-        textOutput("nfilesin"),
+             tags$h5(strong("Select folder with data to be processed:")),
+             shinyDirButton("inputdir", label = "Input directory", title = "Select folder with data to be processed"),
+             verbatimTextOutput("inputdir", placeholder = TRUE),
+             textOutput("nfilesin"),
       )
     ),
     headerPanel(""),
+    # Option create dummy files in input directory ---------------------------
     fluidRow(
       column(6,
              tags$h5(strong("Create dummy file?")),
@@ -36,6 +40,21 @@ myApp <- function(homedir=getwd(), ...) {
       )
     ),
     headerPanel(""),
+    # Upload configuration file -----------------------------------------------
+    fluidRow(
+      column(6,
+             fileInput("configfile", "Upload configuration file"),
+             textOutput("configext")
+      )
+    ),
+    # Upload sleep diary ----------------------------------------------------
+    fluidRow(
+      column(6,
+             fileInput("sleepdiaryfile", "Upload sleepdiary file"),
+             textOutput("sleepdiaryext")
+      )
+    ),
+    # Specify output directory ----------------------------------------------
     fluidRow(
       column(6,
              tags$h5(strong("Select folder where output should be stored:")),
@@ -45,6 +64,7 @@ myApp <- function(homedir=getwd(), ...) {
       )
     ),
     headerPanel(""),
+    # Button to start analysis ---------------------------------------------
     fluidRow(
       column(6,
              tags$h5(strong("Ready to analyse data?")),
@@ -54,26 +74,26 @@ myApp <- function(homedir=getwd(), ...) {
     )
   )
   server <- function(input, output) {
-    timer = reactiveTimer(500)
+    # Defined time to ensure file count is only checked twice per second ---------
+    timer = reactiveTimer(500) 
+    # Extract directories ---------------
     shinyDirChoose(input, 'inputdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'outputdir',  roots = c(home = homedir))
-    global <- reactiveValues(data_in = homedir, data_out = homedir)
     
+    # Capture provided directories in reactive object ----------------------------
     inputdir <- reactive(input$inputdir)
     outputdir <- reactive(input$outputdir)
+    sleepdiaryfile <- reactive(input$sleepdiaryfile$datapath)
+    configfile <- reactive(input$configfile$datapath)
+    # Create global with directories and give it default values -------
+    global <- reactiveValues(data_in = homedir, data_out = homedir)
     
-    output$inputdir <- renderText({
-      global$data_in
-    })
-    output$outputdir <- renderText({
-      global$data_out
-    })
-    
+    # Update global when input changes
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
-                   input$inputdir
+                   input$inputdir # every time input$inputdir updates ...
                  },
-                 handlerExpr = {
+                 handlerExpr = { # ... we re-assign global$data_in
                    if (!"path" %in% names(inputdir())) return()
                    home <- normalizePath(homedir)
                    global$data_in <-
@@ -82,24 +102,31 @@ myApp <- function(homedir=getwd(), ...) {
     
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
-                   input$outputdir
+                   input$outputdir # every time input$outputdir updates ...
                  },
-                 handlerExpr = {
+                 handlerExpr = { # ... we re-assign global$data_out
                    if (!"path" %in% names(outputdir())) return()
                    home <- normalizePath(homedir)
                    global$data_out <-
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
                  })
+    # Send directories to UI --------------------------------------------
+    output$inputdir <- renderText({
+      global$data_in
+    })
+    output$outputdir <- renderText({
+      global$data_out
+    })
     
+    # Count files in input directory and send to UI ------------------------------
     x1 <- reactive({
       timer()
       length(grep(pattern = "[.]csv", x = dir(global$data_in)))
     })
-    
     output$nfilesin <- renderText({
       paste0("There are ",x1()," .csv files in this folder")
     })
-    
+    # Count files in output directory and send to UI ------------------------------
     x3 <- reactive({
       timer()
       length(grep(pattern = "[.]csv", x = dir(global$data_out)))
@@ -107,16 +134,32 @@ myApp <- function(homedir=getwd(), ...) {
     output$nfilesout <- renderText({
       paste0("There are ",x3()," .csv files in this folder")
     })
-    
-    
+    # Extract file extension of configuration file and send to UI ----------------
+    configdata <- reactive({
+      req(input$configfile)
+      ext <- tools::file_ext(input$configfile$name)
+    })
+    output$configext <- renderText({
+      configdata()
+    })
+    # Extract file extension of sleep diary file and send to UI ------------------
+    sleepdiarydata <- reactive({
+      req(input$sleepdiaryfile)
+      ext <- tools::file_ext(input$sleepdiaryfile$name)
+    })
+    output$sleepdiaryext <- renderText({
+      sleepdiarydata()
+    })
+    # Create simulated data files after button is pressed ------------------------
     x4 <- eventReactive(input$simdata, {
-      print("simulatedate")
+      print("simulatedata")
       Nbefore = length(dir(path = global$data_in, full.names = FALSE))
       create_test_files(dir = global$data_in, Nfiles = 10, Nobs = 10)
       Nafter = length(dir(path = global$data_in, full.names = FALSE))
       test = Nafter > Nbefore
       return(test)
     })
+    # Update message on whether simulated files were created ---------------------
     output$sim_message <- renderText({
       if (x4() == TRUE) {
         message = paste0("New files created ",Sys.time())
@@ -124,19 +167,20 @@ myApp <- function(homedir=getwd(), ...) {
         message = paste0("No files created ",Sys.time())
       }
     })
-
+    # Apply tool after analyse-button is pressed ---------------------------------
     x2 <- eventReactive(input$analyse, {
       print("analyse")
       if (input$tool == "myRTool") {
-        myRTool(inputdir = global$data_in, outputdir=global$data_out)
+        myRTool(inputdir = global$data_in, outputdir=global$data_out, config=configfile())
         test = file.exists(paste0(global$data_out,"/results.csv"))
       }
       if (input$tool == "myPyTool") {
-        myPyTool(inputdir = global$data_in, outputdir=global$data_out)
+        myPyTool(inputdir = global$data_in, outputdir=global$data_out, sleepdiary=sleepdiaryfile())
         test = file.exists(paste0(global$data_out,"/testpython.csv"))
       }
       return(test)
     })
+    # If analyse-button pressed send message to UI about success ----------------
     output$analyse_message <- renderText({
       if (x2() == TRUE) {
         message = paste0("Procesing succesful ",Sys.time())
