@@ -24,7 +24,8 @@ myApp <- function(homedir=getwd(), ...) {
                # Select tool -----------------------------------------
                fluidRow(
                  column(6,
-                        shiny::selectInput("tool", label = "Select processing tool: ", choices=c("myRTool", "myPyTool"))
+                        shiny::selectInput("tool", label = "Select processing tool: ", 
+                                           choices=c("myRTool", "myPyTool", "GGIR"))
                  )
                ),
                # Select input folder -----------------------------------
@@ -45,12 +46,12 @@ myApp <- function(homedir=getwd(), ...) {
                ),
                headerPanel(""),
                # Upload configuration file -----------------------------------------------
-               conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
+               conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`GGIR`",
                                 fileInput("configfile", "Upload configuration file"),
                                 textOutput("configext"),
                ),
                # Upload sleep diary ----------------------------------------------------
-               conditionalPanel(condition = "input.tool==`myPyTool`",
+               conditionalPanel(condition = "input.tool==`myPyTool` || input.tool==`GGIR`",
                                 fileInput("sleepdiaryfile", "Upload sleepdiary file"),
                                 textOutput("sleepdiaryext")
                ),
@@ -195,6 +196,10 @@ myApp <- function(homedir=getwd(), ...) {
       if (input$tool == "myPyTool") {
         myPyTool(inputdir = global$data_in, outputdir=global$data_out, sleepdiary=sleepdiaryfile())
         test = file.exists(paste0(global$data_out,"/testpython.csv"))
+      }
+      if (input$tool == "GGIR") {
+        GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, config=configfile(), sleepdiary=sleepdiaryfile())
+        test = file.exists(paste0(global$data_out,"/output_,",basename(global$data_out),"/results/part2_summary.csv"))
       }
       return(test)
     })
