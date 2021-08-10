@@ -16,60 +16,82 @@
 
 myApp <- function(homedir=getwd(), ...) {
   ui <- fluidPage(
-    titlePanel("HabitusGUI"),
-    # Select tool -----------------------------------------
-    fluidRow(
-      column(6,
-             shiny::selectInput("tool", label = "Select processing tool: ", choices=c("myRTool", "myPyTool"))
-      )
-    ),
-    # Select input folder -----------------------------------
-    fluidRow(
-      column(6,
-             tags$h5(strong("Select folder with data to be processed:")),
-             shinyDirButton("inputdir", label = "Input directory", title = "Select folder with data to be processed"),
-             verbatimTextOutput("inputdir", placeholder = TRUE),
-             textOutput("nfilesin"),
-      )
-    ),
-    headerPanel(""),
-    # Option create dummy files in input directory ---------------------------
-    conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
-                     tags$h5(strong("Create dummy file?")),
-                     actionButton("simdata", "Create dummy files"),
-                     textOutput("sim_message"),
-    ),
-    headerPanel(""),
-    # Upload configuration file -----------------------------------------------
-    conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
-                     fileInput("configfile", "Upload configuration file"),
-                     textOutput("configext"),
-    ),
-    # Upload sleep diary ----------------------------------------------------
-    conditionalPanel(condition = "input.tool==`myPyTool`",
-                     fileInput("sleepdiaryfile", "Upload sleepdiary file"),
-                     textOutput("sleepdiaryext")
-    ),
-    # Specify output directory ----------------------------------------------
-    fluidRow(
-      column(6,
-             tags$h5(strong("Select folder where output should be stored:")),
-             shinyDirButton("outputdir", "Output directory", "Select folder where output should be stored"),
-             verbatimTextOutput("outputdir", placeholder = TRUE),
-             textOutput("nfilesout"),
-      )
-    ),
-    headerPanel(""),
-    # Button to start analysis ---------------------------------------------
-    fluidRow(
-      column(6,
-             tags$h5(strong("Ready to analyse data?")),
-             actionButton("analyse", "Analyse data"),
-             textOutput("analyse_message")
+    tabsetPanel(
+      id = "wizard",
+      type= "hidden",
+      tabPanel("page_1",
+               titlePanel("HabitusGUI"),
+               # Select tool -----------------------------------------
+               fluidRow(
+                 column(6,
+                        shiny::selectInput("tool", label = "Select processing tool: ", choices=c("myRTool", "myPyTool"))
+                 )
+               ),
+               # Select input folder -----------------------------------
+               fluidRow(
+                 column(6,
+                        tags$h5(strong("Select folder with data to be processed:")),
+                        shinyDirButton("inputdir", label = "Input directory", title = "Select folder with data to be processed"),
+                        verbatimTextOutput("inputdir", placeholder = TRUE),
+                        textOutput("nfilesin"),
+                 )
+               ),
+               headerPanel(""),
+               # Option create dummy files in input directory ---------------------------
+               conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
+                                tags$h5(strong("Create dummy file?")),
+                                actionButton("simdata", "Create dummy files"),
+                                textOutput("sim_message"),
+               ),
+               headerPanel(""),
+               # Upload configuration file -----------------------------------------------
+               conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
+                                fileInput("configfile", "Upload configuration file"),
+                                textOutput("configext"),
+               ),
+               # Upload sleep diary ----------------------------------------------------
+               conditionalPanel(condition = "input.tool==`myPyTool`",
+                                fileInput("sleepdiaryfile", "Upload sleepdiary file"),
+                                textOutput("sleepdiaryext")
+               ),
+               # Specify output directory ----------------------------------------------
+               fluidRow(
+                 column(6,
+                        tags$h5(strong("Select folder where output should be stored:")),
+                        shinyDirButton("outputdir", "Output directory", "Select folder where output should be stored"),
+                        verbatimTextOutput("outputdir", placeholder = TRUE),
+                        textOutput("nfilesout"),
+                 )
+               ),
+               actionButton("page_12", "next")
+      ),
+      tabPanel("page_2",
+               titlePanel("Configuration check"),
+               actionButton("page_21", "prev"),
+               actionButton("page_23", "next")
+      ),
+      tabPanel("page_3",
+               # Button to start analysis ---------------------------------------------
+               titlePanel("Analyse"),
+               tags$h5(strong("Ready to analyse data?")),
+               actionButton("analyse", "Analyse data"),
+               textOutput("analyse_message"),
+               headerPanel(""),
+               actionButton("page_32", "prev")
       )
     )
   )
+  
   server <- function(input, output) {
+    switch_page <- function(i) {
+      updateTabsetPanel(inputId = "wizard",
+                        selected = paste0("page_", i))
+    }
+    observeEvent(input$page_12, switch_page(2))
+    observeEvent(input$page_21, switch_page(1))
+    observeEvent(input$page_23, switch_page(3))
+    observeEvent(input$page_32, switch_page(2))
+    
     # Defined time to ensure file count is only checked twice per second ---------
     timer = reactiveTimer(500) 
     # Extract directories ---------------
