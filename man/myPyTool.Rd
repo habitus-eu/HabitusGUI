@@ -10,6 +10,8 @@ myPyTool(inputdir, outputdir, sleepdiary)
 \item{inputdir}{Path to input directory}
 
 \item{outputdir}{Path to output directory}
+
+\item{sleepdiary}{Path to sleep diary}
 }
 \value{
 no object is returned, function only writes message to console and writes file.

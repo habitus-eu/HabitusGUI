@@ -4,6 +4,8 @@
 #' @param Nfiles Number of files to create
 #' @param Nobs Number of observations
 #' @return no object is returned, function only writes file.
+#' @importFrom utils write.csv
+#' @importFrom stats rnorm runif
 #' @export
 
 create_test_files = function(dir=c(), Nfiles=10, Nobs = 10) {

@@ -8,7 +8,7 @@ Authors@R:
            email = "v.vanhees@accelting.com")
 Description: Shiny app to aid processing wearable sensor data in Habitus.
 License: Apache License version 2.0 | file LICENSE
-Depends: shiny, shinyFiles
+Imports: shiny, shinyFiles, stats, utils
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

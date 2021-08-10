@@ -4,6 +4,7 @@
 #' @param outputdir Path to output directory
 #' @param config Config object
 #' @return no object is returned, only a new file is created in the output directory
+#' @importFrom utils read.csv
 #' @export
 
 myRTool = function(inputdir, outputdir, config) {

@@ -3,6 +3,8 @@
 #'@param homedir character to specify home directory
 #' @param ... No input needed, function runs the app
 #' @return no object is returned, just an app
+#' @import shiny
+#' @import shinyFiles
 #' @export
 
 # library(shiny)
@@ -32,27 +34,21 @@ myApp <- function(homedir=getwd(), ...) {
     ),
     headerPanel(""),
     # Option create dummy files in input directory ---------------------------
-    fluidRow(
-      column(6,
-             tags$h5(strong("Create dummy file?")),
-             actionButton("simdata", "Create dummy files"),
-             textOutput("sim_message"),
-      )
+    conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
+                     tags$h5(strong("Create dummy file?")),
+                     actionButton("simdata", "Create dummy files"),
+                     textOutput("sim_message"),
     ),
     headerPanel(""),
     # Upload configuration file -----------------------------------------------
-    fluidRow(
-      column(6,
-             fileInput("configfile", "Upload configuration file"),
-             textOutput("configext")
-      )
+    conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
+                     fileInput("configfile", "Upload configuration file"),
+                     textOutput("configext"),
     ),
     # Upload sleep diary ----------------------------------------------------
-    fluidRow(
-      column(6,
-             fileInput("sleepdiaryfile", "Upload sleepdiary file"),
-             textOutput("sleepdiaryext")
-      )
+    conditionalPanel(condition = "input.tool==`myPyTool`",
+                     fileInput("sleepdiaryfile", "Upload sleepdiary file"),
+                     textOutput("sleepdiaryext")
     ),
     # Specify output directory ----------------------------------------------
     fluidRow(
