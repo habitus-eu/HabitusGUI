@@ -3,11 +3,12 @@
 #' @param inputdir Path to input directory
 #' @param outputdir Path to output directory
 #' @param config Config object
+#' @param desiredtz Desired tz databasename
 #' @return no object is returned, only a new file is created in the output directory
 #' @importFrom utils read.csv
 #' @export
 
-myRTool = function(inputdir, outputdir, config) {
+myRTool = function(inputdir, outputdir, config, desiredtz=c()) {
   filenames = dir(path = inputdir, full.names = TRUE)
   N = length(filenames)
   results = data.frame(ID=character(N), maxx=numeric(N), maxy=numeric(N))
@@ -19,6 +20,7 @@ myRTool = function(inputdir, outputdir, config) {
     results$maxy[i] = max(D$y)
     Sys.sleep(0.5)
   }
+  if (length(desiredtz) > 0) print(desiredtz)
   if (!is.null(config)) {
     print(paste0("Configure file: ", config))
   }

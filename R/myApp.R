@@ -68,6 +68,21 @@ myApp <- function(homedir=getwd(), ...) {
       ),
       tabPanel("page_2",
                titlePanel("Configuration check"),
+               conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`GGIR`",
+                                # Show current timezone in configuration file -------------------
+                                textOutput("tz_message"),
+                                # Ask user whether to update timezone?
+                                checkboxInput("select_timezone", "Change timezone?", value=FALSE),
+                                # If yes, show option select button
+                                conditionalPanel(condition = "input.select_timezone == 1",
+                                                 # Select timezone -----------------------------------------
+                                                 shiny::selectInput("timezone", 
+                                                                    label = "Select or type the timezone where data was collected: ", 
+                                                                    choices=OlsonNames()),
+                                                 actionButton("update_timezone", "Update timezone?"),
+                                                 textOutput("tzupdate_message")
+                                )
+               ),
                actionButton("page_21", "prev"),
                actionButton("page_23", "next")
       ),
@@ -186,11 +201,52 @@ myApp <- function(homedir=getwd(), ...) {
         message = paste0("No files created ",Sys.time())
       }
     })
+    # Load config file and check desiredtz
+    x5 <- eventReactive(input$page_12, {
+      desiredtz = checkGGIRconfig(configfile())
+      return(desiredtz)
+    })
+    
+    # Show current desiredtz
+    output$tz_message <- renderText({
+      if (is.null(configfile()) == FALSE) {
+        message = paste0("Timezone in configuration file: ", x5())
+      } else {
+        message = paste0("No configuration file specified. Default system timezone: ", Sys.timezone())
+      }
+    })
+    
+    # Update timezone in config file or provide timezone to analys step ------------
+    x6 <- eventReactive(input$update_timezone, {
+      if (is.null(configfile()) == FALSE) { # if configile exists
+        updateGGIRconfig(configfile(), new_desiredtz=input$timezone)
+        tz_in_file = TRUE
+      } else {# if configfile does not exists
+        # create desiredtz object and give it to analyse
+        tz_in_file = FALSE
+      }
+      return(tz_in_file)
+    })
+    
+    
+    # If analyse-button pressed send message to UI about success ----------------
+    output$tzupdate_message <- renderText({
+      if (x6() == TRUE) {
+        message = paste0("Tz update succesful ",Sys.time())
+      } else if (x6() == FALSE) {
+        message = paste0("Tz update unsuccesful ",Sys.time())
+      }
+    })
+    
     # Apply tool after analyse-button is pressed ---------------------------------
     x2 <- eventReactive(input$analyse, {
       print("analyse")
       if (input$tool == "myRTool") {
-        myRTool(inputdir = global$data_in, outputdir=global$data_out, config=configfile())
+        if (x6() == FALSE) { # no configfile specified, so use user specified timezone
+          myRTool(inputdir = global$data_in, outputdir=global$data_out, desiredtz=input$timezone)
+        } else { # config file specified and possible update, so use this
+          myRTool(inputdir = global$data_in, outputdir=global$data_out, config=configfile())
+        }
         test = file.exists(paste0(global$data_out,"/results.csv"))
       }
       if (input$tool == "myPyTool") {
@@ -198,11 +254,18 @@ myApp <- function(homedir=getwd(), ...) {
         test = file.exists(paste0(global$data_out,"/testpython.csv"))
       }
       if (input$tool == "GGIR") {
-        GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, config=configfile(), sleepdiary=sleepdiaryfile())
+        if (x6() == FALSE) { # no configfile specified, so use user specified timezone
+          GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, 
+                    sleepdiary=sleepdiaryfile(), desiredtz=input$timezone)
+        } else { # config file specified and possible update, so use this
+          GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, config=configfile(), 
+                    sleepdiary=sleepdiaryfile())
+        }
         test = file.exists(paste0(global$data_out,"/output_,",basename(global$data_out),"/results/part2_summary.csv"))
       }
       return(test)
     })
+   
     # If analyse-button pressed send message to UI about success ----------------
     output$analyse_message <- renderText({
       if (x2() == TRUE) {

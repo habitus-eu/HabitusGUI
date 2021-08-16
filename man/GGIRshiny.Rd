@@ -2,9 +2,9 @@
 % Please edit documentation in R/GGIRshiny.R
 \name{GGIRshiny}
 \alias{GGIRshiny}
-\title{GGIR}
+\title{GGIRshiny}
 \usage{
-GGIRshiny(inputdir, outputdir, config, sleepdiary)
+GGIRshiny(inputdir, outputdir, config, sleepdiary, desiredtz = c())
 }
 \arguments{
 \item{inputdir}{Path to input directory}
@@ -14,10 +14,12 @@ GGIRshiny(inputdir, outputdir, config, sleepdiary)
 \item{config}{Config object}
 
 \item{sleepdiary}{Path to sleep diary}
+
+\item{desiredtz}{Desired tz databasename}
 }
 \value{
 no object is returned, only a new file is created in the output directory
 }
 \description{
-GGIR
+GGIRshiny
 }
