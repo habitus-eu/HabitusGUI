@@ -8,7 +8,7 @@
 #' @importFrom utils read.csv
 #' @export
 
-myRTool = function(inputdir, outputdir, config, desiredtz=c()) {
+myRTool = function(inputdir, outputdir, config=c(), desiredtz=c()) {
   filenames = dir(path = inputdir, full.names = TRUE)
   N = length(filenames)
   results = data.frame(ID=character(N), maxx=numeric(N), maxy=numeric(N))

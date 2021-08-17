@@ -4,14 +4,20 @@
 \alias{GGIRshiny}
 \title{GGIRshiny}
 \usage{
-GGIRshiny(inputdir, outputdir, config, sleepdiary, desiredtz = c())
+GGIRshiny(
+  inputdir,
+  outputdir,
+  configfile = c(),
+  sleepdiary = c(),
+  desiredtz = c()
+)
 }
 \arguments{
 \item{inputdir}{Path to input directory}
 
 \item{outputdir}{Path to output directory}
 
-\item{config}{Config object}
+\item{configfile}{Configfile path}
 
 \item{sleepdiary}{Path to sleep diary}
 

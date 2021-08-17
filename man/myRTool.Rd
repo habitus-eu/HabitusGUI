@@ -4,7 +4,7 @@
 \alias{myRTool}
 \title{myRTool}
 \usage{
-myRTool(inputdir, outputdir, config, desiredtz = c())
+myRTool(inputdir, outputdir, config = c(), desiredtz = c())
 }
 \arguments{
 \item{inputdir}{Path to input directory}

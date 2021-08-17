@@ -1,73 +1,76 @@
 #' myApp
 #'
-#'@param homedir character to specify home directory
+#' @param homedir character to specify home directory
 #' @param ... No input needed, function runs the app
 #' @return no object is returned, just an app
 #' @import shiny
 #' @import shinyFiles
+#' @import bslib
 #' @export
 
-# library(shiny)
-# library(shinyFiles)
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys")
 # pkgload::load_all("."); myApp(homedir="~/projects/fontys")
 # roxygen2::roxygenise()
-# Old namespace file content: export(myApp)
 
 myApp <- function(homedir=getwd(), ...) {
+  ONames <- OlsonNames()
+  ONames <- ONames[c(which(ONames == Sys.timezone()), which(ONames != Sys.timezone()))]
   ui <- fluidPage(
+    theme = bslib::bs_theme(bootswatch = NULL),
     tabsetPanel(
       id = "wizard",
       type= "hidden",
       tabPanel("page_1",
-               titlePanel("HabitusGUI"),
+               titlePanel("Welcome to Habitus"),
                # Select tool -----------------------------------------
                fluidRow(
                  column(6,
-                        shiny::selectInput("tool", label = "Select processing tool: ", 
-                                           choices=c("myRTool", "myPyTool", "GGIR"))
+                        selectInput("tool", label = "Select processing tool: ", 
+                                    choices=c("myRTool", "myPyTool", "GGIR", "PALMSpy", "PALMSplus"))
                  )
                ),
                # Select input folder -----------------------------------
                fluidRow(
-                 column(6,
-                        tags$h5(strong("Select folder with data to be processed:")),
-                        shinyDirButton("inputdir", label = "Input directory", title = "Select folder with data to be processed"),
+                 column(12,
+                        # tags$h5(strong("Select folder that has the accelerometer data:")),
+                        shinyFiles::shinyDirButton("inputdir", label = "Accelerometer data directory...", title = "Select folder with accelerometer data"),
                         verbatimTextOutput("inputdir", placeholder = TRUE),
-                        textOutput("nfilesin"),
                  )
-               ),
-               headerPanel(""),
-               # Option create dummy files in input directory ---------------------------
-               conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
-                                tags$h5(strong("Create dummy file?")),
-                                actionButton("simdata", "Create dummy files"),
-                                textOutput("sim_message"),
-               ),
-               headerPanel(""),
-               # Upload configuration file -----------------------------------------------
-               conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`GGIR`",
-                                fileInput("configfile", "Upload configuration file"),
-                                textOutput("configext"),
-               ),
-               # Upload sleep diary ----------------------------------------------------
-               conditionalPanel(condition = "input.tool==`myPyTool` || input.tool==`GGIR`",
-                                fileInput("sleepdiaryfile", "Upload sleepdiary file"),
-                                textOutput("sleepdiaryext")
                ),
                # Specify output directory ----------------------------------------------
                fluidRow(
-                 column(6,
-                        tags$h5(strong("Select folder where output should be stored:")),
-                        shinyDirButton("outputdir", "Output directory", "Select folder where output should be stored"),
+                 column(12,
+                        # tags$h5(strong("Select folder where output should be stored:")),
+                        shinyFiles::shinyDirButton("outputdir", "Output directory...", "Select folder where output should be stored"),
                         verbatimTextOutput("outputdir", placeholder = TRUE),
-                        textOutput("nfilesout"),
+
                  )
                ),
+               # Option create dummy files in input directory ---------------------------
+               conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
+                                # tags$h5(strong("Create dummy file?")),
+                                actionButton("simdata", "Create dummy files for testing the app", class="btn-danger"),
+                                textOutput("sim_message"),
+               ),
+               # Upload configuration file -----------------------------------------------
+               conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`GGIR`",
+                                fileInput("configfile", label="", buttonLabel = "Configuration file..."), #"Upload configuration file"
+                                # textOutput("configext"),
+               ),
+               # Upload sleep diary ----------------------------------------------------
+               conditionalPanel(condition = "input.tool==`myPyTool` || input.tool==`GGIR`",
+                                fileInput("sleepdiaryfile", label="", buttonLabel = "Sleep diary file..."), #"Upload sleepdiary file"
+                                # textOutput("sleepdiaryext")
+               ),
+               hr(),
                actionButton("page_12", "next")
       ),
       tabPanel("page_2",
-               titlePanel("Configuration check"),
+               titlePanel("Check and update configuration"),
+               headerPanel(""),
+               textOutput("nfilesin"),
+               textOutput("nfilesout"),
+               headerPanel(""),
                conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`GGIR`",
                                 # Show current timezone in configuration file -------------------
                                 textOutput("tz_message"),
@@ -77,22 +80,26 @@ myApp <- function(homedir=getwd(), ...) {
                                 conditionalPanel(condition = "input.select_timezone == 1",
                                                  # Select timezone -----------------------------------------
                                                  shiny::selectInput("timezone", 
-                                                                    label = "Select or type the timezone where data was collected: ", 
-                                                                    choices=OlsonNames()),
-                                                 actionButton("update_timezone", "Update timezone?"),
-                                                 textOutput("tzupdate_message")
+                                                                    label = "Select or type the timezone where the data was collected: ", 
+                                                                    choices=ONames),
+                                                 conditionalPanel(condition = "output.config_file_ready",
+                                                                  actionButton("update_timezone", "Update timezone in configuration file?"),
+                                                                  textOutput("tzupdate_message")
+                                                 )
                                 )
                ),
+               hr(),
                actionButton("page_21", "prev"),
                actionButton("page_23", "next")
       ),
       tabPanel("page_3",
                # Button to start analysis ---------------------------------------------
-               titlePanel("Analyse"),
-               tags$h5(strong("Ready to analyse data?")),
-               actionButton("analyse", "Analyse data"),
+               
+               titlePanel("Analysis"),
+               actionButton("analyse", "Run analysis"),
                textOutput("analyse_message"),
                headerPanel(""),
+               hr(),
                actionButton("page_32", "prev")
       )
     )
@@ -120,7 +127,7 @@ myApp <- function(homedir=getwd(), ...) {
     sleepdiaryfile <- reactive(input$sleepdiaryfile$datapath)
     configfile <- reactive(input$configfile$datapath)
     # Create global with directories and give it default values -------
-    global <- reactiveValues(data_in = homedir, data_out = homedir)
+    global <- reactiveValues(data_in = homedir, data_out = homedir, desiredtz=Sys.timezone)
     
     # Update global when input changes
     observeEvent(ignoreNULL = TRUE,
@@ -144,6 +151,13 @@ myApp <- function(homedir=getwd(), ...) {
                    global$data_out <-
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
                  })
+    observeEvent(ignoreNULL = TRUE,
+                 eventExpr = {
+                   input$timezone # every time input$timezone updates ...
+                 },
+                 handlerExpr = { # ... we re-assign global$desiredtz
+                   global$desiredtz <-input$timezone
+                 })
     # Send directories to UI --------------------------------------------
     output$inputdir <- renderText({
       global$data_in
@@ -158,7 +172,7 @@ myApp <- function(homedir=getwd(), ...) {
       length(grep(pattern = "[.]csv", x = dir(global$data_in)))
     })
     output$nfilesin <- renderText({
-      paste0("There are ",x1()," .csv files in this folder")
+      paste0("There are ",x1()," .csv files in the data folder")
     })
     # Count files in output directory and send to UI ------------------------------
     x3 <- reactive({
@@ -166,7 +180,7 @@ myApp <- function(homedir=getwd(), ...) {
       length(grep(pattern = "[.]csv", x = dir(global$data_out)))
     })
     output$nfilesout <- renderText({
-      paste0("There are ",x3()," .csv files in this folder")
+      paste0("There are ",x3()," .csv files in the output folder")
     })
     # Extract file extension of configuration file and send to UI ----------------
     configdata <- reactive({
@@ -186,7 +200,7 @@ myApp <- function(homedir=getwd(), ...) {
     })
     # Create simulated data files after button is pressed ------------------------
     x4 <- eventReactive(input$simdata, {
-      print("simulatedata")
+      print("Creating test files...")
       Nbefore = length(dir(path = global$data_in, full.names = FALSE))
       create_test_files(dir = global$data_in, Nfiles = 10, Nobs = 10)
       Nafter = length(dir(path = global$data_in, full.names = FALSE))
@@ -201,25 +215,31 @@ myApp <- function(homedir=getwd(), ...) {
         message = paste0("No files created ",Sys.time())
       }
     })
-    # Load config file and check desiredtz
+    # Load config file and check desiredtz ---------------------------------------
     x5 <- eventReactive(input$page_12, {
       desiredtz = checkGGIRconfig(configfile())
       return(desiredtz)
     })
     
-    # Show current desiredtz
+    # Check whether configuration file was uploaded, because this defines whether 
+    # the configfile update button should be visible -----------------------------
+    output$config_file_ready <- reactive({
+      return(!is.null(input$configfile))
+    })
+    outputOptions(output, "config_file_ready", suspendWhenHidden = FALSE)
+    # Show current desiredtz -----------------------------------------------------
     output$tz_message <- renderText({
       if (is.null(configfile()) == FALSE) {
         message = paste0("Timezone in configuration file: ", x5())
       } else {
-        message = paste0("No configuration file specified. Default system timezone: ", Sys.timezone())
+        message = paste0("Default system timezone: ", Sys.timezone())
       }
     })
     
     # Update timezone in config file or provide timezone to analys step ------------
     x6 <- eventReactive(input$update_timezone, {
       if (is.null(configfile()) == FALSE) { # if configile exists
-        updateGGIRconfig(configfile(), new_desiredtz=input$timezone)
+        updateGGIRconfig(configfile(), new_desiredtz=global$desiredtz)
         tz_in_file = TRUE
       } else {# if configfile does not exists
         # create desiredtz object and give it to analyse
@@ -240,11 +260,11 @@ myApp <- function(homedir=getwd(), ...) {
     
     # Apply tool after analyse-button is pressed ---------------------------------
     x2 <- eventReactive(input$analyse, {
-      print("analyse")
+      print("Running analysis...")
       if (input$tool == "myRTool") {
-        if (x6() == FALSE) { # no configfile specified, so use user specified timezone
-          myRTool(inputdir = global$data_in, outputdir=global$data_out, desiredtz=input$timezone)
-        } else { # config file specified and possible update, so use this
+        if (is.null(configfile())) { # no configfile specified
+          myRTool(inputdir = global$data_in, outputdir=global$data_out, desiredtz=global$desiredtz)
+        } else { # config file specified and possible updated
           myRTool(inputdir = global$data_in, outputdir=global$data_out, config=configfile())
         }
         test = file.exists(paste0(global$data_out,"/results.csv"))
@@ -254,18 +274,23 @@ myApp <- function(homedir=getwd(), ...) {
         test = file.exists(paste0(global$data_out,"/testpython.csv"))
       }
       if (input$tool == "GGIR") {
-        if (x6() == FALSE) { # no configfile specified, so use user specified timezone
+        if (is.null(configfile())) { # no configfile specified
           GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, 
-                    sleepdiary=sleepdiaryfile(), desiredtz=input$timezone)
-        } else { # config file specified and possible update, so use this
-          GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, config=configfile(), 
-                    sleepdiary=sleepdiaryfile())
+                    sleepdiary=sleepdiaryfile(), desiredtz=global$desiredtz)
+        } else { # config file specified and optionally updated by user
+          if (!is.null(sleepdiaryfile())) {
+            GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, configfile=configfile(), 
+                      sleepdiary=sleepdiaryfile())
+          } else {
+            GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, configfile=configfile())
+          }
         }
-        test = file.exists(paste0(global$data_out,"/output_,",basename(global$data_out),"/results/part2_summary.csv"))
+        expected_output_file = paste0(global$data_out,"/output_",basename(global$data_in),"/results/part2_summary.csv")
+        test = file.exists(expected_output_file)
       }
       return(test)
     })
-   
+    
     # If analyse-button pressed send message to UI about success ----------------
     output$analyse_message <- renderText({
       if (x2() == TRUE) {
@@ -275,7 +300,6 @@ myApp <- function(homedir=getwd(), ...) {
       }
     })
   }
-  
   
   # Run the application 
   shinyApp(ui, server)
