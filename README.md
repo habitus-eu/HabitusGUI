@@ -1,3 +1,7 @@
+![GitHub Actions R-CMD-check](https://github.com/habitus-eu/HabitusGUI/workflows/R-CMD-check-full/badge.svg)
+[![codecov](https://codecov.io/gh/habitus-eu/HabitusGUI/branch/master/graph/badge.svg)](https://codecov.io/gh/habitus-eu/HabitusGUI) 
+
+
 # HabitusGUI
 
 
