@@ -1,9 +1,24 @@
-- name: Codecov
-  uses: codecov/codecov-action@v2.0.2
-  with:
-    # Comma-separated list of files to upload
-    files: ./coverage1.xml,./coverage2.xml # optional
-    flags: unittests # optional
-    name: codecov-umbrella # optional
-    fail_ci_if_error: true # optional (default = false)
-    verbose: true # optional (default = false)
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+name: test-coverage
+
+jobs:
+  test-coverage:
+    runs-on: macOS-latest
+    steps:
+      - name: Codecov
+        uses: codecov/codecov-action@v2.0.2
+        with:
+          files: ./coverage1.xml,./coverage2.xml # optional
+          flags: unittests # optional
+          name: codecov-umbrella # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
