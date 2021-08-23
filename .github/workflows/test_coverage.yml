@@ -17,7 +17,6 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v2.0.2
         with:
-          files: ./coverage1.xml,./coverage2.xml # optional
           flags: unittests # optional
           name: codecov-umbrella # optional
           fail_ci_if_error: true # optional (default = false)
