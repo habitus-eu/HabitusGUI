@@ -174,7 +174,7 @@ myApp <- function(homedir=getwd(), ...) {
     # Count files in input directory and send to UI ------------------------------
     x1 <- reactive({
       timer()
-      length(grep(pattern = "[.]csv", x = dir(global$data_in)))
+      length(grep(pattern = "[.]csv|[.]cwa|[.]bin", x = dir(global$data_in)))
     })
     output$nfilesin <- renderText({
       paste0("There are ",x1()," .csv files in the data folder")
@@ -185,7 +185,7 @@ myApp <- function(homedir=getwd(), ...) {
       length(grep(pattern = "[.]csv", x = dir(global$data_out)))
     })
     output$nfilesout <- renderText({
-      paste0("There are ",x3()," .csv files in the output folder")
+      paste0("There are ",x3()," data files in the output folder")
     })
     # Extract file extension of configuration file and send to UI ----------------
     configdata <- reactive({
