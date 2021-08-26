@@ -26,7 +26,7 @@ myApp <- function(homedir=getwd(), ...) {
                fluidRow(
                  column(6,
                         selectInput("tool", label = "Select processing tool: ", 
-                                    choices=c("myRTool", "myPyTool", "GGIR", "PALMSpy", "PALMSplus"))
+                                    choices=c("GGIR", "myRTool", "myPyTool", "PALMSpy", "PALMSplus"))
                  )
                ),
                # Select input folder -----------------------------------
@@ -51,15 +51,20 @@ myApp <- function(homedir=getwd(), ...) {
                                 # tags$h5(strong("Create dummy file?")),
                                 actionButton("simdata", "Create dummy files for testing the app", class="btn-danger"),
                                 textOutput("sim_message"),
+                                headerPanel(""),
                ),
                # Upload configuration file -----------------------------------------------
                conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`GGIR`",
-                                fileInput("configfile", label="", buttonLabel = "Configuration file..."), #"Upload configuration file"
+                                div(fileInput("configfile", label="(optional)", buttonLabel = "Configuration file..."), 
+                                    style="font-size:80%"
+                                ), #"Upload configuration file"
                                 # textOutput("configext"),
                ),
                # Upload sleep diary ----------------------------------------------------
                conditionalPanel(condition = "input.tool==`myPyTool` || input.tool==`GGIR`",
-                                fileInput("sleepdiaryfile", label="", buttonLabel = "Sleep diary file..."), #"Upload sleepdiary file"
+                                div(fileInput("sleepdiaryfile", label="(optional)", buttonLabel = "Sleep diary file..."),
+                                    style="font-size:80%"
+                                ), #"Upload sleepdiary file"
                                 # textOutput("sleepdiaryext")
                ),
                hr(),
