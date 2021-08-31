@@ -2,6 +2,7 @@
 
 export(GGIRshiny)
 export(checkGGIRconfig)
+export(create_test_GGIRconfig)
 export(create_test_files)
 export(myApp)
 export(myPyTool)
