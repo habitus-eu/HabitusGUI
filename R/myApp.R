@@ -20,8 +20,29 @@ myApp <- function(homedir=getwd(), ...) {
     tabsetPanel(
       id = "wizard",
       type= "hidden",
+      
       tabPanel("page_1",
                titlePanel("Welcome to Habitus"),
+               
+               # TODO: Checkboxes to indicate available data:
+               # - Acceleration data
+               # - Actigraph counts
+               # - GIS
+               # - GPS
+               # TODO:  Research question (specific to what data is selected):
+               # - Sleep
+               # - Physical activity
+               # - QC
+               # - Trips
+               # - Environment
+               # TODO: Show possible pipelines:
+               # - use identify_tools and print as message
+               
+               hr(),
+               actionButton("page_12", "next")
+      ),
+      tabPanel("page_2",
+               titlePanel("Data selection"),
                # Select tool -----------------------------------------
                fluidRow(
                  column(6,
@@ -68,9 +89,10 @@ myApp <- function(homedir=getwd(), ...) {
                                 # textOutput("sleepdiaryext")
                ),
                hr(),
-               actionButton("page_12", "next")
+               actionButton("page_21", "prev"),
+               actionButton("page_23", "next")
       ),
-      tabPanel("page_2",
+      tabPanel("page_3",
                titlePanel("Check and update configuration"),
                headerPanel(""),
                textOutput("nfilesin"),
@@ -94,10 +116,10 @@ myApp <- function(homedir=getwd(), ...) {
                                 )
                ),
                hr(),
-               actionButton("page_21", "prev"),
-               actionButton("page_23", "next")
+               actionButton("page_32", "prev"),
+               actionButton("page_34", "next")
       ),
-      tabPanel("page_3",
+      tabPanel("page_4",
                # Button to start analysis ---------------------------------------------
                
                titlePanel("Analysis"),
@@ -105,7 +127,7 @@ myApp <- function(homedir=getwd(), ...) {
                textOutput("analyse_message"),
                headerPanel(""),
                hr(),
-               actionButton("page_32", "prev")
+               actionButton("page_43", "prev")
       )
     )
   )
@@ -119,6 +141,8 @@ myApp <- function(homedir=getwd(), ...) {
     observeEvent(input$page_21, switch_page(1))
     observeEvent(input$page_23, switch_page(3))
     observeEvent(input$page_32, switch_page(2))
+    observeEvent(input$page_34, switch_page(4))
+    observeEvent(input$page_43, switch_page(3))
     
     # Defined time to ensure file count is only checked twice per second ---------
     timer = reactiveTimer(500) 
