@@ -33,5 +33,15 @@ test_that("Correct tools are proposed by test_identify_tools", {
   expect_equal(length(sce4$tools_needed), 3) 
   expect_equal(sce4$tools_needed, c("GGIR", "PALMS", "PALMSplus"))
   expect_equal(sce4$iotools[[2]]@output, "PALMS_out")
-  expect_equal(sce4$iotools[[2]]@usecases, c("Trips", "QC"))
+  expect_equal(sce4$iotools[[2]]@usecases, c("Trips", "QC", "Environment"))
+  
+  
+  # Scenario 5: All data vailable, but only interest in Environment
+  sce5 = identify_tools(datatypes = c("AccRaw", "ACount", "GPS", "GIS"),
+                        goals = c("Environment"),
+                        available_tools = c("GGIR", "PALMS", "PALMSplus"))
+  expect_equal(length(sce5$tools_needed), 3) 
+  expect_equal(sce5$tools_needed, c("GGIR", "PALMS", "PALMSplus"))
+  expect_equal(sce5$iotools[[2]]@output, "PALMS_out")
+  expect_equal(sce5$iotools[[2]]@usecases, c("Trips", "QC", "Environment"))
 })

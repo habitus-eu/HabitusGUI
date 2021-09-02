@@ -25,14 +25,15 @@ myApp <- function(homedir=getwd(), ...) {
                titlePanel("Welcome to Habitus"),
                
                checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ", 
-                                  choiceNames = list("Raw acceleration", "ActiGraph counts", "GIS", "GPS"),
-                                  choiceValues = list("AccRaw", "ACount", "GIS", "GPS"), width = '100%'),
-               
-               checkboxGroupInput("researchgoals", label = "What is you research interest? ", 
-                                  choiceNames = list("Data quality assessment", "Physical Activity", "Sleep", "Trips", "Behaviour environment relation"),
-                                           choiceValues = list("QC", "PA", "Sleep", "Trips", "Environment"), width = '100%'),
-               # TODO: Show possible pipelines:
-               # - use identify_tools and print as message
+                                  choiceNames = list("Raw acceleration", "ActiGraph counts", "GPS", "GIS"),
+                                  choiceValues = list("AccRaw", "ACount", "GPS", "GIS"), width = '100%'),
+               # If there is AccRaw or ACount data then show second text box that asks user about research goals
+               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
+                                                   "input.availabledata.indexOf(`ACount`) > -1"),
+                                checkboxGroupInput("researchgoals", label = "", 
+                                                   choiceNames = "", choiceValues = "", width = '100%')
+                                ), 
+               # Show possible pipelines:
                textOutput("pipeline"),
                
                hr(),
@@ -129,7 +130,7 @@ myApp <- function(homedir=getwd(), ...) {
     )
   )
   
-  server <- function(input, output) {
+  server <- function(input, output, session) {
     switch_page <- function(i) {
       updateTabsetPanel(inputId = "wizard",
                         selected = paste0("page_", i))
@@ -144,11 +145,44 @@ myApp <- function(homedir=getwd(), ...) {
     # Defined time to ensure file count is only checked twice per second ---------
     timer = reactiveTimer(500) 
     
+    # Update checkbox possible research goals depending on available data
+    observe({
+      x <- input$availabledata
+      
+      # Can use character(0) to remove all choices
+      if (is.null(x)) x <- character(0)
+      researchgoals = c()
+      if ("GPS" %in% x & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
+      if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
+      if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PA", "QC")
+      if ("AccRaw" %in% x) researchgoals = c(researchgoals, "Sleep", "QC")
+      reasearchgoalsNames = c("Data quality assessment", "Physical Activity",
+                              "Sleep", "Trips", "Behaviour environment relation")
+      reasearchgoalsValues = c("QC", "PA", "Sleep", "Trips", "Environment")
+      
+      if (length(researchgoals) == 0) {
+        researchgoalsLabel = ""
+        reasearchgoalsValues = researchgoalsNames = c()
+      } else {
+        researchgoalsNames =  reasearchgoalsNames[which(reasearchgoalsValues %in% researchgoals == TRUE)]
+        reasearchgoalsValues =  reasearchgoalsValues[which(reasearchgoalsValues %in% researchgoals == TRUE)]
+        researchgoalsLabel = "What is you research interest?"
+      }
+      # Update checkbox
+      updateCheckboxGroupInput(session, "researchgoals",
+                               label = researchgoalsLabel,
+                               choiceNames = researchgoalsNames,
+                               choiceValues = reasearchgoalsValues,
+                               selected = input$researchgoals)
+    })
+      
+    
+    
     # Identify pipeline with tools to be used and send to UI
     x123 <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
     output$pipeline <- renderText({
       message = paste0("Proposed software pipeline: ",paste0(x123(), collapse = " + "))
-      ifelse(length(x123()) == 0, yes="Based on current selection no processing will be possible", no=message)
+      ifelse(length(x123()) == 0, yes="Select data types and research interest above.", no=message)
     })
     
     # Extract directories ---------------
