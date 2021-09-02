@@ -11,11 +11,11 @@
 # S4 class needs to be defined outside function
 setClass(Class = "toolio", slots = list(input="character", output="character", usecases="character"))
 
-identify_tools = function(datatypes = c("AccRaw", "AccCount", "GPS", "GIS"),
+identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS"),
                           goals = c("PA", "Sleep", "QC", "Trips", "Environment"),
                           available_tools = c("GGIR", "PALMS", "PALMSplus")) {
-  iotools = list(GGIR = new("toolio", input="AccRaw", output=c("GGIR_out", "AccCount"), usecases=c("PA", "Sleep", "QC")),
-                 PALMS = new("toolio", input=c("AccCount","GPS"), output=c("PALMS_out"), usecases=c("Trips", "QC")),
+  iotools = list(GGIR = new("toolio", input="AccRaw", output=c("GGIR_out", "ACount"), usecases=c("PA", "Sleep", "QC")),
+                 PALMS = new("toolio", input=c("ACount","GPS"), output=c("PALMS_out"), usecases=c("Trips", "QC")),
                  PALMSplus = new("toolio", input=c("PALMS_out","GIS"), output=c("PALMSplus_out"), usecases=c("Environment", "QC")))
   iotools = iotools[which(names(iotools) %in% available_tools)] # only look at available tools
   tools_needed = outputs = c()

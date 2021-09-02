@@ -24,19 +24,16 @@ myApp <- function(homedir=getwd(), ...) {
       tabPanel("page_1",
                titlePanel("Welcome to Habitus"),
                
-               # TODO: Checkboxes to indicate available data:
-               # - Acceleration data
-               # - Actigraph counts
-               # - GIS
-               # - GPS
-               # TODO:  Research question (specific to what data is selected):
-               # - Sleep
-               # - Physical activity
-               # - QC
-               # - Trips
-               # - Environment
+               checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ", 
+                                  choiceNames = list("Raw acceleration", "ActiGraph counts", "GIS", "GPS"),
+                                  choiceValues = list("AccRaw", "ACount", "GIS", "GPS"), width = '100%'),
+               
+               checkboxGroupInput("researchgoals", label = "What is you research interest? ", 
+                                  choiceNames = list("Data quality assessment", "Physical Activity", "Sleep", "Trips", "Behaviour environment relation"),
+                                           choiceValues = list("QC", "PA", "Sleep", "Trips", "Environment"), width = '100%'),
                # TODO: Show possible pipelines:
                # - use identify_tools and print as message
+               textOutput("pipeline"),
                
                hr(),
                actionButton("page_12", "next")
@@ -146,6 +143,14 @@ myApp <- function(homedir=getwd(), ...) {
     
     # Defined time to ensure file count is only checked twice per second ---------
     timer = reactiveTimer(500) 
+    
+    # Identify pipeline with tools to be used and send to UI
+    x123 <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
+    output$pipeline <- renderText({
+      message = paste0("Proposed software pipeline: ",paste0(x123(), collapse = " + "))
+      ifelse(length(x123()) == 0, yes="Based on current selection no processing will be possible", no=message)
+    })
+    
     # Extract directories ---------------
     shinyDirChoose(input, 'inputdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'outputdir',  roots = c(home = homedir))
@@ -194,6 +199,8 @@ myApp <- function(homedir=getwd(), ...) {
     output$outputdir <- renderText({
       global$data_out
     })
+    
+    
     
     # Count files in input directory and send to UI ------------------------------
     x1 <- reactive({
