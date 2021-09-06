@@ -20,8 +20,27 @@ myApp <- function(homedir=getwd(), ...) {
     tabsetPanel(
       id = "wizard",
       type= "hidden",
+      
       tabPanel("page_1",
                titlePanel("Welcome to Habitus"),
+               
+               checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ", 
+                                  choiceNames = list("Raw acceleration", "ActiGraph counts", "GPS", "GIS"),
+                                  choiceValues = list("AccRaw", "ACount", "GPS", "GIS"), width = '100%'),
+               # If there is AccRaw or ACount data then show second text box that asks user about research goals
+               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
+                                                   "input.availabledata.indexOf(`ACount`) > -1"),
+                                checkboxGroupInput("researchgoals", label = "", 
+                                                   choiceNames = "", choiceValues = "", width = '100%')
+                                ), 
+               # Show possible pipelines:
+               textOutput("pipeline"),
+               
+               hr(),
+               actionButton("page_12", "next")
+      ),
+      tabPanel("page_2",
+               titlePanel("Data selection"),
                # Select tool -----------------------------------------
                fluidRow(
                  column(6,
@@ -68,9 +87,10 @@ myApp <- function(homedir=getwd(), ...) {
                                 # textOutput("sleepdiaryext")
                ),
                hr(),
-               actionButton("page_12", "next")
+               actionButton("page_21", "prev"),
+               actionButton("page_23", "next")
       ),
-      tabPanel("page_2",
+      tabPanel("page_3",
                titlePanel("Check and update configuration"),
                headerPanel(""),
                textOutput("nfilesin"),
@@ -94,10 +114,10 @@ myApp <- function(homedir=getwd(), ...) {
                                 )
                ),
                hr(),
-               actionButton("page_21", "prev"),
-               actionButton("page_23", "next")
+               actionButton("page_32", "prev"),
+               actionButton("page_34", "next")
       ),
-      tabPanel("page_3",
+      tabPanel("page_4",
                # Button to start analysis ---------------------------------------------
                
                titlePanel("Analysis"),
@@ -105,12 +125,12 @@ myApp <- function(homedir=getwd(), ...) {
                textOutput("analyse_message"),
                headerPanel(""),
                hr(),
-               actionButton("page_32", "prev")
+               actionButton("page_43", "prev")
       )
     )
   )
   
-  server <- function(input, output) {
+  server <- function(input, output, session) {
     switch_page <- function(i) {
       updateTabsetPanel(inputId = "wizard",
                         selected = paste0("page_", i))
@@ -119,9 +139,52 @@ myApp <- function(homedir=getwd(), ...) {
     observeEvent(input$page_21, switch_page(1))
     observeEvent(input$page_23, switch_page(3))
     observeEvent(input$page_32, switch_page(2))
+    observeEvent(input$page_34, switch_page(4))
+    observeEvent(input$page_43, switch_page(3))
     
     # Defined time to ensure file count is only checked twice per second ---------
     timer = reactiveTimer(500) 
+    
+    # Update checkbox possible research goals depending on available data
+    observe({
+      x <- input$availabledata
+      
+      # Can use character(0) to remove all choices
+      if (is.null(x)) x <- character(0)
+      researchgoals = c()
+      if ("GPS" %in% x & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
+      if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
+      if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PA", "QC")
+      if ("AccRaw" %in% x) researchgoals = c(researchgoals, "Sleep", "QC")
+      reasearchgoalsNames = c("Data quality assessment", "Physical Activity",
+                              "Sleep", "Trips", "Behaviour environment relation")
+      reasearchgoalsValues = c("QC", "PA", "Sleep", "Trips", "Environment")
+      
+      if (length(researchgoals) == 0) {
+        researchgoalsLabel = ""
+        reasearchgoalsValues = researchgoalsNames = c()
+      } else {
+        researchgoalsNames =  reasearchgoalsNames[which(reasearchgoalsValues %in% researchgoals == TRUE)]
+        reasearchgoalsValues =  reasearchgoalsValues[which(reasearchgoalsValues %in% researchgoals == TRUE)]
+        researchgoalsLabel = "What is you research interest?"
+      }
+      # Update checkbox
+      updateCheckboxGroupInput(session, "researchgoals",
+                               label = researchgoalsLabel,
+                               choiceNames = researchgoalsNames,
+                               choiceValues = reasearchgoalsValues,
+                               selected = input$researchgoals)
+    })
+      
+    
+    
+    # Identify pipeline with tools to be used and send to UI
+    x123 <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
+    output$pipeline <- renderText({
+      message = paste0("Proposed software pipeline: ",paste0(x123(), collapse = " + "))
+      ifelse(length(x123()) == 0, yes="Select data types and research interest above.", no=message)
+    })
+    
     # Extract directories ---------------
     shinyDirChoose(input, 'inputdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'outputdir',  roots = c(home = homedir))
@@ -170,6 +233,8 @@ myApp <- function(homedir=getwd(), ...) {
     output$outputdir <- renderText({
       global$data_out
     })
+    
+    
     
     # Count files in input directory and send to UI ------------------------------
     x1 <- reactive({
