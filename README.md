@@ -6,11 +6,11 @@
 
 ## 1 How to use app locally without docker
 
-### 1.1 Install app
+### 1.1 Install app  in R
 
 ```
 library("remotes")
-%>% remotes::install_github("habitus-eu/HabitusGUI")
+remotes::install_github("habitus-eu/HabitusGUI")
 ```
 
 ### 1.2 Install required other dependencies
@@ -19,7 +19,7 @@ For example, if you want to work with GGIR:
 
 `install.packages("GGIR")`
 
-### 1.3 Load app
+### 1.3 Load HabitusGUI package
 
 `library("HabitusGUI")`
 
@@ -27,11 +27,10 @@ For example, if you want to work with GGIR:
 
 `data_dir = "/home/vincent/projects/fontys"`
 
-### 1.5 Launch app
+### 1.5 Launch HabitusGUI app
 
 `HabitusGUI::myApp(homedir=data_dir)`
 
-
 ## 2 How to use app locally with docker
 
-Documentation to follow...
+See https://github.com/habitus-eu/HabitusDocker/blob/main/README.md
