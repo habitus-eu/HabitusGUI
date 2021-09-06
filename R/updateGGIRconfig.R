@@ -19,5 +19,5 @@ updateGGIRconfig = function(configfile=c(), new_desiredtz) {
       conf = rbind(conf, c("desiredtz", new_desiredtz, ""))
     }
   }
-  write.csv(x = conf, file = configfile)
+  write.csv(x = conf, file = configfile, row.names = FALSE)
 }

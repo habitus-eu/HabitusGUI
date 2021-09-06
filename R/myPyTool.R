@@ -11,6 +11,6 @@ myPyTool = function(inputdir, outputdir, sleepdiary) {
   if (length(sleepdiary) > 0) {
     system(paste0(basecommand," ",sleepdiary))
   } else {
-    system(basecommand)
+    system(paste0(basecommand, " sleepdiary not available"))
   }
 }
