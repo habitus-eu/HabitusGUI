@@ -1,6 +1,6 @@
 #' myRTool 
 #'
-#' @param inputdir Path to input directory
+#' @param accdir Path to input directory
 #' @param outputdir Path to output directory
 #' @param config Config object
 #' @param desiredtz Desired tz databasename
@@ -8,8 +8,8 @@
 #' @importFrom utils read.csv
 #' @export
 
-myRTool = function(inputdir, outputdir, config=c(), desiredtz=c()) {
-  filenames = dir(path = inputdir, full.names = TRUE)
+myRTool = function(accdir, outputdir, config=c(), desiredtz=c()) {
+  filenames = dir(path = accdir, full.names = TRUE)
   N = length(filenames)
   results = data.frame(ID=character(N), maxx=numeric(N), maxy=numeric(N))
   for (i in 1:N) {

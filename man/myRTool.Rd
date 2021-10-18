@@ -4,10 +4,10 @@
 \alias{myRTool}
 \title{myRTool}
 \usage{
-myRTool(inputdir, outputdir, config = c(), desiredtz = c())
+myRTool(accdir, outputdir, config = c(), desiredtz = c())
 }
 \arguments{
-\item{inputdir}{Path to input directory}
+\item{accdir}{Path to input directory}
 
 \item{outputdir}{Path to output directory}
 

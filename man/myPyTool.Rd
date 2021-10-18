@@ -4,10 +4,10 @@
 \alias{myPyTool}
 \title{myPyTool}
 \usage{
-myPyTool(inputdir, outputdir, sleepdiary)
+myPyTool(accdir, outputdir, sleepdiary)
 }
 \arguments{
-\item{inputdir}{Path to input directory}
+\item{accdir}{Path to input directory}
 
 \item{outputdir}{Path to output directory}
 

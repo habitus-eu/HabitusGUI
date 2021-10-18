@@ -19,8 +19,7 @@ myApp <- function(homedir=getwd(), ...) {
     theme = bslib::bs_theme(bootswatch = NULL),
     tabsetPanel(
       id = "wizard",
-      type= "hidden",
-      
+      type = "hidden",
       tabPanel("page_1",
                titlePanel("Welcome to Habitus"),
                
@@ -48,13 +47,24 @@ myApp <- function(homedir=getwd(), ...) {
                                     choices=c("GGIR", "myRTool", "myPyTool", "PALMSpy", "PALMSplus"))
                  )
                ),
-               # Select input folder -----------------------------------
+               # Select input folder accelerometer data -----------------------------------
                fluidRow(
                  column(12,
                         # tags$h5(strong("Select folder that has the accelerometer data:")),
-                        shinyFiles::shinyDirButton("inputdir", label = "Accelerometer data directory...", title = "Select folder with accelerometer data"),
-                        verbatimTextOutput("inputdir", placeholder = TRUE),
+                        shinyFiles::shinyDirButton("accdir", label = "Accelerometer data directory...", title = "Select folder with accelerometer data"),
+                        verbatimTextOutput("accdir", placeholder = TRUE),
                  )
+               ),
+               # Select input folder gps data -----------------------------------
+               conditionalPanel(condition = "input.tool==`PALMSpy`",
+                                fluidRow(
+                                  column(12,
+                                         # tags$h5(strong("Select folder that has the accelerometer data:")),
+                                         shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
+                                                                    title = "Select folder with GPS data"),
+                                         verbatimTextOutput("gpsdir", placeholder = TRUE),
+                                  )
+                                ),
                ),
                # Specify output directory ----------------------------------------------
                fluidRow(
@@ -93,7 +103,8 @@ myApp <- function(homedir=getwd(), ...) {
       tabPanel("page_3",
                titlePanel("Check and update configuration"),
                headerPanel(""),
-               textOutput("nfilesin"),
+               textOutput("naccfiles"),
+               textOutput("ngpsfiles"),
                textOutput("nfilesout"),
                headerPanel(""),
                conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`GGIR`",
@@ -186,11 +197,13 @@ myApp <- function(homedir=getwd(), ...) {
     })
     
     # Extract directories ---------------
-    shinyDirChoose(input, 'inputdir',  roots = c(home = homedir))
+    shinyDirChoose(input, 'accdir',  roots = c(home = homedir))
+    shinyDirChoose(input, 'gpsdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'outputdir',  roots = c(home = homedir))
     
     # Capture provided directories in reactive object ----------------------------
-    inputdir <- reactive(input$inputdir)
+    accdir <- reactive(input$accdir)
+    gpsdir <- reactive(input$gpsdir)
     outputdir <- reactive(input$outputdir)
     sleepdiaryfile <- reactive(input$sleepdiaryfile$datapath)
     configfile <- reactive(input$configfile$datapath)
@@ -200,15 +213,24 @@ myApp <- function(homedir=getwd(), ...) {
     # Update global when input changes
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
-                   input$inputdir # every time input$inputdir updates ...
+                   input$accdir # every time input$accdir updates ...
                  },
-                 handlerExpr = { # ... we re-assign global$data_in
-                   if (!"path" %in% names(inputdir())) return()
+                 handlerExpr = { # ... we re-assign global$acc_in
+                   if (!"path" %in% names(accdir())) return()
                    home <- normalizePath(homedir)
-                   global$data_in <-
-                     file.path(home, paste(unlist(inputdir()$path[-1]), collapse = .Platform$file.sep))
+                   global$acc_in <-
+                     file.path(home, paste(unlist(accdir()$path[-1]), collapse = .Platform$file.sep))
                  })
-    
+    observeEvent(ignoreNULL = TRUE,
+                 eventExpr = {
+                   input$gpsdir # every time input$gpsdir updates ...
+                 },
+                 handlerExpr = { # ... we re-assign global$gps_in
+                   if (!"path" %in% names(gpsdir())) return()
+                   home <- normalizePath(homedir)
+                   global$gps_in <-
+                     file.path(home, paste(unlist(gpsdir()$path[-1]), collapse = .Platform$file.sep))
+                 })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
                    input$outputdir # every time input$outputdir updates ...
@@ -227,30 +249,39 @@ myApp <- function(homedir=getwd(), ...) {
                    global$desiredtz <-input$timezone
                  })
     # Send directories to UI --------------------------------------------
-    output$inputdir <- renderText({
-      global$data_in
+    output$accdir <- renderText({
+      global$acc_in
+    })
+    output$gpsdir <- renderText({
+      global$gps_in
     })
     output$outputdir <- renderText({
       global$data_out
     })
     
-    
-    
-    # Count files in input directory and send to UI ------------------------------
-    x1 <- reactive({
+    # Count files in input acc directory and send to UI ------------------------------
+    acc_file_count <- reactive({
       timer()
-      length(grep(pattern = "[.]csv|[.]cwa|[.]bin", x = dir(global$data_in)))
+      length(grep(pattern = "[.]csv|[.]cwa|[.]bin", x = dir(global$acc_in)))
     })
-    output$nfilesin <- renderText({
-      paste0("There are ",x1()," .csv files in the data folder")
+    output$naccfiles <- renderText({
+      paste0("There are ", acc_file_count(), " .csv files in the acc data folder")
     })
+    gps_file_count <- reactive({
+      timer()
+      length(grep(pattern = "[.]csv", x = dir(global$gps_in)))
+    })
+    output$ngpsfiles <- renderText({
+      paste0("There are ", gps_file_count(), " .csv files in the gps data folder")
+    })
+    
     # Count files in output directory and send to UI ------------------------------
     x3 <- reactive({
       timer()
       length(grep(pattern = "[.]csv", x = dir(global$data_out)))
     })
     output$nfilesout <- renderText({
-      paste0("There are ",x3()," data files in the output folder")
+      paste0("There are ", x3(), " data files in the output folder")
     })
     # Extract file extension of configuration file and send to UI ----------------
     configdata <- reactive({
@@ -269,25 +300,25 @@ myApp <- function(homedir=getwd(), ...) {
       sleepdiarydata()
     })
     # Create simulated data files after button is pressed ------------------------
-    x4 <- eventReactive(input$simdata, {
+    simdata <- eventReactive(input$simdata, {
       print("Creating test files...")
       CountFiles = function(path) {
         return(length(dir(path = path, full.names = FALSE)))
       }
-      Nbefore = CountFiles(path = global$data_in)
-      create_test_files(dir = global$data_in, Nfiles = 10, Nobs = 10)
-      Nafter = CountFiles(path = global$data_in)
+      Nbefore = CountFiles(path = global$acc_in)
+      create_test_files(dir = global$acc_in, Nfiles = 10, Nobs = 10)
+      Nafter = CountFiles(path = global$acc_in)
       test = Nafter > Nbefore
       return(test)
     })
     # Update message on whether simulated files were created ---------------------
     output$sim_message <- renderText({
-      message = ifelse(x4() == TRUE,
+      message = ifelse(simdata() == TRUE,
                        yes = paste0("New files created ",Sys.time()),
                        no = paste0("No files created ",Sys.time()))
     })
     # Load config file and check desiredtz ---------------------------------------
-    x5 <- eventReactive(input$page_12, {
+    extract_tz <- eventReactive(input$page_12, {
       desiredtz = checkGGIRconfig(configfile())
       return(desiredtz)
     })
@@ -301,12 +332,12 @@ myApp <- function(homedir=getwd(), ...) {
     # Show current desiredtz -----------------------------------------------------
     output$tz_message <- renderText({
       message = ifelse(is.null(configfile()) == FALSE,
-                       yes = paste0("Timezone in configuration file: ", x5()),
+                       yes = paste0("Timezone in configuration file: ", extract_tz()),
                        no = paste0("Default system timezone: ", Sys.timezone()))
     })
     
     # Update timezone in config file or provide timezone to analys step ------------
-    x6 <- eventReactive(input$update_timezone, {
+    update_tz <- eventReactive(input$update_timezone, {
       tz_in_file = FALSE
       if (is.null(configfile()) == FALSE) { # if configile exists
         updateGGIRconfig(configfile(), new_desiredtz=global$desiredtz)
@@ -317,39 +348,44 @@ myApp <- function(homedir=getwd(), ...) {
     
     # If analyse-button pressed send message to UI about success ----------------
     output$tzupdate_message <- renderText({
-      message = ifelse(x6() == TRUE,
+      message = ifelse(update_tz() == TRUE,
                        yes = paste0("Tz update succesful ",Sys.time()),
                        no =  paste0("Tz update unsuccesful ",Sys.time()))
     })
     
     # Apply tool after analyse-button is pressed ---------------------------------
-    x2 <- eventReactive(input$analyse, {
+    runpipeline <- eventReactive(input$analyse, {
       print("Running analysis...")
       if (input$tool == "myRTool") {
         if (is.null(configfile())) { # no configfile specified
-          myRTool(inputdir = global$data_in, outputdir=global$data_out, desiredtz=global$desiredtz)
+          myRTool(accdir = global$acc_in, outputdir = global$data_out, desiredtz = global$desiredtz)
         } else { # config file specified and possible updated
-          myRTool(inputdir = global$data_in, outputdir=global$data_out, config=configfile())
+          myRTool(accdir = global$acc_in, outputdir = global$data_out, config = configfile())
         }
         test = file.exists(paste0(global$data_out,"/results.csv"))
       }
       if (input$tool == "myPyTool") {
-        myPyTool(inputdir = global$data_in, outputdir=global$data_out, sleepdiary=sleepdiaryfile())
+        myPyTool(accdir = global$acc_in, outputdir = global$data_out, sleepdiary = sleepdiaryfile())
+        test = file.exists(paste0(global$data_out,"/testpython.csv"))
+      }
+      if (input$tool == "PALMSpy") {
+        PALMSpy_R(gps_path = global$gps_in, acc_path = global$acc_in,
+                  output_path = global$data_out, config_file = configfile(), parameters = c())
         test = file.exists(paste0(global$data_out,"/testpython.csv"))
       }
       if (input$tool == "GGIR") {
         if (is.null(configfile())) { # no configfile specified
-          GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, 
-                    sleepdiary=sleepdiaryfile(), desiredtz=global$desiredtz)
+          GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, 
+                    sleepdiary = sleepdiaryfile(), desiredtz = global$desiredtz)
         } else { # config file specified and optionally updated by user
           if (!is.null(sleepdiaryfile())) {
-            GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, configfile=configfile(), 
-                      sleepdiary=sleepdiaryfile())
+            GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, configfile = configfile(), 
+                      sleepdiary = sleepdiaryfile())
           } else {
-            GGIRshiny(inputdir = global$data_in, outputdir=global$data_out, configfile=configfile())
+            GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, configfile = configfile())
           }
         }
-        expected_output_file = paste0(global$data_out,"/output_",basename(global$data_in),"/results/part2_summary.csv")
+        expected_output_file = paste0(global$data_out, "/output_", basename(global$acc_in), "/results/part2_summary.csv")
         test = file.exists(expected_output_file)
       }
       return(test)
@@ -357,7 +393,7 @@ myApp <- function(homedir=getwd(), ...) {
     
     # If analyse-button pressed send message to UI about success ----------------
     output$analyse_message <- renderText({
-      message = ifelse(x2() == TRUE,
+      message = ifelse(runpipeline() == TRUE,
                        yes = paste0("Procesing succesful ",Sys.time()),
                        no = paste0("Procesing unsuccesful ",Sys.time()))
     })

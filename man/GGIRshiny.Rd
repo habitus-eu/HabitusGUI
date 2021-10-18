@@ -5,7 +5,7 @@
 \title{GGIRshiny}
 \usage{
 GGIRshiny(
-  inputdir,
+  accdir,
   outputdir,
   configfile = c(),
   sleepdiary = c(),
@@ -13,7 +13,7 @@ GGIRshiny(
 )
 }
 \arguments{
-\item{inputdir}{Path to input directory}
+\item{accdir}{Path to input directory}
 
 \item{outputdir}{Path to output directory}
 
