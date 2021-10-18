@@ -22,7 +22,6 @@ myApp <- function(homedir=getwd(), ...) {
       type = "hidden",
       tabPanel("page_1",
                titlePanel("Welcome to Habitus"),
-               
                checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ", 
                                   choiceNames = list("Raw acceleration", "ActiGraph counts", "GPS", "GIS"),
                                   choiceValues = list("AccRaw", "ACount", "GPS", "GIS"), width = '100%'),
@@ -34,7 +33,6 @@ myApp <- function(homedir=getwd(), ...) {
                                 ), 
                # Show possible pipelines:
                textOutput("pipeline"),
-               
                hr(),
                actionButton("page_12", "next")
       ),
@@ -50,51 +48,55 @@ myApp <- function(homedir=getwd(), ...) {
                # Select input folder accelerometer data -----------------------------------
                fluidRow(
                  column(12,
-                        # tags$h5(strong("Select folder that has the accelerometer data:")),
-                        shinyFiles::shinyDirButton("accdir", label = "Accelerometer data directory...", title = "Select folder with accelerometer data"),
+                        shinyFiles::shinyDirButton("accdir", label = "Accelerometer data directory...", 
+                                                   title = "Select folder with accelerometer data"),
                         verbatimTextOutput("accdir", placeholder = TRUE),
                  )
                ),
                # Select input folder gps data -----------------------------------
                conditionalPanel(condition = "input.tool==`PALMSpy`",
-                                fluidRow(
-                                  column(12,
-                                         # tags$h5(strong("Select folder that has the accelerometer data:")),
-                                         shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
-                                                                    title = "Select folder with GPS data"),
-                                         verbatimTextOutput("gpsdir", placeholder = TRUE),
-                                  )
-                                ),
-               ),
+                                shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
+                                                           title = "Select folder with GPS data"),
+                                verbatimTextOutput("gpsdir", placeholder = TRUE),
+              ),
                # Specify output directory ----------------------------------------------
                fluidRow(
                  column(12,
                         # tags$h5(strong("Select folder where output should be stored:")),
-                        shinyFiles::shinyDirButton("outputdir", "Output directory...", "Select folder where output should be stored"),
+                        shinyFiles::shinyDirButton("outputdir", "Output directory...", 
+                                                    title = "Select folder where output should be stored"),
                         verbatimTextOutput("outputdir", placeholder = TRUE),
-
                  )
                ),
                # Option create dummy files in input directory ---------------------------
                conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
-                                # tags$h5(strong("Create dummy file?")),
-                                actionButton("simdata", "Create dummy files for testing the app", class="btn-danger"),
+                                actionButton("simdata", "Create dummy files for testing the app", class = "btn-danger"),
                                 textOutput("sim_message"),
                                 headerPanel(""),
                ),
-               # Upload configuration file -----------------------------------------------
+               # Upload configuration file GGIR -----------------------------------------------
                conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`GGIR`",
-                                div(fileInput("configfile", label="(optional)", buttonLabel = "Configuration file..."), 
-                                    style="font-size:80%"
-                                ), #"Upload configuration file"
-                                # textOutput("configext"),
+                                div(fileInput("configfileGGIR", label = "(optional)",
+                                              buttonLabel = "Configuration file GGIR ..."), 
+                                    style = "font-size:80%"
+                                ),
+                                # textOutput("configextGGIR"),
+               ),
+               # Upload configuration file PALMSpy -----------------------------------------------
+               conditionalPanel(condition = "input.tool==`PALMSpy`",
+                                div(fileInput("configfilePALMSpy", label = "(optional)",
+                                              buttonLabel = "Configuration file PALMSpy ..."), 
+                                    style = "font-size:80%"
+                                ),
+                                # textOutput("configextPALMSpy"),
                ),
                # Upload sleep diary ----------------------------------------------------
                conditionalPanel(condition = "input.tool==`myPyTool` || input.tool==`GGIR`",
-                                div(fileInput("sleepdiaryfile", label="(optional)", buttonLabel = "Sleep diary file..."),
-                                    style="font-size:80%"
+                                div(fileInput("sleepdiaryfile", label = "(optional)",
+                                              buttonLabel = "Sleep diary file..."),
+                                    style = "font-size:80%"
                                 ), #"Upload sleepdiary file"
-                                # textOutput("sleepdiaryext")
+                                # textOutput("sleepdiaryext"),
                ),
                hr(),
                actionButton("page_21", "prev"),
@@ -107,20 +109,38 @@ myApp <- function(homedir=getwd(), ...) {
                textOutput("ngpsfiles"),
                textOutput("nfilesout"),
                headerPanel(""),
+               # Check and allow for updating timezone ---------------------------------------------------
                conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`GGIR`",
-                                # Show current timezone in configuration file -------------------
+                                # Show current timezone in configuration file
                                 textOutput("tz_message"),
                                 # Ask user whether to update timezone?
                                 checkboxInput("select_timezone", "Change timezone?", value=FALSE),
                                 # If yes, show option select button
                                 conditionalPanel(condition = "input.select_timezone == 1",
-                                                 # Select timezone -----------------------------------------
+                                                 # Select timezone
                                                  shiny::selectInput("timezone", 
                                                                     label = "Select or type the timezone where the data was collected: ", 
                                                                     choices=ONames),
-                                                 conditionalPanel(condition = "output.config_file_ready",
-                                                                  actionButton("update_timezone", "Update timezone in configuration file?"),
-                                                                  textOutput("tzupdate_message")
+                                                 conditionalPanel(condition = "output.config_file_GGIR_ready",
+                                                                  actionButton("update_timezoneGGIR", "Update timezone in configuration file?"),
+                                                                  textOutput("tzupdate_message_GGIR")
+                                                 )
+                                )
+               ),
+               conditionalPanel(condition = "input.tool==`PALMSpy`",
+                                # Show current timezone in configuration file
+                                textOutput("tz_message"),
+                                # Ask user whether to update timezone?
+                                checkboxInput("select_timezone", "Change timezone?", value = FALSE),
+                                # If yes, show option select button
+                                conditionalPanel(condition = "input.select_timezone == 1",
+                                                 # Select timezone
+                                                 shiny::selectInput("timezone", 
+                                                                    label = "Select or type the timezone where the data was collected: ", 
+                                                                    choices = ONames),
+                                                 conditionalPanel(condition = "output.config_file_PALMSpy_ready",
+                                                                  actionButton("update_timezonePALMSpy", "Update timezone in configuration file?"),
+                                                                  textOutput("tzupdate_message_PALMSpy")
                                                  )
                                 )
                ),
@@ -130,7 +150,6 @@ myApp <- function(homedir=getwd(), ...) {
       ),
       tabPanel("page_4",
                # Button to start analysis ---------------------------------------------
-               
                titlePanel("Analysis"),
                actionButton("analyse", "Run analysis"),
                textOutput("analyse_message"),
@@ -206,7 +225,9 @@ myApp <- function(homedir=getwd(), ...) {
     gpsdir <- reactive(input$gpsdir)
     outputdir <- reactive(input$outputdir)
     sleepdiaryfile <- reactive(input$sleepdiaryfile$datapath)
-    configfile <- reactive(input$configfile$datapath)
+    configfileGGIR <- reactive(input$configfileGGIR$datapath)
+    configfilePALMSpy <- reactive(input$configfilePALMSpy$datapath)
+    
     # Create global with directories and give it default values -------
     global <- reactiveValues(data_in = homedir, data_out = homedir, desiredtz=Sys.timezone)
     
@@ -283,14 +304,24 @@ myApp <- function(homedir=getwd(), ...) {
     output$nfilesout <- renderText({
       paste0("There are ", x3(), " data files in the output folder")
     })
-    # Extract file extension of configuration file and send to UI ----------------
-    configdata <- reactive({
-      req(input$configfile)
-      ext <- tools::file_ext(input$configfile$name)
+    # Extract file extension of configuration file GGIR and send to UI ----------------
+    configdataGGIR <- reactive({
+      req(input$configfileGGIR)
+      ext <- tools::file_ext(input$configfileGGIR$name)
     })
-    output$configext <- renderText({
-      configdata()
+    output$configextGGIR <- renderText({
+      configdataGGIR()
     })
+    
+    # Extract file extension of configuration file PALMSpy and send to UI ----------------
+    configdataPALMSpy <- reactive({
+      req(input$configfilePALMSpy)
+      ext <- tools::file_ext(input$configfilePALMSpy$name)
+    })
+    output$configextPALMSpy <- renderText({
+      configdataPALMSpy()
+    })
+    
     # Extract file extension of sleep diary file and send to UI ------------------
     sleepdiarydata <- reactive({
       req(input$sleepdiaryfile)
@@ -318,51 +349,79 @@ myApp <- function(homedir=getwd(), ...) {
                        no = paste0("No files created ",Sys.time()))
     })
     # Load config file and check desiredtz ---------------------------------------
-    extract_tz <- eventReactive(input$page_12, {
-      desiredtz = checkGGIRconfig(configfile())
+    extract_tz_GGIR <- eventReactive(input$page_12, {
+      desiredtz = checkGGIRconfig(configfileGGIR())
+      return(desiredtz)
+    })
+    
+    extract_tz_PALMSpy <- eventReactive(input$page_12, {
+      desiredtz = checkPALMSpyconfig(configfilePALMSpy())
       return(desiredtz)
     })
     
     # Check whether configuration file was uploaded, because this defines whether 
     # the configfile update button should be visible -----------------------------
-    output$config_file_ready <- reactive({
-      return(!is.null(input$configfile))
+    output$config_file_GGIR_ready <- reactive({
+      return(!is.null(input$configfileGGIR))
     })
-    outputOptions(output, "config_file_ready", suspendWhenHidden = FALSE)
+    output$config_file_PALMSpy_ready <- reactive({
+      return(!is.null(input$configfilePALMSpy))
+    })
+    
+    outputOptions(output, "config_file_GGIR_ready", suspendWhenHidden = FALSE)
+    outputOptions(output, "config_file_PALMSpy_ready", suspendWhenHidden = FALSE)
     # Show current desiredtz -----------------------------------------------------
-    output$tz_message <- renderText({
-      message = ifelse(is.null(configfile()) == FALSE,
-                       yes = paste0("Timezone in configuration file: ", extract_tz()),
+    output$tz_message_GGIR <- renderText({
+      message = ifelse(is.null(configfileGGIR()) == FALSE,
+                       yes = paste0("Timezone in configuration file GGIR: ", extract_tz_GGIR()),
+                       no = paste0("Default system timezone: ", Sys.timezone()))
+    })
+    
+    output$tz_message_PALMSpy <- renderText({
+      message = ifelse(is.null(configfilePALMSpy()) == FALSE,
+                       yes = paste0("Timezone in configuration file PALMSpy: ", extract_tz_PALMSpy()),
                        no = paste0("Default system timezone: ", Sys.timezone()))
     })
     
     # Update timezone in config file or provide timezone to analys step ------------
-    update_tz <- eventReactive(input$update_timezone, {
+    update_tz_GGIR <- eventReactive(input$update_timezoneGGIR, {
       tz_in_file = FALSE
-      if (is.null(configfile()) == FALSE) { # if configile exists
-        updateGGIRconfig(configfile(), new_desiredtz=global$desiredtz)
+      if (is.null(configfileGGIR()) == FALSE) { # if configile exists
+        updateGGIRconfig(configfileGGIR(), new_desiredtz=global$desiredtz)
         tz_in_file = TRUE
       }
       return(tz_in_file)
     })
     
-    # If analyse-button pressed send message to UI about success ----------------
-    output$tzupdate_message <- renderText({
-      message = ifelse(update_tz() == TRUE,
-                       yes = paste0("Tz update succesful ",Sys.time()),
-                       no =  paste0("Tz update unsuccesful ",Sys.time()))
+    update_tz_PALMSpy <- eventReactive(input$update_timezonePALMSpy, {
+      tz_in_file = FALSE
+      if (is.null(configfilePALMSpy()) == FALSE) { # if configile exists
+        updatePALMSpyconfig(configfilePALMSpy(), new_desiredtz=global$desiredtz)
+        tz_in_file = TRUE
+      }
+      return(tz_in_file)
     })
-    
+    # If analyse-button pressed send message to UI about success ----------------
+    output$tzupdate_message_GGIR <- renderText({
+      message = ifelse(update_tz_GGIR() == TRUE,
+                       yes = paste0("Tz update GGIR succesful ", Sys.time()),
+                       no =  paste0("Tz update GGIR unsuccesful ", Sys.time()))
+    })
+    output$tzupdate_message_PALMSpy <- renderText({
+      message = ifelse(update_tz_PALMSpy() == TRUE,
+                       yes = paste0("Tz update PALMSpy succesful ", Sys.time()),
+                       no =  paste0("Tz update PALMSpy unsuccesful ", Sys.time()))
+    })
     # Apply tool after analyse-button is pressed ---------------------------------
     runpipeline <- eventReactive(input$analyse, {
       print("Running analysis...")
       if (input$tool == "myRTool") {
-        if (is.null(configfile())) { # no configfile specified
+        if (is.null(configfileGGIR())) { # no configfile specified
           myRTool(accdir = global$acc_in, outputdir = global$data_out, desiredtz = global$desiredtz)
         } else { # config file specified and possible updated
-          myRTool(accdir = global$acc_in, outputdir = global$data_out, config = configfile())
+          myRTool(accdir = global$acc_in, outputdir = global$data_out, config = configfileGGIR())
         }
-        test = file.exists(paste0(global$data_out,"/results.csv"))
+        test = file.exists(paste0(global$data_out, "/results.csv"))
       }
       if (input$tool == "myPyTool") {
         myPyTool(accdir = global$acc_in, outputdir = global$data_out, sleepdiary = sleepdiaryfile())
@@ -370,19 +429,19 @@ myApp <- function(homedir=getwd(), ...) {
       }
       if (input$tool == "PALMSpy") {
         PALMSpy_R(gps_path = global$gps_in, acc_path = global$acc_in,
-                  output_path = global$data_out, config_file = configfile(), parameters = c())
+                  output_path = global$data_out, config_file = configfilePALMSpy(), parameters = c())
         test = file.exists(paste0(global$data_out,"/testpython.csv"))
       }
       if (input$tool == "GGIR") {
-        if (is.null(configfile())) { # no configfile specified
+        if (is.null(configfileGGIR())) { # no configfile specified
           GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, 
                     sleepdiary = sleepdiaryfile(), desiredtz = global$desiredtz)
         } else { # config file specified and optionally updated by user
           if (!is.null(sleepdiaryfile())) {
-            GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, configfile = configfile(), 
+            GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, configfile = configfileGGIR(), 
                       sleepdiary = sleepdiaryfile())
           } else {
-            GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, configfile = configfile())
+            GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, configfile = configfileGGIR())
           }
         }
         expected_output_file = paste0(global$data_out, "/output_", basename(global$acc_in), "/results/part2_summary.csv")
