@@ -1,0 +1,39 @@
+{
+   "siteVersion":1,
+   "application":{
+      "name":"palmspy",
+      "version":"0.0.0"
+   },
+   "parameters":{
+      "gps-path":"/my/data/dir/gps/",
+      "acc-path":"/my/data/dir/acc/",
+      "interval":"15",
+      "insert-missing_flag":"Yes",
+      "insert-until_flag":"Yes",
+      "insert-max-seconds":"300",
+      "filter-invalid-values_flag":"Yes",
+      "max-speed":"130",
+      "max-ele-change":"1000",
+      "include-acc_flag":"Yes",
+      "minutes-zeros-row":"15",
+      "detect-activity-bouts_flag":"Yes",
+      "activity-bout-duration":"5",
+      "activity-bout-up":"9999",
+      "activity-bout-low":"2296",
+      "activity-bout-tol":"2",
+      "hard-cut":"9999",
+      "moderate-cut":"2295",
+      "light-cut":"100",
+      "merge-acc-to-gps_flag":"Yes"
+   },
+   "mountedFolders":[
+
+   ],
+   "numberOfNodes":1,
+   "tasksPerNode":1,
+   "maxTime":{
+      "hours":3,
+      "minutes":0,
+      "seconds":0
+   }
+}
