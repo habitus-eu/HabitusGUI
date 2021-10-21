@@ -8,6 +8,7 @@
 
 
 updatePALMSpyconfig = function(configfile=c(), new_desiredtz) {
+
   conf = read.csv(configfile)
   if (ncol(conf) != 3) { # is it a config file?
     stop("Configuration file has incorrect dimensions")

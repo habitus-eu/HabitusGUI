@@ -113,27 +113,23 @@ myApp <- function(homedir=getwd(), ...) {
                                 # Show current timezone in configuration file
                                 conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`GGIR`",
                                                  textOutput("tz_message_GGIR"),
-                                ),
-                                conditionalPanel(condition = "input.tool==`PALMSpy`",
-                                                 textOutput("tz_message_PALMSpy"),
-                                ),
-                                # Ask user whether to update timezone?
-                                checkboxInput("select_timezone", "Change timezone?", value=FALSE),
-                                # If yes, show option select button
-                                conditionalPanel(condition = "input.select_timezone == 1",
-                                                 # Select timezone
-                                                 shiny::selectInput("timezone", # <= there is one timezone for all tools
-                                                                    label = "Select or type the timezone where the data was collected: ",
-                                                                    choices=ONames),
-                                                 conditionalPanel(condition = "output.config_file_GGIR_ready", # per tool the user can decide whether tz needs to be updated
-                                                                  actionButton("update_timezoneGGIR", "Update timezone in configuration file?"),
-                                                                  textOutput("tzupdate_message_GGIR"),
-                                                 ),
-                                                 conditionalPanel(condition = "output.config_file_PALMSpy_ready",
-                                                                  actionButton("update_timezonePALMSpy", "Update timezone in configuration file?"),
-                                                                  textOutput("tzupdate_message_PALMSpy")
+                                                 # Ask user whether to update timezone?
+                                                 checkboxInput("select_timezone", "Change timezone?", value=FALSE),
+                                                 # If yes, show option select button
+                                                 conditionalPanel(condition = "input.select_timezone == 1",
+                                                                  # Select timezone
+                                                                  shiny::selectInput("timezone", # <= there is one timezone for all tools
+                                                                                     label = "Select or type the timezone where the data was collected: ",
+                                                                                     choices=ONames),
+                                                                  conditionalPanel(condition = "output.config_file_GGIR_ready", # per tool the user can decide whether tz needs to be updated
+                                                                                   actionButton("update_timezoneGGIR", "Update timezone in configuration file?"),
+                                                                                   textOutput("tzupdate_message_GGIR")
+                                                                  ) 
                                                  )
                                 )
+               ),
+               conditionalPanel(condition = "input.tool==`PALMSpy`",
+                                textOutput("params_message_PALMSpy")
                ),
                hr(),
                actionButton("page_32", "prev"),
@@ -320,9 +316,9 @@ myApp <- function(homedir=getwd(), ...) {
       return(desiredtz)
     })
     
-    extract_tz_PALMSpy <- eventReactive(input$page_12, {
-      desiredtz = checkPALMSpyconfig(configfilePALMSpy())
-      return(desiredtz)
+    extract_palmspy_params <- eventReactive(input$page_12, {
+      palmspy_params = load_palmspy_params(file = configfilePALMSpy())
+      return(palmspy_params)
     })
     
     # Check whether configuration file was uploaded, because this defines whether
@@ -343,10 +339,10 @@ myApp <- function(homedir=getwd(), ...) {
                        no = paste0("Default system timezone: ", Sys.timezone()))
     })
     
-    output$tz_message_PALMSpy <- renderText({
+    output$params_message_PALMSpy <- renderText({
       message = ifelse(is.null(configfilePALMSpy()) == FALSE,
-                       yes = paste0("Timezone in configuration file PALMSpy: ", extract_tz_PALMSpy()),
-                       no = paste0("Default system timezone: ", Sys.timezone()))
+                       yes = paste0("max-speed 111 found ", length(extract_palmspy_params())),
+                       no = "max-speed not found")
     })
     
     # Update timezone in config file or provide timezone to analys step ------------
@@ -359,25 +355,25 @@ myApp <- function(homedir=getwd(), ...) {
       return(tz_in_file)
     })
     
-    update_tz_PALMSpy <- eventReactive(input$update_timezonePALMSpy, {
-      tz_in_file = FALSE
-      if (is.null(configfilePALMSpy()) == FALSE) { # if configile exists
-        updatePALMSpyconfig(configfilePALMSpy(), new_desiredtz=global$desiredtz)
-        tz_in_file = TRUE
-      }
-      return(tz_in_file)
-    })
+    # update_tz_PALMSpy <- eventReactive(input$update_timezonePALMSpy, {
+    #   tz_in_file = FALSE
+    #   if (is.null(configfilePALMSpy()) == FALSE) { # if configile exists
+    #     updatePALMSpyconfig(configfilePALMSpy(), new_desiredtz=global$desiredtz)
+    #     tz_in_file = TRUE
+    #   }
+    #   return(tz_in_file)
+    # })
     # If analyse-button pressed send message to UI about success ----------------
     output$tzupdate_message_GGIR <- renderText({
       message = ifelse(update_tz_GGIR() == TRUE,
                        yes = paste0("Tz update GGIR succesful ", Sys.time()),
                        no =  paste0("Tz update GGIR unsuccesful ", Sys.time()))
     })
-    output$tzupdate_message_PALMSpy <- renderText({
-      message = ifelse(update_tz_PALMSpy() == TRUE,
-                       yes = paste0("Tz update PALMSpy succesful ", Sys.time()),
-                       no =  paste0("Tz update PALMSpy unsuccesful ", Sys.time()))
-    })
+    # output$tzupdate_message_PALMSpy <- renderText({
+    #   message = ifelse(update_tz_PALMSpy() == TRUE,
+    #                    yes = paste0("Tz update PALMSpy succesful ", Sys.time()),
+    #                    no =  paste0("Tz update PALMSpy unsuccesful ", Sys.time()))
+    # })
     # Apply tool after analyse-button is pressed ---------------------------------
     runpipeline <- eventReactive(input$analyse, {
       print("Running analysis...")
