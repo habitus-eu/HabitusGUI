@@ -14,7 +14,7 @@ load_palmspy_params = function(file=c()) {
   print("b")
   if ("parameters" %in% names(config)) {
     print("c")
-    palmspy_params = t(as.data.frame(config$parameters))
+    palmspy_params = config$parameters
     print("d")
     colnames(palmspy_params) = "Value"
   } else {

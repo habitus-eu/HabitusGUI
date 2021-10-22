@@ -348,7 +348,7 @@ myApp <- function(homedir=getwd(), ...) {
     
     output$params_message_PALMSpy <- renderText({
       message = ifelse(is.null(configfilePALMSpy()) == FALSE,
-                       yes = paste0("max-speed 111 found ", nrow(extract_palmspy_params())),
+                       yes = paste0("max-speed 111 found ", ncol(as.data.frame(extract_palmspy_params()))),
                        no = "max-speed not found")
     })
     
