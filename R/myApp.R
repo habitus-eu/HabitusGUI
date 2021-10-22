@@ -129,7 +129,11 @@ myApp <- function(homedir=getwd(), ...) {
                                 )
                ),
                conditionalPanel(condition = "input.tool==`PALMSpy`",
-                                textOutput("params_message_PALMSpy")
+                                textOutput("params_message_PALMSpy"),
+                                actionButton("reset", "Reset"),
+                                actionButton("save", "Save"),
+                                tags$hr()
+                                # modEditTableUI("editable")
                ),
                hr(),
                actionButton("page_32", "prev"),
@@ -317,7 +321,10 @@ myApp <- function(homedir=getwd(), ...) {
     })
     
     extract_palmspy_params <- eventReactive(input$page_12, {
+      print("extract_palmspy_params")
+      print(isolate(configfilePALMSpy()))
       palmspy_params = load_palmspy_params(file = configfilePALMSpy())
+      print("done")
       return(palmspy_params)
     })
     
@@ -341,7 +348,7 @@ myApp <- function(homedir=getwd(), ...) {
     
     output$params_message_PALMSpy <- renderText({
       message = ifelse(is.null(configfilePALMSpy()) == FALSE,
-                       yes = paste0("max-speed 111 found ", length(extract_palmspy_params())),
+                       yes = paste0("max-speed 111 found ", nrow(extract_palmspy_params())),
                        no = "max-speed not found")
     })
     
@@ -355,25 +362,17 @@ myApp <- function(homedir=getwd(), ...) {
       return(tz_in_file)
     })
     
-    # update_tz_PALMSpy <- eventReactive(input$update_timezonePALMSpy, {
-    #   tz_in_file = FALSE
-    #   if (is.null(configfilePALMSpy()) == FALSE) { # if configile exists
-    #     updatePALMSpyconfig(configfilePALMSpy(), new_desiredtz=global$desiredtz)
-    #     tz_in_file = TRUE
-    #   }
-    #   return(tz_in_file)
-    # })
+    
+    # Edit PALMSpy configuration file
+    # callModule(modEditTable,"editable", isolate(extract_palmspy_params()),
+    #            reset = reactive(input$reset), configfile=isolate(configfilePALMSpy())) 
+    
     # If analyse-button pressed send message to UI about success ----------------
     output$tzupdate_message_GGIR <- renderText({
       message = ifelse(update_tz_GGIR() == TRUE,
                        yes = paste0("Tz update GGIR succesful ", Sys.time()),
                        no =  paste0("Tz update GGIR unsuccesful ", Sys.time()))
     })
-    # output$tzupdate_message_PALMSpy <- renderText({
-    #   message = ifelse(update_tz_PALMSpy() == TRUE,
-    #                    yes = paste0("Tz update PALMSpy succesful ", Sys.time()),
-    #                    no =  paste0("Tz update PALMSpy unsuccesful ", Sys.time()))
-    # })
     # Apply tool after analyse-button is pressed ---------------------------------
     runpipeline <- eventReactive(input$analyse, {
       print("Running analysis...")
