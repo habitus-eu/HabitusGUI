@@ -42,7 +42,7 @@ myApp <- function(homedir=getwd(), ...) {
                fluidRow(
                  column(6,
                         selectInput("tool", label = "Select processing tool: ",
-                                    choices=c("PALMSpy", "GGIR", "myRTool", "myPyTool",  "PALMSplus"))
+                                    choices=c("PALMSpy", "GGIR", "myRTool", "PALMSplus"))
                  )
                ),
                # Select input folder accelerometer data -----------------------------------
@@ -72,13 +72,13 @@ myApp <- function(homedir=getwd(), ...) {
                  )
                ),
                # Option create dummy files in input directory ---------------------------
-               conditionalPanel(condition = "input.tool==`myRTool` || input.tool==`myPyTool`",
+               conditionalPanel(condition = "input.tool==`myRTool`",
                                 actionButton("simdata", "Create dummy files for testing the app", class = "btn-danger"),
                                 textOutput("sim_message"),
                                 headerPanel(""),
                ),
                # Upload sleep diary ----------------------------------------------------
-               conditionalPanel(condition = "input.tool==`myPyTool` || input.tool==`GGIR`",
+               conditionalPanel(condition = "input.tool==`GGIR`",
                                 div(fileInput("sleepdiaryfile", label = "(optional)",
                                               buttonLabel = "Sleep diary file..."),
                                     style = "font-size:80%"
@@ -89,11 +89,18 @@ myApp <- function(homedir=getwd(), ...) {
                actionButton("page_23", "next")
       ),
       tabPanel("page_3",
-               titlePanel("Check and update configuration"),
-               headerPanel(""),
-               conditionalPanel(condition = "input.tool==`PALMSpy`",
+               conditionalPanel(condition = "input.tool==`GGIR`",
+                                h1("GGIR configuration"),
+                                p("The GGIR software is used to process the raw accerometer data aimed at sleep or physical activity assessment"),
                                 tags$hr(),
-                                modEditTableUI("edit_palmspy_config")
+                                modConfigUI("edit_ggir_config")
+               ),
+               hr(),
+               conditionalPanel(condition = "input.tool==`PALMSpy`",
+                                h1("PALMSpy configuration"),
+                                p("The PALMSpy software is used to process the GPS and Accelerometer data for example to allow for trip detection"),
+                                tags$hr(),
+                                modConfigUI("edit_palmspy_config")
                ),
                hr(),
                actionButton("page_32", "prev"),
@@ -267,8 +274,14 @@ myApp <- function(homedir=getwd(), ...) {
                        no = paste0("No files created ",Sys.time()))
     })
     # Check and Edit config files ---------------------------------------
-    configfilePALMSpy <-  modEditTableServer("edit_palmspy_config", reset=reactive(input$reset), 
-                       save=reactive(input$save), configfile=reactive(input$configfile))
+    configfilePALMSpy <-  modConfigServer("edit_palmspy_config",
+                                             reset = reactive(input$reset), save = reactive(input$save),
+                                             configfile = reactive(input$configfile), tool = reactive("PALMSpy"))
+    
+    configfileGGIR <-  modConfigServer("edit_ggir_config",
+                                            reset=reactive(input$reset), save = reactive(input$save), 
+                                            configfile = reactive(input$configfile), tool = reactive("GGIR"))
+    
     
     # Apply tool after analyse-button is pressed ---------------------------------
     runpipeline <- eventReactive(input$analyse, {
@@ -304,11 +317,6 @@ myApp <- function(homedir=getwd(), ...) {
         }
         test = file.exists(paste0(global$data_out, "/results.csv"))
       }
-      if (input$tool == "myPyTool") {
-        myPyTool(accdir = global$acc_in, outputdir = global$data_out, sleepdiary = sleepdiaryfile())
-        test = file.exists(paste0(global$data_out,"/testpython.csv"))
-      }
-     
       return(test)
     })
     

@@ -1,11 +1,11 @@
-#' modEditTableUI
+#' modConfigUI
 #'
 #' @param id ...
 #' @return No object returned, this is a shiny module
 #' @export
 
 
-modEditTableUI <- function(id) {
+modConfigUI <- function(id) {
   tagList(
     fileInput("configfile", NULL, label = "(optional)", width = '100%',
               accept = ".json", multiple = FALSE,
