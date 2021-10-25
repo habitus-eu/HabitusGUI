@@ -21,18 +21,7 @@ myApp <- function(homedir=getwd(), ...) {
       id = "wizard",
       type = "hidden",
       tabPanel("page_1",
-               titlePanel("Welcome to Habitus"),
-               checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ", 
-                                  choiceNames = list("Raw acceleration", "ActiGraph counts", "GPS", "GIS"),
-                                  choiceValues = list("AccRaw", "ACount", "GPS", "GIS"), width = '100%'),
-               # If there is AccRaw or ACount data then show second text box that asks user about research goals
-               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
-                                                   "input.availabledata.indexOf(`ACount`) > -1"),
-                                checkboxGroupInput("researchgoals", label = "", 
-                                                   choiceNames = "", choiceValues = "", width = '100%')
-               ), 
-               # Show possible pipelines:
-               textOutput("pipeline"),
+               modBuildPipelineUI("build_pipeline"),
                hr(),
                actionButton("page_12", "next")
       ),
@@ -133,45 +122,9 @@ myApp <- function(homedir=getwd(), ...) {
     # Defined time to ensure file count is only checked twice per second ---------
     timer = reactiveTimer(500) 
     
-    # Update checkbox possible research goals depending on available data
-    observe({
-      x <- input$availabledata
-      
-      # Can use character(0) to remove all choices
-      if (is.null(x)) x <- character(0)
-      researchgoals = c()
-      if ("GPS" %in% x & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
-      if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
-      if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PA", "QC")
-      if ("AccRaw" %in% x) researchgoals = c(researchgoals, "Sleep", "QC")
-      reasearchgoalsNames = c("Data quality assessment", "Physical Activity",
-                              "Sleep", "Trips", "Behaviour environment relation")
-      reasearchgoalsValues = c("QC", "PA", "Sleep", "Trips", "Environment")
-      
-      if (length(researchgoals) == 0) {
-        researchgoalsLabel = ""
-        reasearchgoalsValues = researchgoalsNames = c()
-      } else {
-        researchgoalsNames =  reasearchgoalsNames[which(reasearchgoalsValues %in% researchgoals == TRUE)]
-        reasearchgoalsValues =  reasearchgoalsValues[which(reasearchgoalsValues %in% researchgoals == TRUE)]
-        researchgoalsLabel = "What is you research interest?"
-      }
-      # Update checkbox
-      updateCheckboxGroupInput(session, "researchgoals",
-                               label = researchgoalsLabel,
-                               choiceNames = researchgoalsNames,
-                               choiceValues = reasearchgoalsValues,
-                               selected = input$researchgoals)
-    })
-    
-    
-    
-    # Identify pipeline with tools to be used and send to UI
-    x123 <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
-    output$pipeline <- renderText({
-      message = paste0("Proposed software pipeline: ",paste0(x123(), collapse = " + "))
-      ifelse(length(x123()) == 0, yes="Select data types and research interest above.", no=message)
-    })
+    # Ask user questions about available and research interests
+    # and use the answers to identify a suitable pipeline
+    modBuildPipelineServer("build_pipeline")
     
     # Extract directories ---------------
     shinyDirChoose(input, 'accdir',  roots = c(home = homedir))
@@ -183,7 +136,7 @@ myApp <- function(homedir=getwd(), ...) {
     gpsdir <- reactive(input$gpsdir)
     outputdir <- reactive(input$outputdir)
     sleepdiaryfile <- reactive(input$sleepdiaryfile$datapath)
-
+    
     # Create global with directories and give it default values -------
     global <- reactiveValues(data_in = homedir, data_out = homedir, desiredtz=Sys.timezone)
     
@@ -228,7 +181,7 @@ myApp <- function(homedir=getwd(), ...) {
     output$outputdir <- renderText({
       global$data_out
     })
-
+    
     # Count files in directories and send to UI ------------------------------
     acc_file_count <- reactive({ # accelerometer files
       timer()
@@ -275,12 +228,12 @@ myApp <- function(homedir=getwd(), ...) {
     })
     # Check and Edit config files ---------------------------------------
     configfilePALMSpy <-  modConfigServer("edit_palmspy_config",
-                                             reset = reactive(input$reset), save = reactive(input$save),
-                                             configfile = reactive(input$configfile), tool = reactive("PALMSpy"))
+                                          reset = reactive(input$reset), save = reactive(input$save),
+                                          configfile = reactive(input$configfile), tool = reactive("PALMSpy"))
     
     configfileGGIR <-  modConfigServer("edit_ggir_config",
-                                            reset=reactive(input$reset), save = reactive(input$save), 
-                                            configfile = reactive(input$configfile), tool = reactive("GGIR"))
+                                       reset=reactive(input$reset), save = reactive(input$save), 
+                                       configfile = reactive(input$configfile), tool = reactive("GGIR"))
     
     
     # Apply tool after analyse-button is pressed ---------------------------------
