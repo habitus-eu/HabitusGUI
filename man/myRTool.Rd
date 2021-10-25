@@ -4,7 +4,7 @@
 \alias{myRTool}
 \title{myRTool}
 \usage{
-myRTool(accdir, outputdir, config = c(), desiredtz = c())
+myRTool(accdir, outputdir, config = c())
 }
 \arguments{
 \item{accdir}{Path to input directory}
@@ -12,8 +12,6 @@ myRTool(accdir, outputdir, config = c(), desiredtz = c())
 \item{outputdir}{Path to output directory}
 
 \item{config}{Config object}
-
-\item{desiredtz}{Desired tz databasename}
 }
 \value{
 no object is returned, only a new file is created in the output directory

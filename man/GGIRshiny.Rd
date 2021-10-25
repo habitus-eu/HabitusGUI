@@ -4,13 +4,7 @@
 \alias{GGIRshiny}
 \title{GGIRshiny}
 \usage{
-GGIRshiny(
-  accdir,
-  outputdir,
-  configfile = c(),
-  sleepdiary = c(),
-  desiredtz = c()
-)
+GGIRshiny(accdir, outputdir, configfile = c(), sleepdiary = c())
 }
 \arguments{
 \item{accdir}{Path to input directory}
@@ -20,8 +14,6 @@ GGIRshiny(
 \item{configfile}{Configfile path}
 
 \item{sleepdiary}{Path to sleep diary}
-
-\item{desiredtz}{Desired tz databasename}
 }
 \value{
 no object is returned, only a new file is created in the output directory

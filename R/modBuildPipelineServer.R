@@ -46,6 +46,6 @@ modBuildPipelineServer = function(id) {
       message = paste0("Proposed software pipeline: ",paste0(x123(), collapse = " + "))
       ifelse(length(x123()) == 0, yes="Select data types and research interest above.", no = message)
     })
-    x123
+    x123 # this is now a list of tool names
   })
 }

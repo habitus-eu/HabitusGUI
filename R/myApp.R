@@ -23,6 +23,10 @@ myApp <- function(homedir=getwd(), ...) {
       tabPanel("page_1",
                modBuildPipelineUI("build_pipeline"),
                hr(),
+               # verbatimTextOutput("doGGIR"),
+               textOutput("doGGIR"),
+               conditionalPanel(condition="output.doGGIR == 'show'", p('show GGIR')),
+               conditionalPanel(condition="output.doGGIR == 'hide'", p('hide GGIR')),
                actionButton("page_12", "next")
       ),
       tabPanel("page_2",
@@ -124,7 +128,26 @@ myApp <- function(homedir=getwd(), ...) {
     
     # Ask user questions about available and research interests
     # and use the answers to identify a suitable pipeline
-    modBuildPipelineServer("build_pipeline")
+    pipeline = modBuildPipelineServer("build_pipeline")
+    
+    # check whether GGIR is in the pipeline, and send to UI,
+    # such that it can condition the UI on this.
+    
+    observeEvent(ignoreNULL = FALSE,
+                 eventExpr = {
+                   pipeline() # every time input$accdir updates ...
+                 },
+                 handlerExpr = { # ... we re-assign global$acc_in
+                   if ("GGIR" %in% isolate(pipeline())) {
+                     print("doGGIR = TRUE")
+                     doGGIR = 'show'
+                   } else {
+                     print("doGGIR = FALSE")
+                     doGGIR =  'hide'
+                   }
+                   output$doGGIR = reactive(doGGIR)
+                 })
+    
     
     # Extract directories ---------------
     shinyDirChoose(input, 'accdir',  roots = c(home = homedir))
@@ -138,7 +161,7 @@ myApp <- function(homedir=getwd(), ...) {
     sleepdiaryfile <- reactive(input$sleepdiaryfile$datapath)
     
     # Create global with directories and give it default values -------
-    global <- reactiveValues(data_in = homedir, data_out = homedir, desiredtz=Sys.timezone)
+    global <- reactiveValues(data_in = homedir, data_out = homedir) #, pipeline = NULL)
     
     # Update global when input changes
     observeEvent(ignoreNULL = TRUE,
@@ -171,6 +194,15 @@ myApp <- function(homedir=getwd(), ...) {
                    global$data_out <-
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
                  })
+    
+    # observeEvent(ignoreNULL = TRUE,
+    #              eventExpr = {
+    #                pipeline() # every time pipeline updates ...
+    #              },
+    #              handlerExpr = { # ... we re-assign global$pipeline
+    #                global$pipeline <- isolate(pipeline())
+    #              })
+    
     # Send directories to UI --------------------------------------------
     output$accdir <- renderText({
       global$acc_in
@@ -181,6 +213,9 @@ myApp <- function(homedir=getwd(), ...) {
     output$outputdir <- renderText({
       global$data_out
     })
+    # output$pipeline <- renderText({
+    #   global$pipeline
+    # })
     
     # Count files in directories and send to UI ------------------------------
     acc_file_count <- reactive({ # accelerometer files
@@ -248,8 +283,7 @@ myApp <- function(homedir=getwd(), ...) {
       }
       if (input$tool == "GGIR") {
         if (is.null(configfileGGIR())) { # no configfile specified
-          GGIRshiny(accdir = global$acc_in, outputdir = global$data_out,
-                    sleepdiary = sleepdiaryfile(), desiredtz = global$desiredtz)
+          GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, sleepdiary = sleepdiaryfile())
         } else { # config file specified and optionally updated by user
           if (!is.null(sleepdiaryfile())) {
             GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, configfile = configfileGGIR(),
@@ -264,7 +298,7 @@ myApp <- function(homedir=getwd(), ...) {
       
       if (input$tool == "myRTool") {
         if (is.null(configfileGGIR())) { # no configfile specified
-          myRTool(accdir = global$acc_in, outputdir = global$data_out, desiredtz = global$desiredtz)
+          myRTool(accdir = global$acc_in, outputdir = global$data_out)
         } else { # config file specified and possible updated
           myRTool(accdir = global$acc_in, outputdir = global$data_out, config = configfileGGIR())
         }
