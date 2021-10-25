@@ -4,7 +4,7 @@
 \alias{PALMSpy_R}
 \title{PALMSpy_R}
 \usage{
-PALMSpy_R(gps_path, acc_path, output_path, config_file, parameters)
+PALMSpy_R(gps_path, acc_path, output_path, config_file)
 }
 \arguments{
 \item{gps_path}{Path to gps data}
@@ -14,8 +14,6 @@ PALMSpy_R(gps_path, acc_path, output_path, config_file, parameters)
 \item{output_path}{Path to output directory, default to working directory}
 
 \item{config_file}{Path to configuration file}
-
-\item{parameters}{List object with individual parameters to overrule config_file and software defaults}
 }
 \value{
 No object is returned, function only writes message to console and writes file.

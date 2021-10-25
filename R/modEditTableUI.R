@@ -1,4 +1,18 @@
+#' modEditTableUI
+#'
+#' @param id ...
+#' @return No object returned, this is a shiny module
+#' @export
+
+
 modEditTableUI <- function(id) {
-  ns <- NS(id)
-  DT::dataTableOutput(ns("mod_table"))
+  tagList(
+    fileInput("configfile", NULL, label = "(optional)", width = '100%',
+              accept = ".json", multiple = FALSE,
+              buttonLabel = "Configuration file ..."),
+    actionButton("reset", "Reset"),
+    actionButton("save", "Save"),
+    tags$hr(),
+    DT::dataTableOutput(NS(id, "mod_table"))
+  )
 }

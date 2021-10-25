@@ -2,11 +2,14 @@
 
 import sys
 arg = sys.argv
-message = 'Hello World! ' + arg[1] + ' ' +  arg[2]
-print(message)
-if (len(arg) > 2):
-  print("Sleepdiary: " + arg[3])
-f = open(arg[2]+"/testpython.csv", "w")
+print("Python function to use: ",  arg[0])
+print("GPS folder: ",  arg[1])
+print("Acc folder: ",  arg[2])
+print("Output folder: ",  arg[3])
+if (len(arg) > 3):
+  print("Config file: ",  arg[4])
+  
+message = "PALMSpy analyses successful!"
+f = open(arg[3]+"/testpython.csv", "w") # write file to output directory
 f.write(message)
 f.close()
-# From here onward we will have the Python script for Habiuts
