@@ -7,7 +7,7 @@
 #' @return No object is returned, function only writes message to console and writes file.
 #' @export
 
-PALMSpy_R = function(gps_path, acc_path, output_path, config_file) {
+PALMSpy_R = function(gps_path, acc_path, output_path, config_file =c()) {
   basecommand = paste0("python3 ./inst/python/PALMSpy_python_wrapper.py ", 
                        gps_path, " ", acc_path, " ", output_path)
   if (length(config_file) > 0) {

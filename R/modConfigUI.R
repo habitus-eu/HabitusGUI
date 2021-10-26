@@ -7,8 +7,8 @@
 
 modConfigUI <- function(id) {
   tagList(
-    fileInput("configfile", NULL, label = "Select your configuration file", width = '100%',
-              accept = ".json|.csv", multiple = FALSE,
+    fileInput(NS(id,"configfile"), NULL, label = "Select your configuration file", width = '100%',
+              accept = c(".json", ".csv"), multiple = FALSE,
               buttonLabel = "Configuration file ..."),
     actionButton("reset", "Reset"),
     actionButton("save", "Save"),

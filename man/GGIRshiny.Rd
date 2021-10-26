@@ -4,10 +4,10 @@
 \alias{GGIRshiny}
 \title{GGIRshiny}
 \usage{
-GGIRshiny(accdir, outputdir, configfile = c(), sleepdiary = c())
+GGIRshiny(rawaccdir, outputdir, configfile = c(), sleepdiary = c())
 }
 \arguments{
-\item{accdir}{Path to input directory}
+\item{rawaccdir}{Path to input directory}
 
 \item{outputdir}{Path to output directory}
 

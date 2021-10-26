@@ -21,34 +21,47 @@ myApp <- function(homedir=getwd(), ...) {
       id = "wizard",
       type = "hidden",
       tabPanel("page_1",
-               modBuildPipelineUI("build_pipeline"),
+               # modBuildPipelineUI("build_pipeline"),
+               titlePanel("Welcome to Habitus"),
+               checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
+                                  choiceNames = list("Raw acceleration", "ActiGraph counts", "GPS", "GIS", "Sleep Diary"),
+                                  choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "SleepDiary"), width = '100%'),
+               
+               # If there is AccRaw or ACount data then show second text box that asks user about research goals
+               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
+                                                   "input.availabledata.indexOf(`ACount`) > -1"),
+                                checkboxGroupInput("researchgoals", label = "", 
+                                                   choiceNames = "", choiceValues = "", width = '100%')
+               ), 
+               # Show possible pipelines:
+               textOutput("pipeline"),
                hr(),
-               # verbatimTextOutput("doGGIR"),
-               textOutput("doGGIR"),
-               conditionalPanel(condition="output.doGGIR == 'show'", p('show GGIR')),
-               conditionalPanel(condition="output.doGGIR == 'hide'", p('hide GGIR')),
+               checkboxGroupInput("tools", label = "Select the tools you would like to use?",
+                                  choiceNames = list("GGIR", "PALMSpy", "PALMSplus"),
+                                  choiceValues = list("GGIR", "PALMSpy", "PALMSplus"), width = '100%'),
+               
                actionButton("page_12", "next")
       ),
       tabPanel("page_2",
                titlePanel("Data selection"),
-               # Select tool -----------------------------------------
-               fluidRow(
-                 column(6,
-                        selectInput("tool", label = "Select processing tool: ",
-                                    choices=c("PALMSpy", "GGIR", "myRTool", "PALMSplus"))
-                 )
+               # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
+               conditionalPanel(condition = "input.availabledata.indexOf(`AccRaw`) > -1  && input.tools.includes(`GGIR`)",
+                                shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometer data directory...",
+                                                           title = "Select folder with raw accelerometer data"),
+                                verbatimTextOutput("rawaccdir", placeholder = TRUE),
+                                textOutput("NrawAccFiles")
                ),
-               # Select input folder accelerometer data -----------------------------------
-               fluidRow(
-                 column(12,
-                        shinyFiles::shinyDirButton("accdir", label = "Accelerometer data directory...",
-                                                   title = "Select folder with accelerometer data"),
-                        verbatimTextOutput("accdir", placeholder = TRUE),
-                 ),
-                 textOutput("naccfiles")
+               # Select input folder count accelerometer data if count data is available and PALMSpy is planned------------------
+               # if not then count data will have to be estimated from the raw data, but we do not bother user
+               # with questions where it should be stored
+               conditionalPanel(condition = "input.availabledata.indexOf(`ACount`) > -1 && input.tools.includes(`PALMSpy`)",
+                                shinyFiles::shinyDirButton("countaccdir", label = "Count accelerometer data directory...",
+                                                           title = "Select folder with count accelerometer data"),
+                                verbatimTextOutput("countaccdir", placeholder = TRUE),
+                                textOutput("NountAccFiles")
                ),
                # Select input folder gps data -----------------------------------
-               conditionalPanel(condition = "input.tool==`PALMSpy`",
+               conditionalPanel(condition = "input.availabledata.indexOf(`GPS`) > -1 && input.tools.includes('PALMSpy')",
                                 shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
                                                            title = "Select folder with GPS data"),
                                 verbatimTextOutput("gpsdir", placeholder = TRUE),
@@ -57,39 +70,30 @@ myApp <- function(homedir=getwd(), ...) {
                # Specify output directory ----------------------------------------------
                fluidRow(
                  column(12,
-                        # tags$h5(strong("Select folder where output should be stored:")),
                         shinyFiles::shinyDirButton("outputdir", "Output directory...",
                                                    title = "Select folder where output should be stored"),
                         verbatimTextOutput("outputdir", placeholder = TRUE),
                         textOutput("nfilesout")
                  )
                ),
-               # Option create dummy files in input directory ---------------------------
-               conditionalPanel(condition = "input.tool==`myRTool`",
-                                actionButton("simdata", "Create dummy files for testing the app", class = "btn-danger"),
-                                textOutput("sim_message"),
-                                headerPanel(""),
-               ),
                # Upload sleep diary ----------------------------------------------------
-               conditionalPanel(condition = "input.tool==`GGIR`",
-                                div(fileInput("sleepdiaryfile", label = "(optional)",
+               conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1", #input.tools.includes('GGIR') && 
+                                div(fileInput("sleepdiaryfile", label = "Select sleep diary data",
                                               buttonLabel = "Sleep diary file..."),
-                                    style = "font-size:80%"
-                                ),
-               ),
+                                    style = "font-size:80%")),
                hr(),
                actionButton("page_21", "prev"),
                actionButton("page_23", "next")
       ),
       tabPanel("page_3",
-               conditionalPanel(condition = "input.tool==`GGIR`",
+               conditionalPanel(condition = "input.tools.includes('GGIR')",
                                 h1("GGIR configuration"),
                                 p("The GGIR software is used to process the raw accerometer data aimed at sleep or physical activity assessment"),
                                 tags$hr(),
                                 modConfigUI("edit_ggir_config")
                ),
                hr(),
-               conditionalPanel(condition = "input.tool==`PALMSpy`",
+               conditionalPanel(condition = "input.tools.includes('PALMSpy')",
                                 h1("PALMSpy configuration"),
                                 p("The PALMSpy software is used to process the GPS and Accelerometer data for example to allow for trip detection"),
                                 tags$hr(),
@@ -102,9 +106,14 @@ myApp <- function(homedir=getwd(), ...) {
       tabPanel("page_4",
                # Button to start analysis ---------------------------------------------
                titlePanel("Analysis"),
-               actionButton("analyse", "Run analysis"),
-               textOutput("analyse_message"),
-               headerPanel(""),
+               conditionalPanel(condition = "input.tools.includes('GGIR')",
+                                actionButton("start_ggir", "Start GGIR"),
+                                textOutput("ggir_end_message")
+               ),
+               conditionalPanel(condition = "input.tools.includes('PALMSpy')",
+                                actionButton("start_palmspy", "Start PALMSpy"),
+                                textOutput("palmspy_end_message")
+               ),
                hr(),
                actionButton("page_43", "prev")
       )
@@ -128,37 +137,71 @@ myApp <- function(homedir=getwd(), ...) {
     
     # Ask user questions about available and research interests
     # and use the answers to identify a suitable pipeline
-    pipeline = modBuildPipelineServer("build_pipeline")
+    
+    # pipeline = modBuildPipelineServer("build_pipeline")
+    
+    # Update checkbox possible research goals depending on available data
+    observe({
+      x <- input$availabledata
+      
+      # Can use character(0) to remove all choices
+      if (is.null(x)) x <- character(0)
+      researchgoals = c()
+      if ("GPS" %in% x & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
+      if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
+      if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PA", "QC")
+      if ("AccRaw" %in% x) researchgoals = c(researchgoals, "Sleep", "QC")
+      reasearchgoalsNames = c("Data quality assessment", "Physical Activity",
+                              "Sleep", "Trips", "Behaviour environment relation")
+      reasearchgoalsValues = c("QC", "PA", "Sleep", "Trips", "Environment")
+      
+      if (length(researchgoals) == 0) {
+        researchgoalsLabel = ""
+        reasearchgoalsValues = researchgoalsNames = c()
+      } else {
+        researchgoalsNames =  reasearchgoalsNames[which(reasearchgoalsValues %in% researchgoals == TRUE)]
+        reasearchgoalsValues =  reasearchgoalsValues[which(reasearchgoalsValues %in% researchgoals == TRUE)]
+        researchgoalsLabel = "What is you research interest?"
+      }
+      # Update checkbox
+      updateCheckboxGroupInput(session, "researchgoals",
+                               label = researchgoalsLabel,
+                               choiceNames = researchgoalsNames,
+                               choiceValues = reasearchgoalsValues,
+                               selected = input$researchgoals)
+    })
+    
+    # Identify pipeline with tools to be used and send to UI
+    # x123 <-
+    x123 <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
+    output$pipeline <- renderText({
+      message = paste0("Proposed software pipeline: ",paste0(x123(), collapse = " + "))
+      ifelse(length(x123()) == 0, yes = "Select data types and research interest above.", no = message)
+    })
+    # x123
+    
+    
+    
+    
     
     # check whether GGIR is in the pipeline, and send to UI,
     # such that it can condition the UI on this.
     
-    observeEvent(ignoreNULL = FALSE,
-                 eventExpr = {
-                   pipeline() # every time input$accdir updates ...
-                 },
-                 handlerExpr = { # ... we re-assign global$acc_in
-                   if ("GGIR" %in% isolate(pipeline())) {
-                     print("doGGIR = TRUE")
-                     doGGIR = 'show'
-                   } else {
-                     print("doGGIR = FALSE")
-                     doGGIR =  'hide'
-                   }
-                   output$doGGIR = reactive(doGGIR)
-                 })
-    
-    
     # Extract directories ---------------
-    shinyDirChoose(input, 'accdir',  roots = c(home = homedir))
+    shinyDirChoose(input, 'rawaccdir',  roots = c(home = homedir))
+    shinyDirChoose(input, 'countaccdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'gpsdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'outputdir',  roots = c(home = homedir))
     
     # Capture provided directories in reactive object ----------------------------
-    accdir <- reactive(input$accdir)
+    rawaccdir <- reactive(input$rawaccdir)
+    countaccdir <- reactive(input$countaccdir)
     gpsdir <- reactive(input$gpsdir)
     outputdir <- reactive(input$outputdir)
     sleepdiaryfile <- reactive(input$sleepdiaryfile$datapath)
+    
+    
+   
     
     # Create global with directories and give it default values -------
     global <- reactiveValues(data_in = homedir, data_out = homedir) #, pipeline = NULL)
@@ -166,13 +209,23 @@ myApp <- function(homedir=getwd(), ...) {
     # Update global when input changes
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
-                   input$accdir # every time input$accdir updates ...
+                   input$rawaccdir # every time input$rawaccdir updates ...
                  },
                  handlerExpr = { # ... we re-assign global$acc_in
-                   if (!"path" %in% names(accdir())) return()
+                   if (!"path" %in% names(rawaccdir())) return()
                    home <- normalizePath(homedir)
-                   global$acc_in <-
-                     file.path(home, paste(unlist(accdir()$path[-1]), collapse = .Platform$file.sep))
+                   global$raw_acc_in <-
+                     file.path(home, paste(unlist(rawaccdir()$path[-1]), collapse = .Platform$file.sep))
+                 })
+    observeEvent(ignoreNULL = TRUE,
+                 eventExpr = {
+                   input$countaccdir 
+                 },
+                 handlerExpr = {
+                   if (!"path" %in% names(countaccdir())) return()
+                   home <- normalizePath(homedir)
+                   global$count_acc_in <-
+                     file.path(home, paste(unlist(countaccdir()$path[-1]), collapse = .Platform$file.sep))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -195,17 +248,13 @@ myApp <- function(homedir=getwd(), ...) {
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
                  })
     
-    # observeEvent(ignoreNULL = TRUE,
-    #              eventExpr = {
-    #                pipeline() # every time pipeline updates ...
-    #              },
-    #              handlerExpr = { # ... we re-assign global$pipeline
-    #                global$pipeline <- isolate(pipeline())
-    #              })
     
     # Send directories to UI --------------------------------------------
-    output$accdir <- renderText({
-      global$acc_in
+    output$rawaccdir <- renderText({
+      global$raw_acc_in
+    })
+    output$countaccdir <- renderText({
+      global$count_acc_in
     })
     output$gpsdir <- renderText({
       global$gps_in
@@ -213,17 +262,14 @@ myApp <- function(homedir=getwd(), ...) {
     output$outputdir <- renderText({
       global$data_out
     })
-    # output$pipeline <- renderText({
-    #   global$pipeline
-    # })
     
     # Count files in directories and send to UI ------------------------------
     acc_file_count <- reactive({ # accelerometer files
       timer()
-      req(global$acc_in)
-      length(grep(pattern = "[.]csv|[.]cwa|[.]bin", x = dir(global$acc_in)))
+      req(global$raw_acc_in)
+      length(grep(pattern = "[.]csv|[.]cwa|[.]bin", x = dir(global$raw_acc_in)))
     })
-    output$naccfiles <- renderText({
+    output$NrawAccFiles <- renderText({
       paste0("There are ", acc_file_count(), " .csv files in the acc data folder")
     })
     gps_file_count <- reactive({ # gps files
@@ -243,73 +289,69 @@ myApp <- function(homedir=getwd(), ...) {
       paste0("There are ", x3(), " data files in the output folder")
     })
     
-    # Create simulated data files after button is pressed ------------------------
-    simdata <- eventReactive(input$simdata, {
-      print("Creating test files...")
-      CountFiles = function(path) {
-        return(length(dir(path = path, full.names = FALSE)))
-      }
-      Nbefore = CountFiles(path = global$acc_in)
-      create_test_files(dir = global$acc_in, Nfiles = 10, Nobs = 10)
-      Nafter = CountFiles(path = global$acc_in)
-      test = Nafter > Nbefore
-      return(test)
-    })
-    # Update message on whether simulated files were created ---------------------
-    output$sim_message <- renderText({
-      message = ifelse(simdata() == TRUE,
-                       yes = paste0("New files created ",Sys.time()),
-                       no = paste0("No files created ",Sys.time()))
-    })
     # Check and Edit config files ---------------------------------------
-    configfilePALMSpy <-  modConfigServer("edit_palmspy_config",
-                                          reset = reactive(input$reset), save = reactive(input$save),
-                                          configfile = reactive(input$configfile), tool = reactive("PALMSpy"))
-    
-    configfileGGIR <-  modConfigServer("edit_ggir_config",
-                                       reset=reactive(input$reset), save = reactive(input$save), 
-                                       configfile = reactive(input$configfile), tool = reactive("GGIR"))
-    
-    
-    # Apply tool after analyse-button is pressed ---------------------------------
-    runpipeline <- eventReactive(input$analyse, {
-      print("Running analysis...")
-      
-      
-      if (input$tool == "PALMSpy") {
-        PALMSpy_R(gps_path = global$gps_in, acc_path = global$acc_in,
-                  output_path = global$data_out, config_file = configfilePALMSpy())
-        test = file.exists(paste0(global$data_out,"/testpython.csv"))
+    observeEvent(input$tools, {
+      if ("PALMSpy" %in% input$tools) {
+        configfilePALMSpy <-  modConfigServer("edit_palmspy_config",
+                                              reset = reactive(input$reset), save = reactive(input$save),
+                                              tool = reactive("PALMSpy"))
       }
-      if (input$tool == "GGIR") {
+    })
+    observeEvent(input$tools, {
+      if ("GGIR" %in% input$tools) {
+        configfileGGIR <-  modConfigServer("edit_ggir_config",
+                                           reset=reactive(input$reset), save = reactive(input$save),
+                                           tool = reactive("GGIR"))
+      }
+    })
+    
+    # Apply GGIR after button is pressed ---------------------------------
+    runGGIR <- eventReactive(input$start_ggir, {
+      print("Starting GGIR...")
+      if ("GGIR" %in% input$tools) {
         if (is.null(configfileGGIR())) { # no configfile specified
-          GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, sleepdiary = sleepdiaryfile())
+          if (!is.null(sleepdiaryfile())) {
+            GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, sleepdiary = sleepdiaryfile())
+          } else {
+            GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out)
+          }
         } else { # config file specified and optionally updated by user
           if (!is.null(sleepdiaryfile())) {
-            GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, configfile = configfileGGIR(),
+            GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, configfile = configfileGGIR(),
                       sleepdiary = sleepdiaryfile())
           } else {
-            GGIRshiny(accdir = global$acc_in, outputdir = global$data_out, configfile = configfileGGIR())
+            GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, configfile = configfileGGIR())
           }
         }
-        expected_output_file = paste0(global$data_out, "/output_", basename(global$acc_in), "/results/part2_summary.csv")
+        expected_output_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_summary.csv")
         test = file.exists(expected_output_file)
-      }
-      
-      if (input$tool == "myRTool") {
-        if (is.null(configfileGGIR())) { # no configfile specified
-          myRTool(accdir = global$acc_in, outputdir = global$data_out)
-        } else { # config file specified and possible updated
-          myRTool(accdir = global$acc_in, outputdir = global$data_out, config = configfileGGIR())
-        }
-        test = file.exists(paste0(global$data_out, "/results.csv"))
       }
       return(test)
     })
     
-    # If analyse-button pressed send message to UI about success ----------------
-    output$analyse_message <- renderText({
-      message = ifelse(runpipeline() == TRUE,
+    # Apply PALMSpy after button is pressed ---------------------------------
+    runPALMSpy <- eventReactive(input$start_palmspy, {
+      print("Starting PALMSPy...")
+      if ("PALMSpy" %in% input$tools) {
+        if (is.null(configfilePALMspy())) { # no configfile specified
+          PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in, output_path = global$data_out)
+        } else { # config file specified and optionally updated by user
+          PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in,
+                    output_path = global$data_out, config_file = configfilePALMSpy())
+        }
+        test = file.exists(paste0(global$data_out,"/testpython.csv"))
+      }
+      return(test)
+    })
+    
+    # If button pressed send message to UI about success ----------------
+    output$ggir_end_message <- renderText({
+      message = ifelse(runGGIR() == TRUE,
+                       yes = paste0("Procesing succesful ",Sys.time()),
+                       no = paste0("Procesing unsuccesful ",Sys.time()))
+    })
+    output$palmspy_end_message <- renderText({
+      message = ifelse(runPALMSpy() == TRUE,
                        yes = paste0("Procesing succesful ",Sys.time()),
                        no = paste0("Procesing unsuccesful ",Sys.time()))
     })

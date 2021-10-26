@@ -1,7 +1,7 @@
 #' modBuildPipelineServer
 #'
 #' @param id ...
-#' @return No object returned, this is a shiny module
+#' @return List of pipeline, availabledata and research goals
 #' @export
 
 modBuildPipelineServer = function(id) {
@@ -38,14 +38,12 @@ modBuildPipelineServer = function(id) {
                                selected = input$researchgoals)
     })
     
-    
-    
-    # Identify pipeline with tools to be used and send to UI
+     # Identify pipeline with tools to be used and send to UI
     x123 <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
     output$pipeline <- renderText({
       message = paste0("Proposed software pipeline: ",paste0(x123(), collapse = " + "))
-      ifelse(length(x123()) == 0, yes="Select data types and research interest above.", no = message)
+      ifelse(length(x123()) == 0, yes = "Select data types and research interest above.", no = message)
     })
-    x123 # this is now a list of tool names
+    x123
   })
 }

@@ -4,7 +4,7 @@
 \alias{PALMSpy_R}
 \title{PALMSpy_R}
 \usage{
-PALMSpy_R(gps_path, acc_path, output_path, config_file)
+PALMSpy_R(gps_path, acc_path, output_path, config_file = c())
 }
 \arguments{
 \item{gps_path}{Path to gps data}

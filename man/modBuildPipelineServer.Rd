@@ -10,7 +10,7 @@ modBuildPipelineServer(id)
 \item{id}{...}
 }
 \value{
-No object returned, this is a shiny module
+List of pipeline, availabledata and research goals
 }
 \description{
 modBuildPipelineServer
