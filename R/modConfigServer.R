@@ -14,10 +14,8 @@ modConfigServer = function(id, reset, save, tool) {
   moduleServer(id, function(input, output, session) {
     observeEvent(input$configfile, {
       if (tool() == "PALMSpy") {
-        print("loading P")
         params = load_params(file = input$configfile$datapath, format = "json_palsmpy")
       } else if (tool() == "GGIR") {
-        print("loading G")
         params = load_params(file = input$configfile$datapath, format = "csv_GGIR")
       }
       v <- reactiveValues(params=params)
