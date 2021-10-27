@@ -8,8 +8,10 @@
 #' @export
 
 
-load_params = function(file=c(), format="json_palsmpy") {
-  if (format == "json_palsmpy") {
+load_params = function(file=c(), format="json_palmspy") {
+  print("a")
+  if (format == "json_palmspy") {
+    print("b")
     config = fromJSON(txt = file, simplifyDataFrame = TRUE)
     if ("parameters" %in% names(config)) {
       params = t(as.data.frame(config$parameters))
@@ -18,7 +20,8 @@ load_params = function(file=c(), format="json_palsmpy") {
       warning(paste0("\nparameters section not found in ", file))
       params = c()
     }
-  } else if (format == "csv_GGIR") {
+  } else if (format == "csv_ggir") {
+    print("c")
     params = read.csv(file = file)
     params = as.data.frame(params[,2:ncol(params)], row.names = params[,1])
     RN = row.names(params)
