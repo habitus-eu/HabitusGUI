@@ -1,4 +1,4 @@
-#' save_params
+#' update_params
 #'
 #' @param file Character to specify location of original configuration file
 #' @param format Character to specify format of configuration file: json_palsmpy or csv_GGIR
@@ -8,18 +8,19 @@
 #' @importFrom utils read.csv write.csv
 #' @export
 
-save_params = function(new_params = c(), file = c(), format="json_palsmpy") {
-  if (format == "json_palsmpy") {
-    print("save json")
+update_params = function(new_params = c(), file = c(), format="json_palmspy") {
+  if (format == "json_palmspy") {
     config = fromJSON(txt = file, simplifyDataFrame = TRUE)
     if ("parameters" %in% names(config)) {
-      config$parameters = as.list(t(new_params))
+      new = as.list(t(new_params[,"value"]))
+      names(new) = rownames(new_params)
+      config$parameters[names(new)] = new # only overwrite the matching fields
     } else {
       warning(paste0("\nparameters section not found in ", file))
     }
-    toJSON(txt = file, x = config)
+    exportJson <- toJSON(config)
+    write(exportJson, file = file)
   } else if (format == "csv_GGIR") {
-    print("save csv GGIR")
     old_params = read.csv(file = file)
     params[which(old_params[,1] %in% row.names(new_params)), 2] = new_params
     write.csv(x = new_params, file = file)

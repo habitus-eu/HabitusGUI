@@ -1,0 +1,10 @@
+parameter	topic	description
+interval	gps	Epoch duration (in seconds). This is the time resolution for which the classifications are made
+insert.max.seconds	gps	max number of seconds to replace missing fixes with last valid fix (valid if --insert-until=true)
+filter.invalid.values_flag	gps	Explanation blabal….
+max.speed	gps	fix is invalid if speed is greater than this value (in km/hr)
+max.ele.change	gps	The maximmum elevation change allowed in meter units
+minutes.zeros.row	accelerometer	Number of minutes with a movement count value of zero to trigger the non-wear detection
+activity.bout.duration	accelerometer	Minimum duration of an activity bout (minutes)
+moderate.cut	accelerometer	Cut-point for moderate activity
+light.cut	accelerometer	Cut-point for light activity

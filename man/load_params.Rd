@@ -4,7 +4,7 @@
 \alias{load_params}
 \title{load_params}
 \usage{
-load_params(file = c(), format = "json_palsmpy")
+load_params(file = c(), format = "json_palmspy")
 }
 \arguments{
 \item{file}{Character to specify location of configuration file}
