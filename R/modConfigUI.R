@@ -6,17 +6,15 @@
 
 
 modConfigUI <- function(id) {
-  # tagList(
   fluidRow(
     column(3,
-           # verbatimTextOutput(NS(id,"config_header")),
-           # tags$h1(HTML(paste(textOutput(NS(id,"config_header"))))),
            tags$p(HTML(paste(textOutput(NS(id,"config_explanation"))))),
            tags$hr(),
-           tags$h5(HTML(paste(textOutput(NS(id,"config_instruction"))))),
-           fileInput(NS(id,"configfile"), NULL, label = "", width = '100%',
+           tags$p(HTML(paste(textOutput(NS(id, "config_instruction"))))),
+           fileInput(NS(id, "configfile"), NULL, label = "", width = '100%',
                      accept = c(".json", ".csv"), multiple = FALSE,
                      buttonLabel = "File ..."),
+           downloadButton(NS(id, "download"), "Download template", class = "info-xs"),
            actionButton("reset", "Reset"),
            actionButton("save", "Save"),
            tags$hr(),
@@ -25,5 +23,4 @@ modConfigUI <- function(id) {
            DT::dataTableOutput(NS(id, "mod_table"))
     )
   )
-  # )
 }

@@ -12,6 +12,25 @@ modConfigServer = function(id, reset, save, tool) {
   stopifnot(is.reactive(save))
   
   moduleServer(id, function(input, output, session) {
+    # eventReactive(create_template_config(), {
+    if (tool() == "PALMSpy") {
+      output$download = downloadHandler(
+        filename = "palmspy-params.json",
+        content <- function(file) {
+          config_default = system.file("testfiles_palmspy/palmspy-params.json", package = "HabitusGUI")[1]
+          file.copy(config_default, file)
+        },
+        contentType = "application/json")
+    } else if (tool() == "GGIR") {
+      output$download = downloadHandler(
+        filename = "config.csv",
+        content <- function(file) {
+          config_default = system.file("testfiles_ggir/config.csv", package = "HabitusGUI")[1]
+          file.copy(config_default, file)
+        },
+        contentType = "text/csv")
+    }
+   
     observeEvent(input$configfile, {
       # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
       if (tool() == "PALMSpy") {
@@ -59,8 +78,6 @@ modConfigServer = function(id, reset, save, tool) {
       })
     })
     
-    
-    
     output$config_explanation <- renderText({
       if(tool() == "GGIR"){
         explanation = paste0("GGIR takes as input accelerometer data expressed in universal units ",
@@ -77,9 +94,9 @@ modConfigServer = function(id, reset, save, tool) {
     
     output$config_instruction <- renderText({
       if(tool() == "GGIR"){
-        config_instruction = "Select your GGIR configuration file (.csv):"
+        config_instruction = "Select your GGIR configuration file (.csv) or if you do not have one Download a template:"
       } else if (tool() == "PALMSpy"){
-        config_instruction = "Select your PALMSpy config file file (.csv):"
+        config_instruction = "Select your PALMSpy config file file (.json) or if you do not have one Download a template:"
       }
       config_instruction
     })

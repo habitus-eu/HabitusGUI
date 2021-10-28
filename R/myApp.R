@@ -86,6 +86,7 @@ myApp <- function(homedir=getwd(), ...) {
                actionButton("page_23", "next")
       ),
       tabPanel("page_3",
+               titlePanel("Configuration"),
                conditionalPanel(condition = "input.tools.includes('GGIR')",
                                 h2("GGIR"),
                                 # p("The GGIR software is used to process the raw accerometer data aimed at sleep or physical activity assessment"),
