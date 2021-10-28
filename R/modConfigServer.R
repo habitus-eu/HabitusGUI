@@ -13,54 +13,25 @@ modConfigServer = function(id, reset, save, tool) {
   
   moduleServer(id, function(input, output, session) {
     observeEvent(input$configfile, {
+      # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
       if (tool() == "PALMSpy") {
-        params = load_params(file = input$configfile$datapath, format = "json_palsmpy")
+        params = load_params(file = input$configfile$datapath, format = "json_palmspy")
       } else if (tool() == "GGIR") {
-        params = load_params(file = input$configfile$datapath, format = "csv_GGIR")
+        params = load_params(file = input$configfile$datapath, format = "csv_ggir")
       }
       v <- reactiveValues(params=params)
-      # print(is.reactive(v))
-      # print(isolate(v$params))
       proxy = DT::dataTableProxy("mod_table")
-      # print(v)
       observeEvent(input$mod_table_cell_edit, {
         info = input$mod_table_cell_edit
-        # str(info)
         i = info$row
         j = info$col
         k = info$value
-        if (tool() == "PALMSpy") {
-          modifiable_params = c("gps.path", "acc.path", "interval",
-                                "insert.missing_flag", "insert.until_flag", "insert.max.seconds",
-                                "filter.invalid.values_flag", "max.speed", "max.ele.change",
-                                "include.acc_flag", "minutes.zeros.row", "detect.activity.bouts_flag",
-                                "activity.bout.duration", "activity.bout.up", "activity.bout.low",
-                                "activity.bout.tol", "hard.cut", "moderate.cut", "light.cut",
-                                "merge.acc.to.gps_flag")
-        } else if (tool() == "GGIR") {
-          modifiable_params = c("windowsizes", "desiredtz", "idloc", "timethreshold",
-                                "colid", "coln1","criterror", "def.noc.sleep",
-                                "do.visual", "excludefirstlast", "includenightcrit",
-                                "nnights", "outliers.only", "relyonsleeplog", "sleeplogidnum",
-                                "boutcriter.in", "boutcriter.lig", "boutcriter.mvpa", "boutdur.in",
-                                "boutdur.lig", "boutdur.mvpa", "excludefirstlast.part5", "save_ms5rawlevels",
-                                "threshold.lig", "threshold.mod", "threshold.vig", "timewindow",
-                                "boutcriter", "closedbout", "epochvalues2csv", "hrs.del.end", "hrs.del.start", "iglevels",  
-                                "ilevels", "includedaycrit", "IVIS_epochsize_seconds", "IVIS_windowsize_minutes",
-                                "IVIS.activity.metric", "M5L5res", "maxdur", "mvpadur",
-                                "mvpathreshold", "ndayswindow", "qlevels", "qM5L5", "qwindow", "strategy",
-                                "TimeSegments2ZeroFile", "window.summary.size", "winhr",
-                                "dofirstpage", "viewingwindow", "visualreport")
-        }
-        # str(info)
-        
+        modifiable_column = "value" # modifiable columns
         isolate(
-          if (i %in% match(modifiable_params, rownames(v$params))) {
-            # print(match(modifiable_params, rownames(v$params)))
-            print("trying to coerceValues")
+          if (j %in% match(modifiable_column, colnames(v$params))) {
             v$params[i, j] <<- DT::coerceValue(k, v$params[i, j])
           } else {
-            stop("You are not supposed to change this row.") # check to stop the user from editing only few columns
+            stop("You are not supposed to change this column.") # check to stop the user from editing only few columns
           }
         )
         DT::replaceData(proxy, v$params, resetPaging = FALSE)  # replaces data displayed by the updated table
@@ -73,13 +44,47 @@ modConfigServer = function(id, reset, save, tool) {
       
       # ### Save table to file
       observeEvent(save(), {
-        save_params(new_params = v$params, file = input$configfile$datapath)
+        if (tool() == "PALMSpy") {
+          update_params(new_params = v$params, file = input$configfile$datapath, format="json_palmspy")
+        } else if (tool() == "GGIR") {
+          update_params(new_params = v$params, file = input$configfile$datapath, format="csv_ggir")
+        }
       })
-      # print(isolate(rownames(v$params)))
+      # Render table for use in UI
       output$mod_table <- DT::renderDataTable({
-        DT::datatable(v$params, editable = TRUE)
+        DT::datatable(v$params, editable=TRUE,
+                      options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
+                                                    pageLength = 5))
+                      # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
       })
     })
-    reactive(input$configfile$datapath) # return filepath
+    
+    
+    
+    output$config_explanation <- renderText({
+      if(tool() == "GGIR"){
+        explanation = paste0("GGIR takes as input accelerometer data expressed in universal units ",
+                             "of gravitational acceleration and offers a broad analysis spanning: ",
+                             "data quality, sleep, physical activity, behaviour fragmentation, and ",
+                             "circadian rhythms. For additional information see: https://cran.r-project.org/package=GGIR/vignettes/GGIR.html")
+      } else if (tool() == "PALMSpy"){
+        explanation = paste0("PALMSpy takes as input summarised accelerometer data (ActiGraph counts) ",
+                             "and GPS data and uses them to estimate movement behaviours from the ",
+                             "perspective location in a country or city and travel distance and speed")
+      }
+      explanation
+    })
+    
+    output$config_instruction <- renderText({
+      if(tool() == "GGIR"){
+        config_instruction = "Select your GGIR configuration file (.csv):"
+      } else if (tool() == "PALMSpy"){
+        config_instruction = "Select your PALMSpy config file file (.csv):"
+      }
+      config_instruction
+    })
+    
+    # output$config_explanation = renderText({  explanation() })
+    reactive(input$configfile$datapath) # return filepath, such that this can be used outside this module
   })
 }
