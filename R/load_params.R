@@ -4,7 +4,7 @@
 #' @param format Character to specify format of configuration file: json_palsmpy or csv_GGIR
 #' @return list of parameters extract from the configuration file
 #' @importFrom jsonlite fromJSON
-#' @importFrom utils read.csv
+#' @importFrom utils read.csv read.table
 #' @export
 
 
@@ -27,10 +27,15 @@ load_params = function(file=c(), format="json_palmspy") {
     }
   } else if (format == "csv_ggir") {
     params = read.csv(file = file)
-    params = as.data.frame(params[,2:ncol(params)], row.names = params[,1])
-    RN = row.names(params)
-    dups = duplicated(RN)
+    # remove duplicates, because sometimes GGIR config files have duplicates
+    dups = duplicated(params)
     params = params[!dups,]
+    # Keep only parameters with a matching description in the description file
+    params_info_ggir_file = system.file("testfiles_ggir/params_description_ggir.tsv", package = "HabitusGUI")[1]
+    params_info_ggir = read.table(file = params_info_ggir_file, sep = "\t", header = TRUE)
+    params_merged = merge(params_info_ggir, params, by.x = "parameter", by.y = "argument")
+    rownames(params_merged) = params_merged$parameter
+    params = params_merged[,c("value", "topic", "description")]
   }
   return(params)
 }

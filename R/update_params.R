@@ -20,9 +20,17 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
     }
     exportJson <- toJSON(config)
     write(exportJson, file = file)
-  } else if (format == "csv_GGIR") {
-    old_params = read.csv(file = file)
-    params[which(old_params[,1] %in% row.names(new_params)), 2] = new_params
-    write.csv(x = new_params, file = file)
+  } else if (format == "csv_ggir") {
+    params = read.csv(file = file)
+    # remove duplicates, because sometimes GGIR config files have duplicates
+    dups = duplicated(params$argument)
+    params = params[!dups,]
+    rownames(params) = params$argument
+    # only overwrite the matching fields
+    for (j in 1:nrow(new_params)) {
+      ind = which(rownames(params) %in% rownames(new_params)[j] == TRUE)
+      params$value[ind] = new_params$value[j]
+    }
+    write.csv(x = params, file = file, row.names = FALSE)
   }
 }
