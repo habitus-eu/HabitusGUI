@@ -6,7 +6,8 @@ print("Python function to use: ",  arg[0])
 print("GPS folder: ",  arg[1])
 print("Acc folder: ",  arg[2])
 print("Output folder: ",  arg[3])
-if (len(arg) > 3):
+print(len(arg))
+if (len(arg) > 4):
   print("Config file: ",  arg[4])
   
 message = "PALMSpy analyses successful!"

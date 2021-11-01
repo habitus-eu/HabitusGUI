@@ -1,35 +1,32 @@
 #' modConfigServer
 #'
 #' @param id ...
-#' @param reset ...
-#' @param save ...
 #' @param tool ...
 #' @return No object returned, this is a shiny module
 #' @export
 
-modConfigServer = function(id, reset, save, tool) {
-  stopifnot(is.reactive(reset))
-  stopifnot(is.reactive(save))
-  
+modConfigServer = function(id, tool) {
+
   moduleServer(id, function(input, output, session) {
-    # eventReactive(create_template_config(), {
-    if (tool() == "PALMSpy") {
-      output$download = downloadHandler(
-        filename = "palmspy-params.json",
-        content <- function(file) {
-          config_default = system.file("testfiles_palmspy/palmspy-params.json", package = "HabitusGUI")[1]
-          file.copy(config_default, file)
-        },
-        contentType = "application/json")
-    } else if (tool() == "GGIR") {
-      output$download = downloadHandler(
-        filename = "config.csv",
-        content <- function(file) {
-          config_default = system.file("testfiles_ggir/config.csv", package = "HabitusGUI")[1]
-          file.copy(config_default, file)
-        },
-        contentType = "text/csv")
-    }
+    observeEvent(tool(), {
+      if (tool() == "PALMSpy") {
+        output$download = downloadHandler(
+          filename = "palmspy-params.json",
+          content <- function(file) {
+            config_default = system.file("testfiles_palmspy/palmspy-params.json", package = "HabitusGUI")[1]
+            file.copy(config_default, file)
+          },
+          contentType = "application/json")
+      } else if (tool() == "GGIR") {
+        output$download = downloadHandler(
+          filename = "config.csv",
+          content <- function(file) {
+            config_default = system.file("testfiles_ggir/config.csv", package = "HabitusGUI")[1]
+            file.copy(config_default, file)
+          },
+          contentType = "text/csv")
+      }
+    })
    
     observeEvent(input$configfile, {
       # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
@@ -57,12 +54,12 @@ modConfigServer = function(id, reset, save, tool) {
       })
       
       ### Reset Table
-      observeEvent(reset(), {
+      observeEvent(input$reset, {
         v$params <- params # your default data
       })
       
       # ### Save table to file
-      observeEvent(save(), {
+      observeEvent(input$save, {
         if (tool() == "PALMSpy") {
           update_params(new_params = v$params, file = input$configfile$datapath, format="json_palmspy")
         } else if (tool() == "GGIR") {
@@ -101,7 +98,7 @@ modConfigServer = function(id, reset, save, tool) {
       config_instruction
     })
     
-    # output$config_explanation = renderText({  explanation() })
-    reactive(input$configfile$datapath) # return filepath, such that this can be used outside this module
+    # configfile_latest =  # return filepath, such that this can be used outside this module
+    reactive(input$configfile$datapath)
   })
 }

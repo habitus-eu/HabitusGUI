@@ -11,8 +11,13 @@ PALMSpy_R = function(gps_path, acc_path, output_path, config_file =c()) {
   basecommand = paste0("python3 ./inst/python/PALMSpy_python_wrapper.py ", 
                        gps_path, " ", acc_path, " ", output_path)
   if (length(config_file) > 0) {
+    print("A")
+    print(config_file)
+    print(class(config_file))
     system(paste0(basecommand, " ",config_file))
   } else {
+    print("B")
+    
     system(paste0(basecommand, " config_file not available"))
   }
 }

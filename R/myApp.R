@@ -173,17 +173,11 @@ myApp <- function(homedir=getwd(), ...) {
     })
     
     # Identify pipeline with tools to be used and send to UI
-    # x123 <-
-    x123 <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
+    proposed_pipeline <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
     output$pipeline <- renderText({
-      message = paste0("Proposed software pipeline: ",paste0(x123(), collapse = " + "))
-      ifelse(length(x123()) == 0, yes = "Select data types and research interest above.", no = message)
+      message = paste0("Proposed software pipeline: ",paste0(proposed_pipeline(), collapse = " + "))
+      ifelse(length(proposed_pipeline()) == 0, yes = "Select data types and research interest above.", no = message)
     })
-    # x123
-    
-    
-    
-    
     
     # check whether GGIR is in the pipeline, and send to UI,
     # such that it can condition the UI on this.
@@ -201,8 +195,6 @@ myApp <- function(homedir=getwd(), ...) {
     outputdir <- reactive(input$outputdir)
     sleepdiaryfile <- reactive(input$sleepdiaryfile$datapath)
     
-    
-   
     
     # Create global with directories and give it default values -------
     global <- reactiveValues(data_in = homedir, data_out = homedir) #, pipeline = NULL)
@@ -291,39 +283,19 @@ myApp <- function(homedir=getwd(), ...) {
     })
     
     # Check and Edit config files ---------------------------------------
-    observeEvent(input$tools, {
-      if ("PALMSpy" %in% input$tools) {
-        configfilePALMSpy <-  modConfigServer("edit_palmspy_config",
-                                              reset = reactive(input$reset), save = reactive(input$save),
-                                              tool = reactive("PALMSpy"))
-      }
+    configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"))
+    output$file1= renderText({
+      paste0("file 1:", configfilePALMSpy())
     })
-    observeEvent(input$tools, {
-      if ("GGIR" %in% input$tools) {
-        configfileGGIR <-  modConfigServer("edit_ggir_config",
-                                           reset=reactive(input$reset), save = reactive(input$save),
-                                           tool = reactive("GGIR"))
-      }
-    })
+    configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"))
+ 
     
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
       print("Starting GGIR...")
       if ("GGIR" %in% input$tools) {
-        if (is.null(configfileGGIR())) { # no configfile specified
-          if (!is.null(sleepdiaryfile())) {
-            GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, sleepdiary = sleepdiaryfile())
-          } else {
-            GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out)
-          }
-        } else { # config file specified and optionally updated by user
-          if (!is.null(sleepdiaryfile())) {
-            GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, configfile = configfileGGIR(),
-                      sleepdiary = sleepdiaryfile())
-          } else {
-            GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, configfile = configfileGGIR())
-          }
-        }
+        GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
+                  sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()))
         expected_output_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_summary.csv")
         test = file.exists(expected_output_file)
       }
@@ -332,18 +304,14 @@ myApp <- function(homedir=getwd(), ...) {
     
     # Apply PALMSpy after button is pressed ---------------------------------
     runPALMSpy <- eventReactive(input$start_palmspy, {
-      print("Starting PALMSPy...")
       if ("PALMSpy" %in% input$tools) {
-        if (is.null(configfilePALMspy())) { # no configfile specified
-          PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in, output_path = global$data_out)
-        } else { # config file specified and optionally updated by user
-          PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in,
-                    output_path = global$data_out, config_file = configfilePALMSpy())
-        }
+        PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in,
+                  output_path = global$data_out, config_file = isolate(configfilePALMSpy()))
         test = file.exists(paste0(global$data_out,"/testpython.csv"))
       }
       return(test)
     })
+    
     
     # If button pressed send message to UI about success ----------------
     output$ggir_end_message <- renderText({
@@ -357,7 +325,6 @@ myApp <- function(homedir=getwd(), ...) {
                        no = paste0("Procesing unsuccesful ",Sys.time()))
     })
   }
-  
   # Run the application 
   shinyApp(ui, server)
 }

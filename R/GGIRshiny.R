@@ -9,10 +9,7 @@
 #' @export
 
 GGIRshiny = function(rawaccdir, outputdir, configfile=c(), sleepdiary=c()) {
-  if (is.null(sleepdiary)) sleepdiary = c()
-  if (length(sleepdiary) > 0) {
-    GGIR::g.shell.GGIR(datadir=rawaccdir, outputdir=outputdir, configfile = configfile, loglocation=sleepdiary)
-  } else { 
-    GGIR::g.shell.GGIR(datadir=rawaccdir, outputdir=outputdir, configfile = configfile)
-  }
+  if (length(sleepdiary) == 0) sleepdiary = c()
+  if (length(configfile) == 0) configfile = c()
+  GGIR::g.shell.GGIR(datadir=rawaccdir, outputdir=outputdir, configfile = configfile, loglocation=sleepdiary)
 }

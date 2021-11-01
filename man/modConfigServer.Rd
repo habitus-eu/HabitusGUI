@@ -4,14 +4,10 @@
 \alias{modConfigServer}
 \title{modConfigServer}
 \usage{
-modConfigServer(id, reset, save, tool)
+modConfigServer(id, tool)
 }
 \arguments{
 \item{id}{...}
-
-\item{reset}{...}
-
-\item{save}{...}
 
 \item{tool}{...}
 }
