@@ -107,12 +107,18 @@ myApp <- function(homedir=getwd(), ...) {
       tabPanel("page_4",
                # Button to start analysis ---------------------------------------------
                titlePanel("Analysis"),
+               hr(),
                conditionalPanel(condition = "input.tools.includes('GGIR')",
-                                actionButton("start_ggir", "Start GGIR"),
+                                h3("GGIR:"),
+                                waiter::use_waiter(),
+                                actionButton("start_ggir", "Start analysis", width = '300px'),
                                 textOutput("ggir_end_message")
                ),
+               hr(),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
-                                actionButton("start_palmspy", "Start PALMSpy"),
+                                h3("PALMSpy:"),
+                                waiter::use_waiter(),
+                                actionButton("start_palmspy", "Start analysis", width = '300px'),
                                 textOutput("palmspy_end_message")
                ),
                hr(),
@@ -294,9 +300,14 @@ myApp <- function(homedir=getwd(), ...) {
     runGGIR <- eventReactive(input$start_ggir, {
       print("Starting GGIR...")
       if ("GGIR" %in% input$tools) {
+        waiter <- waiter::Waiter$new(id ="start_ggir", html=spin_throbber())$show()
+        on.exit(waiter$hide())
         GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
                   sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()))
         expected_output_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_summary.csv")
+        for (i in seq_len(10)){
+          Sys.sleep(1)
+        }
         test = file.exists(expected_output_file)
       }
       return(test)
@@ -305,13 +316,17 @@ myApp <- function(homedir=getwd(), ...) {
     # Apply PALMSpy after button is pressed ---------------------------------
     runPALMSpy <- eventReactive(input$start_palmspy, {
       if ("PALMSpy" %in% input$tools) {
+        waiter <- waiter::Waiter$new(id ="start_palmspy", html=spin_throbber())$show()
+        on.exit(waiter$hide())
         PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in,
                   output_path = global$data_out, config_file = isolate(configfilePALMSpy()))
+        for (i in seq_len(10)){
+          Sys.sleep(1)
+        }
         test = file.exists(paste0(global$data_out,"/testpython.csv"))
       }
       return(test)
     })
-    
     
     # If button pressed send message to UI about success ----------------
     output$ggir_end_message <- renderText({
