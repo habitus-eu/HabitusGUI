@@ -6,6 +6,7 @@
 #' @import shiny
 #' @import shinyFiles
 #' @import bslib
+#' @import waiter
 #' @export
 
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys")
@@ -300,7 +301,7 @@ myApp <- function(homedir=getwd(), ...) {
     runGGIR <- eventReactive(input$start_ggir, {
       print("Starting GGIR...")
       if ("GGIR" %in% input$tools) {
-        waiter <- waiter::Waiter$new(id ="start_ggir", html=spin_throbber())$show()
+        waiter <- waiter::Waiter$new(id ="start_ggir", html=waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
                   sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()))
@@ -316,7 +317,7 @@ myApp <- function(homedir=getwd(), ...) {
     # Apply PALMSpy after button is pressed ---------------------------------
     runPALMSpy <- eventReactive(input$start_palmspy, {
       if ("PALMSpy" %in% input$tools) {
-        waiter <- waiter::Waiter$new(id ="start_palmspy", html=spin_throbber())$show()
+        waiter <- waiter::Waiter$new(id ="start_palmspy", html=waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in,
                   output_path = global$data_out, config_file = isolate(configfilePALMSpy()))
