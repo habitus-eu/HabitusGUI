@@ -38,7 +38,7 @@ myApp <- function(homedir=getwd(), ...) {
                # Show possible pipelines:
                textOutput("pipeline"),
                hr(),
-               checkboxGroupInput("tools", label = "Select the tools you would like to use?",
+               checkboxGroupInput("tools", label = "Select the tools you would like to use.",
                                   choiceNames = list("GGIR (R package)",
                                                      "BrondCounts (R packages activityCounts + GGIR)",
                                                      "PALMSpy (Python library)", "PALMSplus (R package)"),
@@ -95,16 +95,22 @@ myApp <- function(homedir=getwd(), ...) {
                                 h2("GGIR"),
                                 # p("The GGIR software is used to process the raw accerometer data aimed at sleep or physical activity assessment"),
                                 # tags$hr(),
-                                modConfigUI("edit_ggir_config")
+                                modConfigUI("edit_ggir_config"),
+                                hr()
                ),
-               hr(),
+               conditionalPanel(condition = "input.tools.includes('BrondCounts')",
+                                h2("BrondCounts"),
+                                p("No parameters are needed for the BrondCounts"),
+                                # tags$hr(),
+                                hr()
+               ),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
                                 h2("PALMSpy"),
                                 # p("The PALMSpy software is used to process the GPS and Accelerometer data for example to allow for trip detection"),
                                 # tags$hr(),
-                                modConfigUI("edit_palmspy_config")
+                                modConfigUI("edit_palmspy_config"),
+                                hr()
                ),
-               hr(),
                actionButton("page_32", "prev"),
                actionButton("page_34", "next")
       ),
@@ -112,20 +118,28 @@ myApp <- function(homedir=getwd(), ...) {
                # Button to start analysis ---------------------------------------------
                titlePanel("Analysis"),
                hr(),
-               conditionalPanel(condition = "input.tools.includes('GGIR')",
-                                h3("GGIR:"),
+               conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
+                                "input.tools.includes('BrondCounts')"),
+                                conditionalPanel(condition =
+                                                   paste0("input.tools.indexOf(`GGIR`) > -1  && ",
+                                                          "input.tools.indexOf(`BrondCounts`) > -1"), 
+                                                 h3("GGIR and BrondCounts:")
+                                ),
+                                conditionalPanel(condition = "input.tools.indexOf(`BrondCounts`) == -1", 
+                                                 h3("GGIR:")
+                                ),
                                 waiter::use_waiter(),
                                 actionButton("start_ggir", "Start analysis", width = '300px'),
-                                textOutput("ggir_end_message")
+                                textOutput("ggir_end_message"),
+                                hr()
                ),
-               hr(),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
                                 h3("PALMSpy:"),
                                 waiter::use_waiter(),
                                 actionButton("start_palmspy", "Start analysis", width = '300px'),
-                                textOutput("palmspy_end_message")
+                                textOutput("palmspy_end_message"),
+                                hr()
                ),
-               hr(),
                actionButton("page_43", "prev")
       )
     )
@@ -148,9 +162,6 @@ myApp <- function(homedir=getwd(), ...) {
     
     # Ask user questions about available and research interests
     # and use the answers to identify a suitable pipeline
-    
-    # pipeline = modBuildPipelineServer("build_pipeline")
-    
     # Update checkbox possible research goals depending on available data
     observe({
       x <- input$availabledata
@@ -294,20 +305,24 @@ myApp <- function(homedir=getwd(), ...) {
     
     # Check and Edit config files ---------------------------------------
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"))
-    output$file1= renderText({
-      paste0("file 1:", configfilePALMSpy())
-    })
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"))
  
     
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
-      print("Starting GGIR...")
-      if ("GGIR" %in% input$tools) {
+      if ("GGIR" %in% input$tools | "BrondCounts" %in% input$tools) {
         waiter <- waiter::Waiter$new(id ="start_ggir", html=waiter::spin_throbber())$show()
         on.exit(waiter$hide())
+        if ("BrondCounts" %in% input$tools) {
+          print("Starting GGIR and BrondCounts ...")
+          do.BrondCounts = TRUE
+        } else {
+          print("Starting GGIR...")
+          do.BrondCounts = FALSE
+        }
         GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
-                  sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()))
+                  sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()),
+                  do.BrondCounts = do.BrondCounts)
         expected_output_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_summary.csv")
         for (i in seq_len(10)){
           Sys.sleep(1)
@@ -316,6 +331,7 @@ myApp <- function(homedir=getwd(), ...) {
       }
       return(test)
     })
+   
     
     # Apply PALMSpy after button is pressed ---------------------------------
     runPALMSpy <- eventReactive(input$start_palmspy, {

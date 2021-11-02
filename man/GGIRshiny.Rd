@@ -4,7 +4,13 @@
 \alias{GGIRshiny}
 \title{GGIRshiny}
 \usage{
-GGIRshiny(rawaccdir, outputdir, configfile = c(), sleepdiary = c())
+GGIRshiny(
+  rawaccdir,
+  outputdir,
+  configfile = c(),
+  sleepdiary = c(),
+  do.BrondCounts = FALSE
+)
 }
 \arguments{
 \item{rawaccdir}{Path to input directory}
@@ -14,6 +20,8 @@ GGIRshiny(rawaccdir, outputdir, configfile = c(), sleepdiary = c())
 \item{configfile}{Configfile path}
 
 \item{sleepdiary}{Path to sleep diary}
+
+\item{do.BrondCounts}{Boolean to indicate whether BrondCounts should be derived}
 }
 \value{
 no object is returned, only a new file is created in the output directory
