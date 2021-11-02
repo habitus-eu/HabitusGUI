@@ -31,6 +31,7 @@ myApp <- function(homedir=getwd(), ...) {
                # If there is AccRaw or ACount data then show second text box that asks user about research goals
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
                                                    "input.availabledata.indexOf(`ACount`) > -1"),
+                                hr(),
                                 checkboxGroupInput("researchgoals", label = "", 
                                                    choiceNames = "", choiceValues = "", width = '100%')
                ), 
@@ -38,8 +39,10 @@ myApp <- function(homedir=getwd(), ...) {
                textOutput("pipeline"),
                hr(),
                checkboxGroupInput("tools", label = "Select the tools you would like to use?",
-                                  choiceNames = list("GGIR", "PALMSpy", "PALMSplus"),
-                                  choiceValues = list("GGIR", "PALMSpy", "PALMSplus"), width = '100%'),
+                                  choiceNames = list("GGIR (R package)",
+                                                     "BrondCounts (R packages activityCounts + GGIR)",
+                                                     "PALMSpy (Python library)", "PALMSplus (R package)"),
+                                  choiceValues = list("GGIR", "BrondCounts", "PALMSpy", "PALMSplus"), width = '100%'),
                
                actionButton("page_12", "next")
       ),
