@@ -50,40 +50,36 @@ myApp <- function(homedir=getwd(), ...) {
                titlePanel("Data selection"),
                # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
                conditionalPanel(condition = "input.availabledata.indexOf(`AccRaw`) > -1  && input.tools.includes(`GGIR`)",
-                                shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometer data directory...",
+                                shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
                                                            title = "Select folder with raw accelerometer data"),
-                                verbatimTextOutput("rawaccdir", placeholder = TRUE),
-                                textOutput("NrawAccFiles")
+                                verbatimTextOutput("rawaccdir", placeholder = TRUE)
                ),
                # Select input folder count accelerometer data if count data is available and PALMSpy is planned------------------
                # if not then count data will have to be estimated from the raw data, but we do not bother user
                # with questions where it should be stored
                conditionalPanel(condition = "input.availabledata.indexOf(`ACount`) > -1 && input.tools.includes(`PALMSpy`)",
-                                shinyFiles::shinyDirButton("countaccdir", label = "Count accelerometer data directory...",
+                                shinyFiles::shinyDirButton("countaccdir", label = "Count accelerometry data directory...",
                                                            title = "Select folder with count accelerometer data"),
-                                verbatimTextOutput("countaccdir", placeholder = TRUE),
-                                textOutput("NountAccFiles")
+                                verbatimTextOutput("countaccdir", placeholder = TRUE)
                ),
                # Select input folder gps data -----------------------------------
                conditionalPanel(condition = "input.availabledata.indexOf(`GPS`) > -1 && input.tools.includes('PALMSpy')",
                                 shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
                                                            title = "Select folder with GPS data"),
-                                verbatimTextOutput("gpsdir", placeholder = TRUE),
-                                textOutput("ngpsfiles")
+                                verbatimTextOutput("gpsdir", placeholder = TRUE)
                ),
                # Specify output directory ----------------------------------------------
                fluidRow(
                  column(12,
                         shinyFiles::shinyDirButton("outputdir", "Output directory...",
                                                    title = "Select folder where output should be stored"),
-                        verbatimTextOutput("outputdir", placeholder = TRUE),
-                        textOutput("nfilesout")
+                        verbatimTextOutput("outputdir", placeholder = TRUE)
                  )
                ),
                # Upload sleep diary ----------------------------------------------------
-               conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1", #input.tools.includes('GGIR') && 
-                                div(fileInput("sleepdiaryfile", label = "Select sleep diary data",
-                                              buttonLabel = "Sleep diary file..."),
+               conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1",
+                                div(fileInput("sleepdiaryfile", label = "",
+                                              buttonLabel = "Select sleep diary file...", width = '100%'),
                                     style = "font-size:80%")),
                hr(),
                actionButton("page_21", "prev"),
@@ -93,21 +89,16 @@ myApp <- function(homedir=getwd(), ...) {
                titlePanel("Configuration"),
                conditionalPanel(condition = "input.tools.includes('GGIR')",
                                 h2("GGIR"),
-                                # p("The GGIR software is used to process the raw accerometer data aimed at sleep or physical activity assessment"),
-                                # tags$hr(),
                                 modConfigUI("edit_ggir_config"),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('BrondCounts')",
                                 h2("BrondCounts"),
                                 p("No parameters are needed for the BrondCounts"),
-                                # tags$hr(),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
                                 h2("PALMSpy"),
-                                # p("The PALMSpy software is used to process the GPS and Accelerometer data for example to allow for trip detection"),
-                                # tags$hr(),
                                 modConfigUI("edit_palmspy_config"),
                                 hr()
                ),
@@ -277,32 +268,6 @@ myApp <- function(homedir=getwd(), ...) {
       global$data_out
     })
     
-    # Count files in directories and send to UI ------------------------------
-    acc_file_count <- reactive({ # accelerometer files
-      timer()
-      req(global$raw_acc_in)
-      length(grep(pattern = "[.]csv|[.]cwa|[.]bin", x = dir(global$raw_acc_in)))
-    })
-    output$NrawAccFiles <- renderText({
-      paste0("There are ", acc_file_count(), " .csv files in the acc data folder")
-    })
-    gps_file_count <- reactive({ # gps files
-      timer()
-      req(global$gps_in)
-      length(grep(pattern = "[.]csv", x = dir(global$gps_in)))
-    })
-    output$ngpsfiles <- renderText({
-      paste0("There are ", gps_file_count(), " .csv files in the gps data folder")
-    })
-    x3 <- reactive({ # output files
-      timer()
-      req(global$data_out)
-      length(grep(pattern = "[.]csv", x = dir(global$data_out)))
-    })
-    output$nfilesout <- renderText({
-      paste0("There are ", x3(), " data files in the output folder")
-    })
-    
     # Check and Edit config files ---------------------------------------
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"))
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"))
@@ -311,7 +276,7 @@ myApp <- function(homedir=getwd(), ...) {
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
       if ("GGIR" %in% input$tools | "BrondCounts" %in% input$tools) {
-        waiter <- waiter::Waiter$new(id ="start_ggir", html=waiter::spin_throbber())$show()
+        waiter <- waiter::Waiter$new(id = "start_ggir", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         if ("BrondCounts" %in% input$tools) {
           print("Starting GGIR and BrondCounts ...")
@@ -331,12 +296,11 @@ myApp <- function(homedir=getwd(), ...) {
       }
       return(test)
     })
-   
     
     # Apply PALMSpy after button is pressed ---------------------------------
     runPALMSpy <- eventReactive(input$start_palmspy, {
       if ("PALMSpy" %in% input$tools) {
-        waiter <- waiter::Waiter$new(id ="start_palmspy", html=waiter::spin_throbber())$show()
+        waiter <- waiter::Waiter$new(id = "start_palmspy", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in,
                   output_path = global$data_out, config_file = isolate(configfilePALMSpy()))
@@ -351,13 +315,13 @@ myApp <- function(homedir=getwd(), ...) {
     # If button pressed send message to UI about success ----------------
     output$ggir_end_message <- renderText({
       message = ifelse(runGGIR() == TRUE,
-                       yes = paste0("Procesing succesful ",Sys.time()),
-                       no = paste0("Procesing unsuccesful ",Sys.time()))
+                       yes = paste0("Procesing succesful ", Sys.time()),
+                       no = paste0("Procesing unsuccesful ", Sys.time()))
     })
     output$palmspy_end_message <- renderText({
       message = ifelse(runPALMSpy() == TRUE,
-                       yes = paste0("Procesing succesful ",Sys.time()),
-                       no = paste0("Procesing unsuccesful ",Sys.time()))
+                       yes = paste0("Procesing succesful ", Sys.time()),
+                       no = paste0("Procesing unsuccesful ", Sys.time()))
     })
   }
   # Run the application 
