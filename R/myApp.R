@@ -328,13 +328,13 @@ myApp <- function(homedir=getwd(), ...) {
         waiter <- waiter::Waiter$new(id = "start_ggir", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         if ("BrondCounts" %in% input$tools) {
-          id = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+          id_ggir = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           do.BrondCounts = TRUE
         } else {
-          id = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+          id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           do.BrondCounts = FALSE
         }
-        on.exit(removeNotification(id), add = TRUE)
+        on.exit(removeNotification(id_ggir), add = TRUE)
         GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
                   sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()),
                   do.BrondCounts = do.BrondCounts)
@@ -351,10 +351,10 @@ myApp <- function(homedir=getwd(), ...) {
     # Apply PALMSpy after button is pressed ---------------------------------
     runPALMSpy <- eventReactive(input$start_palmspy, {
       if ("PALMSpy" %in% input$tools) {
-        id = showNotification("PALMSpy in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+        id_palmspy = showNotification("PALMSpy in progress ...", type = "message", duration = NULL, closeButton = FALSE)
         waiter <- waiter::Waiter$new(id = "start_palmspy", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
-        on.exit(removeNotification(id), add = TRUE)
+        on.exit(removeNotification(id_palmspy), add = TRUE)
         PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in,
                   output_path = global$data_out, config_file = isolate(configfilePALMSpy()))
         for (i in seq_len(10)) {
