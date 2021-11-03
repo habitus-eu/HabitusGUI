@@ -17,7 +17,12 @@ myApp <- function(homedir=getwd(), ...) {
   ONames <- OlsonNames()
   ONames <- ONames[c(which(ONames == Sys.timezone()), which(ONames != Sys.timezone()))]
   ui <- fluidPage(
-    theme = bslib::bs_theme(bootswatch = NULL),
+    theme = bslib::bs_theme(bootswatch = "sketchy"), #,"sandstone"),
+    # preview examples: https://bootswatch.com/
+    # “cerulean”, “cosmo”, “cyborg”, “darkly”, “flatly”, “journal”, “litera”, “lumen”, 
+    # “lux”, “materia”, “minty”, “morph”, “pulse”, “quartz”, “sandstone”, “simplex”, 
+    #     “sketchy”, “slate”, “solar”, “spacelab”, “superhero”, “united”, “vapor”, “yeti”, “zephyr” 
+    
     tabsetPanel(
       id = "wizard",
       type = "hidden",
@@ -169,16 +174,20 @@ myApp <- function(homedir=getwd(), ...) {
       if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0") {
         showNotification("Select folder with raw accelerometer data", type = "error")
       } else {
-        if ("ACount" %in% input$availabledata & "BrondCounts" %in% input$tools & as.character(input$countaccdir)[1] == "0") {
-          showNotification("Select folder with count accelerometer data", type = "error")
+        if ("AccRaw" %in% input$availabledata & "BrondCounts" %in% input$tools & as.character(input$rawaccdir)[1] == "0") {
+          showNotification("Select folder with raw accelerometer data", type = "error")
         } else {
-          if ("GPS" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$gpsdir)[1] == "0") {
-            showNotification("Select folder with GPS data", type = "error")
+          if ("ACount" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$countaccdir)[1] == "0") {
+            showNotification("Select folder with count accelerometer data", type = "error")
           } else {
-            if ("SleepDiary" %in% input$availabledata & "GGIR" %in% input$tools & length(as.character(sleepdiaryfile())) == 0) {
-              showNotification("Select sleepdiary file", type = "error")
+            if ("GPS" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$gpsdir)[1] == "0") {
+              showNotification("Select folder with GPS data", type = "error")
             } else {
-              switch_page(3)
+              if ("SleepDiary" %in% input$availabledata & "GGIR" %in% input$tools & length(as.character(sleepdiaryfile())) == 0) {
+                showNotification("Select sleepdiary file", type = "error")
+              } else {
+                switch_page(3)
+              }
             }
           }
         }
@@ -323,13 +332,13 @@ myApp <- function(homedir=getwd(), ...) {
           do.BrondCounts = TRUE
         } else {
           id = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-          showNotification("Starting GGIR", type = "message")
           do.BrondCounts = FALSE
         }
+        on.exit(removeNotification(id), add = TRUE)
         GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
                   sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()),
                   do.BrondCounts = do.BrondCounts)
-        on.exit(removeNotification(id), add = TRUE)
+        
         expected_output_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_summary.csv")
         for (i in seq_len(10)) {
           Sys.sleep(1)
@@ -348,7 +357,7 @@ myApp <- function(homedir=getwd(), ...) {
         on.exit(removeNotification(id), add = TRUE)
         PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in,
                   output_path = global$data_out, config_file = isolate(configfilePALMSpy()))
-        for (i in seq_len(10)){
+        for (i in seq_len(10)) {
           Sys.sleep(1)
         }
         test = file.exists(paste0(global$data_out,"/testpython.csv"))
