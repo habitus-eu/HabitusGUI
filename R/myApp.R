@@ -368,13 +368,13 @@ myApp <- function(homedir=getwd(), ...) {
     # If button pressed send message to UI about success ----------------
     output$ggir_end_message <- renderText({
       message = ifelse(runGGIR() == TRUE,
-                       yes = paste0("Procesing succesful ", Sys.time()),
-                       no = paste0("Procesing unsuccesful ", Sys.time()))
+                       yes = paste0("Processing succesful ", Sys.time()),
+                       no = paste0("Processing unsuccesful ", Sys.time()))
     })
     output$palmspy_end_message <- renderText({
       message = ifelse(runPALMSpy() == TRUE,
-                       yes = paste0("Procesing succesful ", Sys.time()),
-                       no = paste0("Procesing unsuccesful ", Sys.time()))
+                       yes = paste0("Processing succesful ", Sys.time()),
+                       no = paste0("Processing unsuccesful ", Sys.time()))
     })
   }
   # Run the application 
