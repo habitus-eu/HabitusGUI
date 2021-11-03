@@ -141,9 +141,49 @@ myApp <- function(homedir=getwd(), ...) {
       updateTabsetPanel(inputId = "wizard",
                         selected = paste0("page_", i))
     }
-    observeEvent(input$page_12, switch_page(2))
+    observeEvent(input$page_12, {
+      if (length(input$tools) == 0) {
+        showNotification("Select at least one tool", type = "error")
+      } else {
+        if ("GGIR" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
+          showNotification("GGIR not possible without access to raw accelerometer data", type = "error")
+        } else {
+          if ("PALMSpy" %in% input$tools == TRUE & "GPS" %in% input$availabledata == FALSE) {
+            showNotification("PALMSpy not possible without access to GPS data", type = "error")
+          } else {
+            if ("PALMSplus" %in% input$tools == TRUE & "GIS" %in% input$availabledata == FALSE) {
+              showNotification("PALMSplus not possible without access to GIS data", type = "error")
+            } else {
+              if ("BrondCounts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
+                showNotification("BrondCounts not possible without access to raw accelerometer data", type = "error")
+              } else {
+                switch_page(2)
+              }
+            }
+          }
+        }
+      }
+    })
     observeEvent(input$page_21, switch_page(1))
-    observeEvent(input$page_23, switch_page(3))
+    observeEvent(input$page_23, {
+      if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0") {
+        showNotification("Select folder with raw accelerometer data", type = "error")
+      } else {
+        if ("ACount" %in% input$availabledata & "BrondCounts" %in% input$tools & as.character(input$countaccdir)[1] == "0") {
+          showNotification("Select folder with count accelerometer data", type = "error")
+        } else {
+          if ("GPS" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$gpsdir)[1] == "0") {
+            showNotification("Select folder with GPS data", type = "error")
+          } else {
+            if ("SleepDiary" %in% input$availabledata & "GGIR" %in% input$tools & length(as.character(sleepdiaryfile())) == 0) {
+              showNotification("Select sleepdiary file", type = "error")
+            } else {
+              switch_page(3)
+            }
+          }
+        }
+      }
+    })
     observeEvent(input$page_32, switch_page(2))
     observeEvent(input$page_34, switch_page(4))
     observeEvent(input$page_43, switch_page(3))
@@ -279,17 +319,19 @@ myApp <- function(homedir=getwd(), ...) {
         waiter <- waiter::Waiter$new(id = "start_ggir", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         if ("BrondCounts" %in% input$tools) {
-          print("Starting GGIR and BrondCounts ...")
+          id = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           do.BrondCounts = TRUE
         } else {
-          print("Starting GGIR...")
+          id = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+          showNotification("Starting GGIR", type = "message")
           do.BrondCounts = FALSE
         }
         GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
                   sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()),
                   do.BrondCounts = do.BrondCounts)
+        on.exit(removeNotification(id), add = TRUE)
         expected_output_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_summary.csv")
-        for (i in seq_len(10)){
+        for (i in seq_len(10)) {
           Sys.sleep(1)
         }
         test = file.exists(expected_output_file)
@@ -300,8 +342,10 @@ myApp <- function(homedir=getwd(), ...) {
     # Apply PALMSpy after button is pressed ---------------------------------
     runPALMSpy <- eventReactive(input$start_palmspy, {
       if ("PALMSpy" %in% input$tools) {
+        id = showNotification("PALMSpy in progress ...", type = "message", duration = NULL, closeButton = FALSE)
         waiter <- waiter::Waiter$new(id = "start_palmspy", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
+        on.exit(removeNotification(id), add = TRUE)
         PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in,
                   output_path = global$data_out, config_file = isolate(configfilePALMSpy()))
         for (i in seq_len(10)){

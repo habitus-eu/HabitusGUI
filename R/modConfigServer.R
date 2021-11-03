@@ -55,20 +55,22 @@ modConfigServer = function(id, tool) {
       
       ### Reset Table
       observeEvent(input$reset, {
+        showNotification("Resetting values", type = "message")
         v$params <- params # your default data
       })
       
       # ### Save table to file
       observeEvent(input$save, {
+        showNotification("Saving changes", type = "message")
         if (tool() == "PALMSpy") {
-          update_params(new_params = v$params, file = input$configfile$datapath, format="json_palmspy")
+          update_params(new_params = v$params, file = input$configfile$datapath, format = "json_palmspy")
         } else if (tool() == "GGIR") {
-          update_params(new_params = v$params, file = input$configfile$datapath, format="csv_ggir")
+          update_params(new_params = v$params, file = input$configfile$datapath, format = "csv_ggir")
         }
       })
       # Render table for use in UI
       output$mod_table <- DT::renderDataTable({
-        DT::datatable(v$params, editable=TRUE,
+        DT::datatable(v$params, editable = TRUE,
                       options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
                                                     pageLength = 5))
                       # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
@@ -76,12 +78,12 @@ modConfigServer = function(id, tool) {
     })
     
     output$config_explanation <- renderText({
-      if(tool() == "GGIR"){
+      if (tool() == "GGIR") {
         explanation = paste0("GGIR takes as input accelerometer data expressed in universal units ",
                              "of gravitational acceleration and offers a broad analysis spanning: ",
                              "data quality, sleep, physical activity, behaviour fragmentation, and ",
                              "circadian rhythms. For additional information see: https://cran.r-project.org/package=GGIR/vignettes/GGIR.html")
-      } else if (tool() == "PALMSpy"){
+      } else if (tool() == "PALMSpy") {
         explanation = paste0("PALMSpy takes as input summarised accelerometer data (ActiGraph counts) ",
                              "and GPS data and uses them to estimate movement behaviours from the ",
                              "perspective location in a country or city and travel distance and speed")
@@ -90,15 +92,15 @@ modConfigServer = function(id, tool) {
     })
     
     output$config_instruction <- renderText({
-      if(tool() == "GGIR"){
+      if (tool() == "GGIR") {
         config_instruction = "Select your GGIR configuration file (.csv) or if you do not have one Download a template:"
-      } else if (tool() == "PALMSpy"){
+      } else if (tool() == "PALMSpy") {
         config_instruction = "Select your PALMSpy config file file (.json) or if you do not have one Download a template:"
       }
       config_instruction
     })
     
-    # configfile_latest =  # return filepath, such that this can be used outside this module
+    # return filepath, such that this can be used outside this module
     reactive(input$configfile$datapath)
   })
 }

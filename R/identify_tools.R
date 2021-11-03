@@ -46,8 +46,11 @@ identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS"),
   if ("AccRaw" %in% datatypes == FALSE & "GGIR" %in% tools_needed) {
     tools_needed = tools_needed[-which(tools_needed == "GGIR")]
   }
-  if ("ACount" %in% datatypes == TRUE & "BrondCounts" %in% tools_needed) {
-    tools_needed = tools_needed[-which(tools_needed == "BrondCounts")]
+  if ("BrondCounts" %in% tools_needed) {
+    if ("ACount" %in% datatypes == TRUE | # No need to estimate counts if they already exist
+        ("AccRaw" %in% datatypes == TRUE & "GPS" %in% datatypes == FALSE)) { # No need to estimate counts if there is no GPS data
+      tools_needed = tools_needed[-which(tools_needed == "BrondCounts")]
+    }
   }
   invisible(list(tools_needed = tools_needed, iotools = iotools[which(names(iotools) %in% tools_needed)]))
 }
