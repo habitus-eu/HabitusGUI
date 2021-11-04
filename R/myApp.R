@@ -28,14 +28,17 @@ myApp <- function(homedir=getwd(), ...) {
       type = "hidden",
       tabPanel("page_1",
                # modBuildPipelineUI("build_pipeline"),
-               titlePanel("Welcome to Habitus"),
+               titlePanel(h1("Habitus")),
                checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
-                                  choiceNames = list("Raw acceleration", "ActiGraph counts", "GPS", "GIS", "Sleep Diary"),
+                                  choiceNames = list("Raw acceleration (at least ten values per second per axis)", 
+                                                     "Counts (in ActiGraph .csv format)",
+                                                     "GPS (in .csv format)", "GIS", "Sleep Diary (in GGIR compatible .csv format)"),
                                   choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "SleepDiary"), width = '100%'),
                
                # If there is AccRaw or ACount data then show second text box that asks user about research goals
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
-                                                   "input.availabledata.indexOf(`ACount`) > -1"),
+                                                   "(input.availabledata.indexOf(`ACount`) > -1 &&",
+                                                   "input.availabledata.indexOf(`AccRaw`) > -1)"),
                                 hr(),
                                 checkboxGroupInput("researchgoals", label = "", 
                                                    choiceNames = "", choiceValues = "", width = '100%')
@@ -43,7 +46,7 @@ myApp <- function(homedir=getwd(), ...) {
                # Show possible pipelines:
                textOutput("pipeline"),
                hr(),
-               checkboxGroupInput("tools", label = "Select the tools you would like to use.",
+               checkboxGroupInput("tools", label = "Select the tools you would like to use:",
                                   choiceNames = list("GGIR (R package)",
                                                      "BrondCounts (R packages activityCounts + GGIR)",
                                                      "PALMSpy (Python library)", "PALMSplus (R package)"),
@@ -56,7 +59,7 @@ myApp <- function(homedir=getwd(), ...) {
                # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
                conditionalPanel(condition = "input.availabledata.indexOf(`AccRaw`) > -1  && input.tools.includes(`GGIR`)",
                                 shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
-                                                           title = "Select folder with raw accelerometer data"),
+                                                           title = "Select raw accelerometer data directory"),
                                 verbatimTextOutput("rawaccdir", placeholder = TRUE)
                ),
                # Select input folder count accelerometer data if count data is available and PALMSpy is planned------------------
@@ -64,20 +67,20 @@ myApp <- function(homedir=getwd(), ...) {
                # with questions where it should be stored
                conditionalPanel(condition = "input.availabledata.indexOf(`ACount`) > -1 && input.tools.includes(`PALMSpy`)",
                                 shinyFiles::shinyDirButton("countaccdir", label = "Count accelerometry data directory...",
-                                                           title = "Select folder with count accelerometer data"),
+                                                           title = "Select count accelerometer data directory"),
                                 verbatimTextOutput("countaccdir", placeholder = TRUE)
                ),
                # Select input folder gps data -----------------------------------
                conditionalPanel(condition = "input.availabledata.indexOf(`GPS`) > -1 && input.tools.includes('PALMSpy')",
                                 shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
-                                                           title = "Select folder with GPS data"),
+                                                           title = "Select GPS data directory"),
                                 verbatimTextOutput("gpsdir", placeholder = TRUE)
                ),
                # Specify output directory ----------------------------------------------
                fluidRow(
                  column(12,
                         shinyFiles::shinyDirButton("outputdir", "Output directory...",
-                                                   title = "Select folder where output should be stored"),
+                                                   title = "Select directory where output should be stored"),
                         verbatimTextOutput("outputdir", placeholder = TRUE)
                  )
                ),
@@ -172,16 +175,16 @@ myApp <- function(homedir=getwd(), ...) {
     observeEvent(input$page_21, switch_page(1))
     observeEvent(input$page_23, {
       if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0") {
-        showNotification("Select folder with raw accelerometer data", type = "error")
+        showNotification("Select raw accelerometer data directory", type = "error")
       } else {
         if ("AccRaw" %in% input$availabledata & "BrondCounts" %in% input$tools & as.character(input$rawaccdir)[1] == "0") {
-          showNotification("Select folder with raw accelerometer data", type = "error")
+          showNotification("Select raw accelerometer data directory", type = "error")
         } else {
           if ("ACount" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$countaccdir)[1] == "0") {
-            showNotification("Select folder with count accelerometer data", type = "error")
+            showNotification("Select count accelerometer data directory", type = "error")
           } else {
             if ("GPS" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$gpsdir)[1] == "0") {
-              showNotification("Select folder with GPS data", type = "error")
+              showNotification("Select GPS data directory", type = "error")
             } else {
               if ("SleepDiary" %in% input$availabledata & "GGIR" %in% input$tools & length(as.character(sleepdiaryfile())) == 0) {
                 showNotification("Select sleepdiary file", type = "error")
@@ -203,7 +206,7 @@ myApp <- function(homedir=getwd(), ...) {
     # Ask user questions about available and research interests
     # and use the answers to identify a suitable pipeline
     # Update checkbox possible research goals depending on available data
-    observe({
+    observeEvent(input$availabledata, {
       x <- input$availabledata
       
       # Can use character(0) to remove all choices
@@ -213,6 +216,7 @@ myApp <- function(homedir=getwd(), ...) {
       if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
       if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PA", "QC")
       if ("AccRaw" %in% x) researchgoals = c(researchgoals, "Sleep", "QC")
+      if ("ACount" %in% x == TRUE & "AccRaw" %in% x == FALSE) researchgoals = c()
       reasearchgoalsNames = c("Data quality assessment", "Physical Activity",
                               "Sleep", "Trips", "Behaviour environment relation")
       reasearchgoalsValues = c("QC", "PA", "Sleep", "Trips", "Environment")
@@ -237,7 +241,7 @@ myApp <- function(homedir=getwd(), ...) {
     proposed_pipeline <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
     output$pipeline <- renderText({
       message = paste0("Proposed software pipeline: ",paste0(proposed_pipeline(), collapse = " + "))
-      ifelse(length(proposed_pipeline()) == 0, yes = "Select data types and research interest above.", no = message)
+      ifelse(length(proposed_pipeline()) == 0, yes = "--> Tick boxes above according to the analysis you would like to do", no = message)
     })
     
     # check whether GGIR is in the pipeline, and send to UI,
