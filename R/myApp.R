@@ -45,13 +45,16 @@ myApp <- function(homedir=getwd(), ...) {
                ), 
                # Show possible pipelines:
                textOutput("pipeline"),
-               hr(),
-               checkboxGroupInput("tools", label = "Select the tools you would like to use:",
-                                  choiceNames = list("GGIR (R package)",
-                                                     "BrondCounts (R packages activityCounts + GGIR)",
-                                                     "PALMSpy (Python library)", "PALMSplus (R package)"),
-                                  choiceValues = list("GGIR", "BrondCounts", "PALMSpy", "PALMSplus"), width = '100%'),
-               
+               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
+                                                   "(input.availabledata.indexOf(`ACount`) > -1 &&",
+                                                   "input.availabledata.indexOf(`AccRaw`) > -1)"),
+                                hr(),
+                                checkboxGroupInput("tools", label = "Select the tools you would like to use:",
+                                                   choiceNames = list("GGIR (R package)",
+                                                                      "BrondCounts (R packages activityCounts + GGIR)",
+                                                                      "PALMSpy (Python library)", "PALMSplus (R package)"),
+                                                   choiceValues = list("GGIR", "BrondCounts", "PALMSpy", "PALMSplus"), width = '100%'),
+               ),
                actionButton("page_12", "next")
       ),
       tabPanel("page_2",
@@ -118,7 +121,7 @@ myApp <- function(homedir=getwd(), ...) {
                titlePanel("Analysis"),
                hr(),
                conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
-                                "input.tools.includes('BrondCounts')"),
+                                                   "input.tools.includes('BrondCounts')"),
                                 conditionalPanel(condition =
                                                    paste0("input.tools.indexOf(`GGIR`) > -1  && ",
                                                           "input.tools.indexOf(`BrondCounts`) > -1"), 
@@ -150,22 +153,26 @@ myApp <- function(homedir=getwd(), ...) {
                         selected = paste0("page_", i))
     }
     observeEvent(input$page_12, {
-      if (length(input$tools) == 0) {
-        showNotification("Select at least one tool", type = "error")
+      if (length(input$availabledata) == 0 & length(input$tools) == 0) {
+        showNotification("Select data type(s) to be analysed", type = "error")
       } else {
-        if ("GGIR" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
-          showNotification("GGIR not possible without access to raw accelerometer data", type = "error")
+        if (length(input$tools) == 0) {
+          showNotification("Select at least one tool", type = "error")
         } else {
-          if ("PALMSpy" %in% input$tools == TRUE & "GPS" %in% input$availabledata == FALSE) {
-            showNotification("PALMSpy not possible without access to GPS data", type = "error")
+          if ("GGIR" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
+            showNotification("GGIR not possible without access to raw accelerometer data", type = "error")
           } else {
-            if ("PALMSplus" %in% input$tools == TRUE & "GIS" %in% input$availabledata == FALSE) {
-              showNotification("PALMSplus not possible without access to GIS data", type = "error")
+            if ("PALMSpy" %in% input$tools == TRUE & "GPS" %in% input$availabledata == FALSE) {
+              showNotification("PALMSpy not possible without access to GPS data", type = "error")
             } else {
-              if ("BrondCounts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
-                showNotification("BrondCounts not possible without access to raw accelerometer data", type = "error")
+              if ("PALMSplus" %in% input$tools == TRUE & "GIS" %in% input$availabledata == FALSE) {
+                showNotification("PALMSplus not possible without access to GIS data", type = "error")
               } else {
-                switch_page(2)
+                if ("BrondCounts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
+                  showNotification("BrondCounts not possible without access to raw accelerometer data", type = "error")
+                } else {
+                  switch_page(2)
+                }
               }
             }
           }
@@ -324,7 +331,7 @@ myApp <- function(homedir=getwd(), ...) {
     # Check and Edit config files ---------------------------------------
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"))
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"))
- 
+    
     
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
