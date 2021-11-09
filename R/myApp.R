@@ -38,7 +38,7 @@ myApp <- function(homedir=getwd(), ...) {
                # If there is AccRaw or ACount data then show second text box that asks user about research goals
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
                                                    "(input.availabledata.indexOf(`ACount`) > -1 &&",
-                                                   "input.availabledata.indexOf(`AccRaw`) > -1)"),
+                                                   "input.availabledata.indexOf(`GPS`) > -1)"),
                                 hr(),
                                 checkboxGroupInput("researchgoals", label = "", 
                                                    choiceNames = "", choiceValues = "", width = '100%')
@@ -47,7 +47,7 @@ myApp <- function(homedir=getwd(), ...) {
                textOutput("pipeline"),
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
                                                    "(input.availabledata.indexOf(`ACount`) > -1 &&",
-                                                   "input.availabledata.indexOf(`AccRaw`) > -1)"),
+                                                   "input.availabledata.indexOf(`GPS`) > -1)"),
                                 hr(),
                                 checkboxGroupInput("tools", label = "Select the tools you would like to use:",
                                                    choiceNames = list("GGIR (R package)",
@@ -58,7 +58,7 @@ myApp <- function(homedir=getwd(), ...) {
                actionButton("page_12", "next")
       ),
       tabPanel("page_2",
-               titlePanel("Data selection"),
+               titlePanel("Habitus - Data selection"),
                # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
                conditionalPanel(condition = "input.availabledata.indexOf(`AccRaw`) > -1  && input.tools.includes(`GGIR`)",
                                 shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
@@ -97,7 +97,7 @@ myApp <- function(homedir=getwd(), ...) {
                actionButton("page_23", "next")
       ),
       tabPanel("page_3",
-               titlePanel("Configuration"),
+               titlePanel("Habitus - Parameter Configuration"),
                conditionalPanel(condition = "input.tools.includes('GGIR')",
                                 h2("GGIR"),
                                 modConfigUI("edit_ggir_config"),
@@ -118,7 +118,7 @@ myApp <- function(homedir=getwd(), ...) {
       ),
       tabPanel("page_4",
                # Button to start analysis ---------------------------------------------
-               titlePanel("Analysis"),
+               titlePanel("Habitus - Analyses"),
                hr(),
                conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
                                                    "input.tools.includes('BrondCounts')"),
@@ -223,7 +223,7 @@ myApp <- function(homedir=getwd(), ...) {
       if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
       if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PA", "QC")
       if ("AccRaw" %in% x) researchgoals = c(researchgoals, "Sleep", "QC")
-      if ("ACount" %in% x == TRUE & "AccRaw" %in% x == FALSE) researchgoals = c()
+      if ("ACount" %in% x == TRUE & "GPS" %in% x == FALSE & "AccRaw" %in% x == FALSE) researchgoals = c()
       reasearchgoalsNames = c("Data quality assessment", "Physical Activity",
                               "Sleep", "Trips", "Behaviour environment relation")
       reasearchgoalsValues = c("QC", "PA", "Sleep", "Trips", "Environment")
