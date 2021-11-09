@@ -13,8 +13,24 @@ GGIRshiny = function(rawaccdir, outputdir, configfile=c(), sleepdiary=c(), do.Br
   if (length(sleepdiary) == 0) sleepdiary = c()
   if (length(configfile) == 0) configfile = c()
   if (do.BrondCounts == FALSE) {
-    GGIR::g.shell.GGIR(datadir=rawaccdir, outputdir=outputdir, configfile = configfile, loglocation=sleepdiary)
+    GGIR::g.shell.GGIR(datadir = rawaccdir, outputdir = outputdir, 
+                       configfile = configfile, loglocation = sleepdiary)
   } else {
-    GGIR::g.shell.GGIR(datadir=rawaccdir, outputdir=outputdir, configfile = configfile, loglocation=sleepdiary)
+    desired_sf_by_BrondCounts = 30
+    myfun =  list(FUN = BrondCounts, # Note BrondCounts is function within HabitusGUI
+                  parameters = desired_sf_by_BrondCounts,
+                  expected_sample_rate = desired_sf_by_BrondCounts,
+                  expected_unit = "g",
+                  colnames = c("countx","county","countz"),
+                  minlength = 5,
+                  outputres = 1,
+                  outputtype = "numeric",
+                  reporttype = "scalar",
+                  aggfunction = sum,
+                  timestamp = TRUE)
+    GGIR::g.shell.GGIR(datadir = rawaccdir, outputdir = outputdir, 
+                       configfile = configfile, loglocation = sleepdiary, 
+                       myfun = myfun, do.parallel=FALSE, backup.cal.coef = "retrieve")
+    BrondCounts2csv(outputdir = paste0(outputdir, "/output_", basename(rawaccdir)), configfile = configfile)
   }
 }
