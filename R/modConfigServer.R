@@ -51,23 +51,28 @@ modConfigServer = function(id, tool) {
           }
         )
         DT::replaceData(proxy, v$params, resetPaging = FALSE)  # replaces data displayed by the updated table
-      })
-      
-      ### Reset Table
-      observeEvent(input$reset, {
-        showNotification("Resetting values", type = "message")
-        v$params <- params # your default data
-      })
-      
-      # ### Save table to file
-      observeEvent(input$save, {
+        # Auto-save every change
         showNotification("Saving changes", type = "message")
         if (tool() == "PALMSpy") {
           update_params(new_params = v$params, file = input$configfile$datapath, format = "json_palmspy")
         } else if (tool() == "GGIR") {
           update_params(new_params = v$params, file = input$configfile$datapath, format = "csv_ggir")
         }
+        
       })
+      
+      ### Reset Table
+      observeEvent(input$reset, {
+        showNotification("Resetting values", type = "message")
+        v$params <- params # your default data
+        # also saving to file
+        if (tool() == "PALMSpy") { 
+          update_params(new_params = v$params, file = input$configfile$datapath, format = "json_palmspy")
+        } else if (tool() == "GGIR") {
+          update_params(new_params = v$params, file = input$configfile$datapath, format = "csv_ggir")
+        }
+      })
+
       # Render table for use in UI
       output$mod_table <- DT::renderDataTable({
         DT::datatable(v$params, editable = TRUE,
@@ -75,9 +80,14 @@ modConfigServer = function(id, tool) {
                                                     pageLength = 5))
                       # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
       })
+      output$config_instruction <- renderText({
+        "Review the parameter values and edit where needed by double clicking:"
+      })
     })
-    
-    output$config_explanation <- renderText({
+    output$config_instruction <- renderText({ # the default output before the configuration file is selected
+      "Select a configuration file on the left. Download the template if you do not have a configuration file."
+    })
+    output$config_explanation1 <- renderText({
       if (tool() == "GGIR") {
         explanation = paste0("GGIR takes as input accelerometer data expressed in universal units ",
                              "of gravitational acceleration and offers a broad analysis spanning: ",
@@ -91,14 +101,26 @@ modConfigServer = function(id, tool) {
       explanation
     })
     
-    output$config_instruction <- renderText({
+    output$config_explanation2 <- renderText({
       if (tool() == "GGIR") {
-        config_instruction = "Select your GGIR configuration file (.csv) or if you do not have one Download a template:"
+        config_explanation2 = "GGIR configuration files are in .csv format. If you do not have one Download a template below."
       } else if (tool() == "PALMSpy") {
-        config_instruction = "Select your PALMSpy config file file (.json) or if you do not have one Download a template:"
+        config_explanation2 = "PALMSpy configuration files are in .json. If you do not have one Download a template below."
       }
-      config_instruction
+      config_explanation2
     })
+    
+    
+  
+    
+    # # Inform UI that file has been upload such that save and reset button can be displayed
+    # getData <- reactive({
+    #   if(is.null(input$configfile)) return(NULL)
+    # })
+    # output$configfileUploaded <- reactive({
+    #   return(!is.null(getData()))
+    # })
+    # outputOptions(output, 'configfileUploaded', suspendWhenHidden=FALSE)
     
     # return filepath, such that this can be used outside this module
     reactive(input$configfile$datapath)

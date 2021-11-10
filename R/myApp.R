@@ -204,7 +204,25 @@ myApp <- function(homedir=getwd(), ...) {
       }
     })
     observeEvent(input$page_32, switch_page(2))
-    observeEvent(input$page_34, switch_page(4))
+    observeEvent(input$page_34, {
+      configs_ready = TRUE
+      if ("PALMSpy" %in% input$tools) {
+        if (length(paste0(configfilePALMSpy())) == 0) {
+          configs_ready = FALSE
+        }
+      }
+      if ("GGIR" %in% input$tools) {
+        if (length(paste0(configfileGGIR())) == 0) {
+          configs_ready = FALSE
+        }
+      }
+      if (configs_ready == TRUE) {
+        switch_page(4)
+      } else {
+        showNotification("Select configuration file(s)", type = "error")
+      }
+        
+      })
     observeEvent(input$page_43, switch_page(3))
     
     # Defined time to ensure file count is only checked twice per second ---------
