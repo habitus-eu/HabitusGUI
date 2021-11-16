@@ -35,6 +35,15 @@ modConfigServer = function(id, tool) {
       } else if (tool() == "GGIR") {
         params = load_params(file = input$configfile$datapath, format = "csv_ggir")
       }
+      params_errors = check_params(params)
+      if (nrow(params_errors) > 0) {
+        for (parError_i in 1:nrow(params_errors)) {
+          message = paste0("Error in ", params_errors$name[parError_i], ": ", params_errors$error[parError_i])
+          showNotification(message, type = "error", duration = 10)
+          Sys.sleep(1)
+        }
+      }
+      
       v <- reactiveValues(params=params)
       proxy = DT::dataTableProxy("mod_table")
       observeEvent(input$mod_table_cell_edit, {
@@ -51,14 +60,28 @@ modConfigServer = function(id, tool) {
           }
         )
         DT::replaceData(proxy, v$params, resetPaging = FALSE)  # replaces data displayed by the updated table
-        # Auto-save every change
-        showNotification("Saving changes", type = "message")
+        
+        params_errors = check_params(v$params)
+        if (nrow(params_errors) > 0) {
+          for (parError_i in 1:nrow(params_errors)) {
+            message = paste0("Cannot update ", params_errors$name[parError_i], " to ",
+                             v$params$value[which(rownames(v$params) == params_errors$name[parError_i])], 
+                             ": ", params_errors$error[parError_i])
+            showNotification(message, type = "error", duration = 5)
+            # resetting to orginal value
+            old_value =  params$value[which(rownames(params) == params_errors$name[parError_i])]
+            v$params$value[which(rownames(v$params) == params_errors$name[parError_i])] = old_value 
+          }
+        } else {
+          # Only show Saving sign when no errors were found
+          showNotification("Saving changes", type = "message")
+        }
+        # Auto-save after every change
         if (tool() == "PALMSpy") {
           update_params(new_params = v$params, file = input$configfile$datapath, format = "json_palmspy")
         } else if (tool() == "GGIR") {
           update_params(new_params = v$params, file = input$configfile$datapath, format = "csv_ggir")
         }
-        
       })
       
       ### Reset Table
@@ -75,7 +98,8 @@ modConfigServer = function(id, tool) {
 
       # Render table for use in UI
       output$mod_table <- DT::renderDataTable({
-        DT::datatable(v$params, editable = TRUE,
+        cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set") == FALSE)
+        DT::datatable(v$params[cols2show], editable = TRUE,
                       options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
                                                     pageLength = 5))
                       # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option

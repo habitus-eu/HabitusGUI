@@ -15,17 +15,19 @@ check_params = function(params = c()) {
   if (length(numi) > 0) {
     for (i in numi) {
       try(expr = {
-        test_num = any(is.na(suppressWarnings(as.numeric(params$value[i]))))
+        num_value = suppressWarnings(
+          as.numeric(unlist(lapply(strsplit(x = params$value[i], "[(]|[)]|[,]|c"), function(x){x[!x == ""]})))
+          )
       }, silent = TRUE)
+      test_num = any(is.na(num_value))
       if (test_num == TRUE) {
         blocked_params$name[cnt] = rowNames[i]
         blocked_params$error[cnt] = "Value is not numeric"
         cnt = cnt + 1
       } 
       if (test_num == FALSE) {
-        num_value = as.numeric(params$value[i])
         if (params$class[i] == "num_integer") {
-          if (round(num_value) != num_value) {
+          if (any(round(num_value) != num_value)) {
             blocked_params$name[cnt] = rowNames[i]
             blocked_params$error[cnt] = "Number is not an integer"
             cnt = cnt + 1
