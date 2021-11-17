@@ -60,7 +60,9 @@ myApp <- function(homedir=getwd(), ...) {
       tabPanel("page_2",
                titlePanel("Habitus - Data selection"),
                # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
-               conditionalPanel(condition = "input.availabledata.indexOf(`AccRaw`) > -1  && input.tools.includes(`GGIR`)",
+               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  && ",
+                                                   "(input.tools.includes(`GGIR`) || ",
+                                                   "input.tools.includes(`BrondCounts`))"),
                                 shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
                                                            title = "Select raw accelerometer data directory"),
                                 verbatimTextOutput("rawaccdir", placeholder = TRUE)
