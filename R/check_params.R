@@ -59,5 +59,18 @@ check_params = function(params = c()) {
     blocked_params = blocked_params[-c(cnt:N),]
   }
   block_params = blocked_params[order(blocked_params$name),]
-  return(blocked_params)
+  
+  green_message = "Configuration file has succesfully passed all checks"
+  message = c()
+  if (nrow(block_params) > 0) {
+    for (parError_i in 1:nrow(block_params)) {
+      message = paste0(c(message, paste0("Error in parameter \" ", 
+                                  block_params$name[parError_i], " = ", 
+                                  params$value[which(rownames(params) == block_params$name[parError_i])],
+                                  " \": ", 
+                                  block_params$error[parError_i],"<br/>")), collapse = "")
+    }
+    green_message = c()
+  }
+  invisible(list(blocked_params = blocked_params, error_message = message, green_message = green_message))
 }

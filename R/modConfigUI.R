@@ -17,12 +17,14 @@ modConfigUI <- function(id) {
            downloadButton(NS(id, "download"), "Download template", class = "info-xs"),
            actionButton(NS(id, "reset"), "Reset"),
            # actionButton(NS(id, "save"), "Save"),
-           
            tags$hr(),
     ),
     column(9,
            h4(textOutput(NS(id, "config_instruction"))),
-           DT::dataTableOutput(NS(id, "mod_table"))
+           DT::dataTableOutput(NS(id, "mod_table")),
+           # span(verbatimTextOutput(NS(id, "config_issues")), style="color:red"),
+           span(htmlOutput(NS(id, "config_issues")), style="color:red"),
+           span(htmlOutput(NS(id, "config_green")), style="color:green"),
     )
   )
 }

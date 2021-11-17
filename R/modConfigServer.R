@@ -36,14 +36,12 @@ modConfigServer = function(id, tool) {
         params = load_params(file = input$configfile$datapath, format = "csv_ggir")
       }
       params_errors = check_params(params)
-      if (nrow(params_errors) > 0) {
-        for (parError_i in 1:nrow(params_errors)) {
-          message = paste0("Error in ", params_errors$name[parError_i], ": ", params_errors$error[parError_i])
-          showNotification(message, type = "error", duration = 10)
-          Sys.sleep(1)
-        }
-      }
-      
+      output$config_issues <- renderUI({
+        HTML(params_errors$error_message)
+      })
+      output$config_green <- renderUI({
+        HTML(params_errors$green_message)
+      })
       v <- reactiveValues(params=params)
       proxy = DT::dataTableProxy("mod_table")
       observeEvent(input$mod_table_cell_edit, {
@@ -62,17 +60,13 @@ modConfigServer = function(id, tool) {
         DT::replaceData(proxy, v$params, resetPaging = FALSE)  # replaces data displayed by the updated table
         
         params_errors = check_params(v$params)
-        if (nrow(params_errors) > 0) {
-          for (parError_i in 1:nrow(params_errors)) {
-            message = paste0("Cannot update ", params_errors$name[parError_i], " to ",
-                             v$params$value[which(rownames(v$params) == params_errors$name[parError_i])], 
-                             ": ", params_errors$error[parError_i])
-            showNotification(message, type = "error", duration = 5)
-            # resetting to orginal value
-            old_value =  params$value[which(rownames(params) == params_errors$name[parError_i])]
-            v$params$value[which(rownames(v$params) == params_errors$name[parError_i])] = old_value 
-          }
-        } else {
+        output$config_issues <- renderUI({
+          HTML(params_errors$error_message)
+        })
+        output$config_green <- renderUI({
+          HTML(params_errors$green_message)
+        })
+        if (nrow(params_errors$blocked_params) == 0) {
           # Only show Saving sign when no errors were found
           showNotification("Saving changes", type = "message")
         }
@@ -94,6 +88,15 @@ modConfigServer = function(id, tool) {
         } else if (tool() == "GGIR") {
           update_params(new_params = v$params, file = input$configfile$datapath, format = "csv_ggir")
         }
+        # update list with errors
+        params_errors = check_params(params)
+        output$config_issues <- renderUI({
+          HTML(params_errors$error_message)
+        })
+        output$config_green <- renderUI({
+          HTML(params_errors$green_message)
+        })
+        
       })
 
       # Render table for use in UI

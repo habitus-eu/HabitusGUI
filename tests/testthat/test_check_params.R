@@ -14,10 +14,16 @@ test_that("Parameters are checked", {
   paramcheck = check_params(params)
   
   # Check that values are as expected
-  expect_equal(paramcheck$name, c("a", "c", "f", "g", "e"))
-  expect_equal(paramcheck$error, c("Number is not within expected range", 
+  expect_equal(paramcheck$blocked_params$name, c("a", "c", "f", "g", "e"))
+  expect_equal(paramcheck$blocked_params$error, c("Number is not within expected range", 
                                    "Number is not an integer",
                                    "Value is not numeric",
                                    "Value is not numeric", 
                                    "Value is not part of expected set"))
+  expect_equal(paramcheck$error_message, paste0("Error in parameter \" a = 0 \": Number is not within",
+                                                " expected range<br/>Error in parameter \" c = 1.1 \": ",
+                                                "Number is not an integer<br/>Error in parameter \" e = A ",
+                                                "\": Value is not part of expected set<br/>Error in parameter",
+                                                " \" f = A \": Value is not numeric<br/>Error in parameter \" ",
+                                                "g = NA \": Value is not numeric<br/>", collapse = ""))
 })
