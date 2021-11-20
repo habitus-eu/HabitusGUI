@@ -22,13 +22,13 @@ myApp <- function(homedir=getwd(), ...) {
     # “cerulean”, “cosmo”, “cyborg”, “darkly”, “flatly”, “journal”, “litera”, “lumen”, 
     # “lux”, “materia”, “minty”, “morph”, “pulse”, “quartz”, “sandstone”, “simplex”, 
     #     “sketchy”, “slate”, “solar”, “spacelab”, “superhero”, “united”, “vapor”, “yeti”, “zephyr” 
-    
     tabsetPanel(
       id = "wizard",
       type = "hidden",
       tabPanel("page_1",
-               # modBuildPipelineUI("build_pipeline"),
-               titlePanel(h1("Habitus")),
+               fluidRow(column(8, div(h1("Habitus"), style = "height:50px")),
+                        column(4, div(imageOutput("logo_page1"), style = "height:50px;float:right"))
+               ),
                checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
                                   choiceNames = list("Raw acceleration (at least ten values per second per axis)", 
                                                      "Counts (in ActiGraph .csv format)",
@@ -58,7 +58,9 @@ myApp <- function(homedir=getwd(), ...) {
                actionButton("page_12", "next")
       ),
       tabPanel("page_2",
-               titlePanel("Habitus - Data selection"),
+               fluidRow(column(8, div(h1("Habitus - Data selection"), style = "height:50px")),
+                        column(4, div(imageOutput("logo_page2"), style = "height:50px;float:right"))
+               ),
                # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  && ",
                                                    "(input.tools.includes(`GGIR`) || ",
@@ -99,7 +101,9 @@ myApp <- function(homedir=getwd(), ...) {
                actionButton("page_23", "next")
       ),
       tabPanel("page_3",
-               titlePanel("Habitus - Parameter Configuration"),
+               fluidRow(column(8, div(h1("Habitus - Parameter Configuration"), style = "height:50px")),
+                        column(4, div(imageOutput("logo_page3"), style = "height:50px;float:right"))
+               ),
                conditionalPanel(condition = "input.tools.includes('GGIR')",
                                 h2("GGIR"),
                                 modConfigUI("edit_ggir_config"),
@@ -120,8 +124,9 @@ myApp <- function(homedir=getwd(), ...) {
       ),
       tabPanel("page_4",
                # Button to start analysis ---------------------------------------------
-               titlePanel("Habitus - Analyses"),
-               hr(),
+               fluidRow(column(8, div(h1("Habitus - Analyses"), style = "height:50px")),
+                        column(4, div(imageOutput("logo_page4"), style = "height:50px;float:right"))
+               ),
                conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
                                                    "input.tools.includes('BrondCounts')"),
                                 conditionalPanel(condition =
@@ -150,6 +155,25 @@ myApp <- function(homedir=getwd(), ...) {
   )
   
   server <- function(input, output, session) {
+    
+    
+    getlogo = function() {
+      renderImage({
+        list(src = system.file("www/fontys_logo.png", package = "HabitusGUI")[1],
+             contentType = "image/png",
+             width = 100, height = 100)
+      }, deleteFile = FALSE)
+    }
+    
+    output$logo_page1 = getlogo()
+    output$logo_page2 = getlogo()
+    output$logo_page3 = getlogo()
+    output$logo_page4 = getlogo()
+    # renderImage({
+    #   list(src = system.file("www/fontys_logo.png", package = "HabitusGUI")[1],
+    #        contentType = "image/png",
+    #        width = 100, height = 100)
+    # }, deleteFile = FALSE)
     switch_page <- function(i) {
       updateTabsetPanel(inputId = "wizard",
                         selected = paste0("page_", i))

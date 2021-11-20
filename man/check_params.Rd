@@ -4,10 +4,12 @@
 \alias{check_params}
 \title{check_params}
 \usage{
-check_params(params = c())
+check_params(params = c(), tool = c())
 }
 \arguments{
 \item{params}{Parameter object to be checked}
+
+\item{tool}{Tool name for which parameters are checked}
 }
 \value{
 Data.frame with problematic parameter values and corresponding error

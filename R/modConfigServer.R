@@ -35,7 +35,7 @@ modConfigServer = function(id, tool) {
       } else if (tool() == "GGIR") {
         params = load_params(file = input$configfile$datapath, format = "csv_ggir")
       }
-      params_errors = check_params(params)
+      params_errors = check_params(params, tool = tool())
       output$config_issues <- renderUI({
         HTML(params_errors$error_message)
       })
@@ -59,7 +59,7 @@ modConfigServer = function(id, tool) {
         )
         DT::replaceData(proxy, v$params, resetPaging = FALSE)  # replaces data displayed by the updated table
         
-        params_errors = check_params(v$params)
+        params_errors = check_params(v$params, tool = tool())
         output$config_issues <- renderUI({
           HTML(params_errors$error_message)
         })
@@ -91,7 +91,7 @@ modConfigServer = function(id, tool) {
           update_params(new_params = v$params, file = input$configfile$datapath, format = "csv_ggir")
         }
         # update list with errors
-        params_errors = check_params(params)
+        params_errors = check_params(params, tool = tool())
         output$config_issues <- renderUI({
           HTML(params_errors$error_message)
         })
