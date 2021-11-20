@@ -9,6 +9,7 @@
 
 
 load_params = function(file=c(), format="json_palmspy") {
+  expected_tsv_columns = c("value", "topic", "display", "class", "minimum", "maximum",	"set", "description")
   if (format == "json_palmspy") {
     config = fromJSON(txt = file, simplifyDataFrame = TRUE)
     if ("parameters" %in% names(config)) {
@@ -20,7 +21,7 @@ load_params = function(file=c(), format="json_palmspy") {
       params_info_palmspy = read.table(file = params_info_palmspy_file, sep = "\t", header = TRUE)
       params_merged = merge(params_info_palmspy, params, by = "parameter")
       rownames(params_merged) = params_merged$parameter
-      params = params_merged[,c("value", "topic", "description", "class", "minimum", "maximum",	"set")]
+      params = params_merged[, expected_tsv_columns]
     } else {
       warning(paste0("\nparameters section not found in ", file))
       params = c()
@@ -35,7 +36,7 @@ load_params = function(file=c(), format="json_palmspy") {
     params_info_ggir = read.table(file = params_info_ggir_file, sep = "\t", header = TRUE)
     params_merged = merge(params_info_ggir, params, by.x = "parameter", by.y = "argument")
     rownames(params_merged) = params_merged$parameter
-    params = params_merged[,c("value", "topic", "description", "class", "minimum", "maximum",	"set")]
+    params = params_merged[, expected_tsv_columns]
   }
   return(params)
 }

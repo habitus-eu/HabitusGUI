@@ -1,10 +1,10 @@
-parameter	topic	description	class	minimum	maximum	set
-interval	gps	Epoch duration (in seconds). This is the time resolution for which the classifications are made	num_integer	1	3600	
-insert.max.seconds	gps	max number of seconds to replace missing fixes with last valid fix (valid if --insert-until=true)	num_double	0	100000	
-filter.invalid.values_flag	gps	Explanation blabal….	set			TRUE;FALSE
-max.speed	gps	fix is invalid if speed is greater than this value (in km/hr)				
-max.ele.change	gps	The maximmum elevation change allowed in meter units				
-minutes.zeros.row	accelerometer	Number of minutes with a movement count value of zero to trigger the non-wear detection	num_integer	0	10000	
-activity.bout.duration	accelerometer	Minimum duration of an activity bout (minutes)	num_double	0	10000	
-moderate.cut	accelerometer	Cut-point for moderate activity	num_double	0	10000	
-light.cut	accelerometer	Cut-point for light activity	num_double	0	10000	
+parameter	topic	display	class	minimum	maximum	set	description
+interval	gps	TRUE	num_integer	1	3600		Epoch duration (in seconds). This is the time resolution for which the classifications are made
+insert.max.seconds	gps	TRUE	num_double	0	100000		max number of seconds to replace missing fixes with last valid fix (valid if --insert-until=true)
+filter.invalid.values_flag	gps	TRUE	set			TRUE;FALSE	Explanation blabal….
+max.speed	gps	TRUE	num_double	0	500		fix is invalid if speed is greater than this value (in km/hr)
+max.ele.change	gps	TRUE	num_double	-500	500		The maximmum elevation change allowed in meter units
+minutes.zeros.row	accelerometer	TRUE	num_integer	0	10000		Number of minutes with a movement count value of zero to trigger the non-wear detection
+activity.bout.duration	accelerometer	TRUE	num_double	0	10000		Minimum duration of an activity bout (minutes)
+moderate.cut	accelerometer	TRUE	num_double	0	10000		Cut-point for moderate activity
+light.cut	accelerometer	TRUE	num_double	0	10000		Cut-point for light activity

@@ -52,7 +52,7 @@ modConfigServer = function(id, tool) {
         modifiable_column = "value" # modifiable columns
         isolate(
           if (j %in% match(modifiable_column, colnames(v$params))) {
-            v$params[i, j] <<- DT::coerceValue(k, v$params[i, j])
+            v$params[which(v$params$display == TRUE)[i], j] <<- DT::coerceValue(k, v$params[i, j])
           } else {
             stop("You are not supposed to change this column.") # check to stop the user from editing only few columns
           }
@@ -69,6 +69,8 @@ modConfigServer = function(id, tool) {
         if (nrow(params_errors$blocked_params) == 0) {
           # Only show Saving sign when no errors were found
           showNotification("Saving changes", type = "message")
+        } else {
+          v$params$display[which(rownames(v$params) %in% params_errors$blocked_params$name == TRUE)] = TRUE
         }
         # Auto-save after every change
         if (tool() == "PALMSpy") {
@@ -96,13 +98,13 @@ modConfigServer = function(id, tool) {
         output$config_green <- renderUI({
           HTML(params_errors$green_message)
         })
-        
       })
 
       # Render table for use in UI
       output$mod_table <- DT::renderDataTable({
-        cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set") == FALSE)
-        DT::datatable(v$params[cols2show], editable = TRUE,
+        rows2show = which(v$params$display == TRUE)
+        cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set", "display") == FALSE)
+        DT::datatable(v$params[rows2show, cols2show], editable = TRUE,
                       options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
                                                     pageLength = 5))
                       # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
@@ -136,18 +138,6 @@ modConfigServer = function(id, tool) {
       }
       config_explanation2
     })
-    
-    
-  
-    
-    # # Inform UI that file has been upload such that save and reset button can be displayed
-    # getData <- reactive({
-    #   if(is.null(input$configfile)) return(NULL)
-    # })
-    # output$configfileUploaded <- reactive({
-    #   return(!is.null(getData()))
-    # })
-    # outputOptions(output, 'configfileUploaded', suspendWhenHidden=FALSE)
     
     # return filepath, such that this can be used outside this module
     reactive(input$configfile$datapath)
