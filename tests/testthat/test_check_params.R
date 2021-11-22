@@ -5,8 +5,8 @@ test_that("Parameters are checked", {
   params = data.frame(value = c("0", "1", "1.1", "A", "A", "A", "NA", "c(1,2,3)", "1,2,3"),
                       topic = rep("topic", 9),
                       description = rep("description", 9),
-                      class = c("num_double", "num_double", "num_integer", 
-                                "set", "set", "num_double", "num_double", "num_integer", "num_integer"),
+                      class = c("double", "double", "integer", 
+                                "set", "set", "double", "double", "integer", "integer"),
                       minimum = rep("1", 9),
                       maximum = rep("10", 9),
                       set = c(NA, NA, NA, "A;B;C", "D;E;F", NA, NA, NA, NA))

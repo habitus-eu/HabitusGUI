@@ -11,7 +11,7 @@ check_params = function(params = c(), tool = c()) {
   rowNames = rownames(params)
   
   # Check parameters which value should be numeric and inside a continues range.
-  numi = which(params$class == "num_double" | params$class == "num_integer")
+  numi = which(params$class == "double" | params$class == "integer")
   cnt = 1
   if (length(numi) > 0) {
     for (i in numi) {
@@ -38,7 +38,7 @@ check_params = function(params = c(), tool = c()) {
         }
       }
       if (test_na == FALSE) {
-        if (params$class[i] == "num_integer") {
+        if (params$class[i] == "integer") {
           if (any(round(num_value) != num_value)) {
             blocked_params$name[cnt] = rowNames[i]
             blocked_params$error[cnt] = "is not an integer"
