@@ -40,7 +40,7 @@ its dependencies.
 
 1. Install docker via the official installation instructions: https://docs.docker.com/get-docker/.
 
-Note for VirtualBox users in Windows: When working in Windows, the installation directs you to the installation of the 'Docker Desktop for Windows'. This is not compatible with VirtualBox. We recommend that you use VirtualBox to launch a Ubuntu VM and to launch the app from within the VM.
+Note for VirtualBox users in Windows: When working in Windows, the installation directs you to the installation of the "Docker Desktop for Windows". This is not compatible with VirtualBox. We recommend that you use VirtualBox to launch a Ubuntu VM and to launch the app from within the VM.
 
 2. Create a folder on your machine an name it HabitusDocker
 
@@ -58,15 +58,15 @@ When in Linux: Open Linux Command prompt.
 8. Type `docker build -t habitus-app .`
 
 
-#### 1.2.2 Run the installed HabitusGUI app  with Docker Desktop for Windows
+#### 1.2.2 Run the installed HabitusGUI app with "Docker Desktop for Windows"
 
-1. Open the 'Docker Desktop for Windows'
+1. Open the "Docker Desktop for Windows"
 2. Go to images
 3. Click run
 4. Click on icon to launch in browser
 
 
-#### 1.2.3 Run the installed HabitusGUI app without Docker Desktop for Windows
+#### 1.2.3 Run the installed HabitusGUI app without "Docker Desktop for Windows"
 
 1. Open Command line:
 
