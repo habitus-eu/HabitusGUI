@@ -3,9 +3,9 @@
 
 # 1 Installation
 
-We anticipate that HabitusGUI will be installed on a server environment, where the typical user will not have to worry about the installation process. The instructions below are primarily created to allow for testing purposes.
+We anticipate that HabitusGUI will be installed on a server environment, where the typical user will not have to worry about the installation process.
 
-## 1.1 Install locally without Docker
+## 1.1 Install without Docker
 
 This approach assumes that all HabitusGUI dependencies, such as GGIR, PALMSpy, and PALMSplus, are available in the work environment.
 
@@ -13,7 +13,7 @@ This approach assumes that all HabitusGUI dependencies, such as GGIR, PALMSpy, a
 
 1. Install R: https://cran.r-project.org/
 2. Start R: `R`
-3. Copy paste to the following line to the R command line and press Enter:
+3. Copy and paste to the following line to the R command line and press Enter:
 
 ```
 install.package(remotes); library("remotes"); remotes::install_github("habitus-eu/HabitusGUI", dependencies=TRUE)
@@ -31,7 +31,7 @@ If you ever want to update the software in the future then repeat this step.
 
 4. Launch HabitusGUI app: `HabitusGUI::myApp(homedir=data_dir)`
 
-## 1.2 Docker
+## 1.2 Install with Docker
 
 The HabitusGUI R package repository contains docker files needed for hosting Habitus Shiny app and
 its dependencies.
@@ -100,9 +100,9 @@ If you would ever when to remove the image then do:
 
 # 2 Instructions for tool contributors
 
-This paragraph describes what we expect from the maintainers of the tools that are used by HabitusGUI
+This section describes what we expect from the maintainers of the external software tools that are used by HabitusGUI.
 
-### 2.1 Information we need from you
+### 2.1 Information we need from you about your software tool
 
 To help us integrate your tool we need the following information from you:
 
@@ -124,14 +124,13 @@ To help us integrate your tool we need the following information from you:
 8. List of research goals for which the tool is needed.
 9. If software tool takes as input the output from other software tools then describe what those other tools are and how they would have to be configured.
 
+Note: Please try to keep the above consistent across future releases of your tool. If you have to make a change then please let us know in time such that we can update our end of the code accordingly.
 
-Note: Please try to keep the above consistent across releases of your tool. If you have to make a change then please let us know in time such that we can update our end of the code accordingly.
+### 2.2 What we expect from your software tool
 
-### 2.2 What expect from your software
-
-1. Is Open Source and has an Open Source License file in the repository
-2. Has an integration test to show that software can be installated.
-3. Handles corrupt or invalid data files, and provides clear communication about the identification of such files with the user.
-4. Allows for controlling all software parameters relevant to the research with a configuration file.
-5. To take advantage of parallel processing on CPU infrastructure.
-4. Integration test
+1. Is publicly available and has Open Source License file.
+2. Has an integration test to demonstrate that the software can be uninstalled.
+3. Has some unit test to test for core functionalities.
+4. Handles corrupt or invalid data files, and provides clear communication about the identification of such files with the user.
+5. Allows for using a configuration file to set all software parameters relevant to the end-user.
+6. To take advantage of parallel processing on CPU infrastructure if relevant.
