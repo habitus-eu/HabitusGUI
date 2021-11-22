@@ -31,9 +31,31 @@ For example, if you want to work with GGIR:
 
 `HabitusGUI::myApp(homedir=data_dir)`
 
-## 2 How to use app locally with docker
 
-See https://github.com/habitus-eu/HabitusDocker/blob/main/README.md
+## 2 Docker
+
+### 2.1 How to use app locally with docker
+
+This repository contains docker files needed for hosting Habitus Shiny app and
+its dependencies.
+
+1. Build app: `sudo docker build -t habitus-app .`
+
+2. Run app and expose it to data volume on the host:
+
+`sudo docker run --rm -v /home/vincent/projects/fontys:/srv/shiny-server/data -p 3838:3838 habitus-app`
+
+Here `/home/vincent/projects/fontys` should be replaced by the local directory you would like to expose to the app.
+
+(If you do `sudo docker run --rm -p 3838:3838 habitus-app` you would not expose the data to the app)
+
+3. Open app in browser: `http://localhost:3838/`
+
+4. Remove image: `sudo docker rmi habitus-app`
+
+### 2.2 How to work with iso files
+
+...
 
 
 ## 3 For tool developers
