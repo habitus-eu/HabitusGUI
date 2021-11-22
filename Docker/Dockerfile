@@ -19,7 +19,7 @@ RUN R -e 'install.packages(c(\
               "jsonlite", \
               "DT", \
               "waiter", \
-              "activityCounts" \
+              "activityCounts", \
               "remotes" \
             ), \
             repos="https://packagemanager.rstudio.com/cran/__linux__/focal/2021-04-23"\
