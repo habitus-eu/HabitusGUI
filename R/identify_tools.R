@@ -12,12 +12,12 @@
 setClass(Class = "toolio", slots = list(input = "character", output = "character", usecases = "character"))
 
 identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS"),
-                          goals = c("PA", "Sleep", "QC", "Trips", "Environment"),
+                          goals = c("PA", "QC", "Trips", "Environment"),
                           available_tools = c("GGIR", "PALMSpy", "PALMSplus", "BrondCounts")) {
   iotools = list(GGIR = new("toolio",
                             input = "AccRaw",
                             output = c("GGIR_out", "ACount"),
-                            usecases = c("PA", "Sleep", "QC", "Trips", "Environment")), 
+                            usecases = c("PA", "QC", "Trips", "Environment")), 
                  PALMSpy = new("toolio",
                                input = c("ACount","GPS"),
                                output = c("PALMSpy_out"),

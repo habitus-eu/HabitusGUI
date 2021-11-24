@@ -14,8 +14,6 @@
 # roxygen2::roxygenise()
 
 myApp <- function(homedir=getwd(), ...) {
-  ONames <- OlsonNames()
-  ONames <- ONames[c(which(ONames == Sys.timezone()), which(ONames != Sys.timezone()))]
   ui <- fluidPage(
     theme = bslib::bs_theme(bootswatch = "sketchy"), #,"sandstone"),
     # preview examples: https://bootswatch.com/
@@ -265,12 +263,12 @@ myApp <- function(homedir=getwd(), ...) {
       researchgoals = c()
       if ("GPS" %in% x & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
       if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
-      if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PA", "QC")
-      if ("AccRaw" %in% x) researchgoals = c(researchgoals, "Sleep", "QC")
+      if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PB", "QC")
+      if ("AccRaw" %in% x) researchgoals = c(researchgoals, "QC")
       if ("ACount" %in% x == TRUE & "GPS" %in% x == FALSE & "AccRaw" %in% x == FALSE) researchgoals = c()
-      reasearchgoalsNames = c("Data quality assessment", "Physical Activity",
-                              "Sleep", "Trips", "Behaviour environment relation")
-      reasearchgoalsValues = c("QC", "PA", "Sleep", "Trips", "Environment")
+      reasearchgoalsNames = c("Data quality assessment", "Physical activity, sedentary behaviour & sleep",
+                              "Trips (displacements)", "Relation between behaviour and environment")
+      reasearchgoalsValues = c("QC", "PB", "Trips", "Environment")
       
       if (length(researchgoals) == 0) {
         researchgoalsLabel = ""
