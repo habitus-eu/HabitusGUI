@@ -71,6 +71,19 @@ check_params = function(params = c(), tool = c()) {
       }
     }
   }
+  # Check parameters which value should be timezone
+  seti = which(params$class == "timezone")
+  if (length(seti) > 0) {
+    for (i in seti) {
+      if (params$value[i] %in% OlsonNames() ==  FALSE) {
+        blocked_params$name[cnt] = rowNames[i]
+        blocked_params$error[cnt] = "is not an expected (Olson) timezone name. You may want to check spelling."
+        cnt = cnt + 1
+      }
+    }
+  }
+  
+  # Create messages
   if (cnt <= N) {
     blocked_params = blocked_params[-c(cnt:N),]
   }
