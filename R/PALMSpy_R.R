@@ -11,9 +11,13 @@ PALMSpy_R = function(gps_path, acc_path, output_path, config_file =c()) {
   
   palmspy_pyfile = system.file("python/PALMSpy_python_wrapper.py", package = "HabitusGUI")[1]
   
+  print(paste0("output_path = ",output_path))
+  print(paste0("acc_path = ",acc_path))
+  
   basecommand = paste0("python3 ", palmspy_pyfile, " ", 
                        gps_path, " ", acc_path, " ", output_path)
   if (length(config_file) > 0) {
+    print(paste0("config_file = ",config_file))
     system(paste0(basecommand, " ",config_file))
   } else {
     system(paste0(basecommand, " config_file not available"))

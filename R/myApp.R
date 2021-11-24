@@ -125,6 +125,8 @@ myApp <- function(homedir=getwd(), ...) {
                fluidRow(column(8, div(h1("Habitus - Analyses"), style = "height:50px")),
                         column(4, div(imageOutput("logo_page4"), style = "height:50px;float:right"))
                ),
+               span(h4(textOutput("recommendorder")), style="color:purple"),
+               hr(),
                conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
                                                    "input.tools.includes('BrondCounts')"),
                                 conditionalPanel(condition =
@@ -380,57 +382,135 @@ myApp <- function(homedir=getwd(), ...) {
     
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
+      GGIRBrondCounts_message = ""
       if ("GGIR" %in% input$tools | "BrondCounts" %in% input$tools) {
-        waiter <- waiter::Waiter$new(id = "start_ggir", html = waiter::spin_throbber())$show()
-        on.exit(waiter$hide())
-        if ("BrondCounts" %in% input$tools) {
-          id_ggir = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-          do.BrondCounts = TRUE
+        GGIRBrondCounts_message = "Error: Contact maintainer"
+        # Basic check before running function:
+        ready_to_run_ggirbrondcounts = FALSE
+        if (dir.exists(global$raw_acc_in)) {
+          acc_files_available = length(dir(path = global$raw_acc_in, pattern = "csv|bin|gt3x|bin|cwa|wav", recursive = FALSE, full.names = FALSE)) > 0
+          if (acc_files_available == TRUE) {
+            ready_to_run_ggirbrondcounts = TRUE
+          } else {
+            GGIRBrondCounts_message = paste0("No count files found in ", global$raw_acc_in)
+          }
         } else {
-          id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-          do.BrondCounts = FALSE
+          GGIRBrondCounts_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", global$raw_acc_in)
         }
-        on.exit(removeNotification(id_ggir), add = TRUE)
-        GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
-                  sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()),
-                  do.BrondCounts = do.BrondCounts)
-        
-        expected_output_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_summary.csv")
-        for (i in seq_len(10)) {
-          Sys.sleep(1)
+        # Only run function when checks are met:
+        if (ready_to_run_ggirbrondcounts == TRUE) {
+          waiter <- waiter::Waiter$new(id = "start_ggir", html = waiter::spin_throbber())$show()
+          on.exit(waiter$hide())
+          if ("BrondCounts" %in% input$tools) {
+            id_ggir = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+            do.BrondCounts = TRUE
+          } else {
+            id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+            do.BrondCounts = FALSE
+          }
+          on.exit(removeNotification(id_ggir), add = TRUE)
+          GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
+                    sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()),
+                    do.BrondCounts = do.BrondCounts)
+          
+          # Now check whether results are correctly generated:
+          expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_summary.csv")
+          if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
+            if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
+              expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
+              if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
+                if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
+                  GGIRBrondCounts_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " For example, see ", 
+                                                   expected_outputdir_brondcounts, " and ",
+                                                   expected_ggiroutput_file)
+                } else {
+                  GGIRBrondCounts_message = "BrondCounts unsuccessful"
+                }
+              } else {
+                GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), " For example, see ", expected_ggiroutput_file)
+              }
+            } else {
+              GGIRBrondCounts_message = "GGIR unsuccessful"
+            }
+          } 
         }
-        test = file.exists(expected_output_file)
       }
-      return(test)
+      return(GGIRBrondCounts_message)
     })
     
     # Apply PALMSpy after button is pressed ---------------------------------
     runPALMSpy <- eventReactive(input$start_palmspy, {
+      PALMSpy_message = ""
       if ("PALMSpy" %in% input$tools) {
+        PALMSpy_message = "Error: Contact maintainer"
+        ready_to_run_palsmpy = FALSE
+        # Check whether input files exist:
+        gps_files_available = length(dir(path = global$gps_in, pattern = ".csv", recursive = FALSE, full.names = FALSE)) > 0
+        # Get location of count data:
+        if ("ACount" %in% input$availabledata) { # if available data includes counts then find them there
+          count_file_location = global$count_acc_in
+        } else {  # if available data does not include counts then look for simulated data
+          count_file_location = paste0(global$data_out, "/actigraph")
+        }
+        # Check whether both count and gps data exist
+        if (dir.exists(count_file_location) == TRUE) {
+          cnt_files_available = length(dir(path = count_file_location, pattern = ".csv", recursive = FALSE, full.names = FALSE)) > 0
+          if (cnt_files_available == TRUE) {
+            if (gps_files_available ==  TRUE) {
+              ready_to_run_palsmpy = TRUE
+            }
+          } else {
+            PALMSpy_message = paste0("No count files found in ", count_file_location)
+          }
+        } else {
+          PALMSpy_message = paste0("Folder that is supposed to hold count files does not exist: ", 
+                                   count_file_location, "First run GGIR and BrondCounts.")
+        }
+      }
+      if (ready_to_run_palsmpy == TRUE) {
         id_palmspy = showNotification("PALMSpy in progress ...", type = "message", duration = NULL, closeButton = FALSE)
         waiter <- waiter::Waiter$new(id = "start_palmspy", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         on.exit(removeNotification(id_palmspy), add = TRUE)
-        PALMSpy_R(gps_path = global$gps_in, acc_path = global$count_acc_in,
+        PALMSpy_R(gps_path = global$gps_in, acc_path = count_file_location,
                   output_path = global$data_out, config_file = isolate(configfilePALMSpy()))
         for (i in seq_len(10)) {
           Sys.sleep(1)
         }
-        test = file.exists(paste0(global$data_out,"/testpython.csv"))
+        # Now check whether results are correctly generated:
+        expected_palmspy_results_file = paste0(global$data_out,"/testpython.csv")
+        if (file.exists(expected_palmspy_results_file) == TRUE) {
+          PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), " For example, see ", expected_palmspy_results_file)
+        } else {
+          PALMSpy_message = "PALMSpy unsuccessful"
+        }
       }
-      return(test)
+      return(PALMSpy_message)
     })
     
+    output$recommendorder <- renderText({
+      pipeline = proposed_pipeline()
+      if ("GGIR" %in% pipeline & "BrondCounts" %in% pipeline) {
+        pipeline = pipeline[-which(pipeline %in% c("GGIR", "BrondCounts"))]
+        pipeline = c("GGIR & Brondcounts", pipeline)
+      }
+      if (length(pipeline) > 1) {
+        message = paste0("Recommended order of analyses: ", paste0(pipeline, collapse = " -> "))
+      } else {
+        message = ""
+      }
+      return(message)
+    })
     # If button pressed send message to UI about success ----------------
     output$ggir_end_message <- renderText({
-      message = ifelse(runGGIR() == TRUE,
-                       yes = paste0("Processing succesful ", Sys.time()),
-                       no = paste0("Processing unsuccesful ", Sys.time()))
+      message = runGGIR() #ifelse(runGGIR() == TRUE,
+                       # yes = paste0("Processing succesful ", Sys.time()),
+                       # no = paste0("Processing unsuccesful ", Sys.time()))
     })
     output$palmspy_end_message <- renderText({
-      message = ifelse(runPALMSpy() == TRUE,
-                       yes = paste0("Processing succesful ", Sys.time()),
-                       no = paste0("Processing unsuccesful ", Sys.time()))
+      message = runPALMSpy() #ifelse(runPALMSpy() == TRUE,
+                       # yes = paste0("Processing succesful ", Sys.time()),
+                       # no = paste0("Processing unsuccesful ", Sys.time()))
     })
   }
   # Run the application 

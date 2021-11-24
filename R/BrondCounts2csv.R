@@ -11,7 +11,8 @@ BrondCounts2csv = function(outputdir = c(), configfile = c()) {
   # Create imitated Actigraph file from counts in GGIR output
   #------------------------------------------------------------------------
   # Add folder for simulated actigraph output:
-  actigraphdir = paste0(outputdir, "/actigraph")
+  tmp = unlist(strsplit(outputdir, "/"))
+  actigraphdir = paste0(paste0(tmp[1:(length(tmp) - 1)], collapse = "/"), "/actigraph")
   if (dir.exists(actigraphdir) == FALSE) {
     dir.create(actigraphdir)
   }

@@ -28,7 +28,7 @@ GGIRshiny = function(rawaccdir, outputdir, configfile=c(), sleepdiary=c(), do.Br
                   reporttype = "scalar",
                   aggfunction = sum,
                   timestamp = TRUE)
-    GGIR::g.shell.GGIR(datadir = rawaccdir, outputdir = outputdir, 
+    GGIR::g.shell.GGIR(datadir = rawaccdir, outputdir = outputdir, overwrite = FALSE,
                        configfile = configfile, loglocation = sleepdiary, 
                        myfun = myfun, do.parallel=FALSE, backup.cal.coef = "retrieve")
     BrondCounts2csv(outputdir = paste0(outputdir, "/output_", basename(rawaccdir)), configfile = configfile)
