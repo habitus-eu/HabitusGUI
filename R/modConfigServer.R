@@ -66,10 +66,7 @@ modConfigServer = function(id, tool) {
         output$config_green <- renderUI({
           HTML(params_errors$green_message)
         })
-        if (nrow(params_errors$blocked_params) == 0) {
-          # Only show Saving sign when no errors were found
-          showNotification("Saving changes", type = "message")
-        } else {
+        if (nrow(params_errors$blocked_params) != 0) {
           v$params$display[which(rownames(v$params) %in% params_errors$blocked_params$name == TRUE)] = TRUE
         }
         # Auto-save after every change

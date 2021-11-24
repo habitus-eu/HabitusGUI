@@ -236,7 +236,7 @@ myApp <- function(homedir=getwd(), ...) {
         }
       }
       if (configs_ready == TRUE) {
-        switch_page(4)
+        showNotification("Saving configuration file(s) to output folder", type = "message", duration = 2)
         if ("GGIR" %in% input$tools) {
           file.copy(from = configfileGGIR(), to = paste0(global$data_out, "/config.csv"), 
                     overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
@@ -245,6 +245,7 @@ myApp <- function(homedir=getwd(), ...) {
           file.copy(from = configfilePALMSpy(), to = paste0(global$data_out, "/config.json"), 
                     overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
         }
+        switch_page(4)
       } else {
         showNotification("Select configuration file(s)", type = "error")
       }
