@@ -167,11 +167,6 @@ myApp <- function(homedir=getwd(), ...) {
     output$logo_page2 = getlogo()
     output$logo_page3 = getlogo()
     output$logo_page4 = getlogo()
-    # renderImage({
-    #   list(src = system.file("www/fontys_logo.png", package = "HabitusGUI")[1],
-    #        contentType = "image/png",
-    #        width = 100, height = 100)
-    # }, deleteFile = FALSE)
     switch_page <- function(i) {
       updateTabsetPanel(inputId = "wizard",
                         selected = paste0("page_", i))
@@ -242,11 +237,18 @@ myApp <- function(homedir=getwd(), ...) {
       }
       if (configs_ready == TRUE) {
         switch_page(4)
+        if ("GGIR" %in% input$tools) {
+          file.copy(from = configfileGGIR(), to = paste0(global$data_out, "/config.csv"), 
+                    overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+        }
+        if ("PALMSpy" %in% input$tools) {
+          file.copy(from = configfilePALMSpy(), to = paste0(global$data_out, "/config.json"), 
+                    overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+        }
       } else {
         showNotification("Select configuration file(s)", type = "error")
       }
-        
-      })
+    })
     observeEvent(input$page_43, switch_page(3))
     
     # Defined time to ensure file count is only checked twice per second ---------
