@@ -70,7 +70,7 @@ This will build a Docker image  with R, HabitusGUI and all it's software depende
 2. Go to images
 3. Click run and update the optional settings as follows such that it has access to the relevant local directory.
 
-![image](Docker_windows_printscreen.png)
+<img src="Docker_windows_printscreen.png" width="500">
 
 4. Click on icon to launch in browser
 
