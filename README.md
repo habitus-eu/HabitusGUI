@@ -1,7 +1,7 @@
 ![GitHub Actions R-CMD-check](https://github.com/habitus-eu/HabitusGUI/workflows/R-CMD-check-full/badge.svg)
 [![codecov](https://codecov.io/gh/habitus-eu/HabitusGUI/branch/main/graph/badge.svg?token=GPRPJ3IXWC)](https://codecov.io/gh/habitus-eu/HabitusGUI)
 
-HabitusGUI is a Shiny app designed to ease processing behavioural data with research software such as GGIR, activityCounts, PALMSpy and PALMSplus. If you are the maintainer of one of these software tools then please see our requirements on your tool [here](https://github.com/habitus-eu/HabitusGUI/INSTRUCTIONS_TOOL_MAINTAINERS.md).
+HabitusGUI is a Shiny app designed to ease processing behavioural data with research software such as GGIR, activityCounts, PALMSpy and PALMSplus. If you are the maintainer of one of these software tools then please see our requirements on your tool [here](https://github.com/habitus-eu/HabitusGUI/blob/main/INSTRUCTIONS_TOOL_MAINTAINERS.md).
 
 
 We anticipate that HabitusGUI will be installed on a server environment, where the typical user will not have to worry about the installation process as described below.
@@ -41,9 +41,9 @@ its dependencies.
 
 1. Install docker via the official installation instructions: https://docs.docker.com/get-docker/.
 
-Note for VirtualBox users in Windows: When working in Windows, the installation directs you to the installation of the "Docker Desktop for Windows". This is not compatible with VirtualBox. We recommend that you use VirtualBox to launch a Ubuntu VM and to launch the app from within the VM.
+**Note for VirtualBox users in Windows:** When working in Windows, the installation directs you to the installation of the "Docker Desktop for Windows". This is not compatible with VirtualBox. If you do not know what VirtualBox is then you are probably not using it. If you know what VirtualBox is and you want to keep using it, then we recommend creating an Ubuntu VM with VirtualBox and installing Docker inside that VM.
 
-2. Create a folder on your machine an name it HabitusDocker
+2. Create a folder on your machine and name it 'HabitusDocker'.
 
 3. Go to https://github.com/habitus-eu/HabitusGUI/blob/main/Docker/Dockerfile and right click on Raw, and then left click on `Save link as ...` Save the file to the HabitusDocker folder.
 
@@ -51,41 +51,40 @@ Note for VirtualBox users in Windows: When working in Windows, the installation 
 
 5. Go to https://github.com/habitus-eu/HabitusGUI/blob/main/Docker/code/app.R and right click on Raw, and then left click on `Save link as...`. Save the file in the folder 'code' you use created.
 
-6. When in Windows: Open Windows Powershell.
-When in Linux: Open Linux Command prompt.
+6. Open command prompt
 
-7. cd to the folder HabitusDocker folder
+**In Windows:** Open Windows Powershell.
+**In Linux:** Open Linux Command prompt.
+
+7. cd to the folder 'HabitusDocker' folder that you just created.
 
 8. Type `docker build -t habitus-app .`
 
+This will build a Docker image  with R, HabitusGUI and all it's software dependencies.
 
-#### 2.2 Run the installed HabitusGUI app with "Docker Desktop for Windows"
+#### 2.2 Run the docker image
+
+**In Windows via Docker Desktop for Windows:**
 
 1. Open the "Docker Desktop for Windows"
 2. Go to images
-3. Click run
+3. Click run and update the optional settings as follows such that it has access to the relevant local directory.
+
+![image](Docker_windows_printscreen.png)
+
 4. Click on icon to launch in browser
 
+**In Linux:**
 
-#### 2.3 Run the installed HabitusGUI app without "Docker Desktop for Windows"
+1. Open Linux Command prompt.
 
-1. Open Command line:
+2. cd to the folder 'HabitusDocker' folder as created earlier
 
-   **In Windows:** Open Windows Powershell
+3. Run the image and expose it to a data volume on the host:
 
-   **In Linux:** Open Linux Command prompt.
+`docker run --rm -v /home/vincent/projects/fontys:/srv/shiny-server/data -p 3838:3838 habitus-app`
 
-2. cd to the folder HabitusDocker folder as created earlier
-
-3. Run app and expose it to data volume on the host:
-
-   **In Linux:** `docker run --rm -v /home/vincent/projects/fontys:/srv/shiny-server/data -p 3838:3838 habitus-app`
-
-   Here `/home/vincent/projects/fontys` should be replaced by the local directory you would like to expose to the app.
-
-   **In Windows:** `docker run --rm -v D:\Docker:/srv/shiny-server/data -p 3838:3838 habitus-app`
-
-   Here `D:\Docker` should be replaced by the local directory you would like to expose to the app.
+Here `/home/vincent/projects/fontys` should be replaced by the local directory you would like to expose to the app.
 
 4. Open app in browser: `http://localhost:3838/`
 
