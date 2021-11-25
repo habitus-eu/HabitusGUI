@@ -1,6 +1,6 @@
 Package: HabitusGUI
 Title: GUI for processing behavioural data
-Description: Shiny app to ease processing behavioural data with research software such as GGIR, activityCounts, PALMSpy and PALMSplus
+Description: Shiny app to ease processing behavioural data with research software such as GGIR, activityCounts, PALMSpy,and PALMSplus.
 Version: 0.1.1
 Date: 2021-11-25
 Authors@R: 
@@ -8,7 +8,6 @@ Authors@R:
            family = "van Hees",
            role = c("aut", "cre"),
            email = "v.vanhees@accelting.com")
-Description: Shiny app to aid processing wearable sensor data in Habitus.
 License: Apache License version 2.0 | file LICENSE
 Suggests: testthat, covr, rmarkdown
 Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, waiter, activityCounts
