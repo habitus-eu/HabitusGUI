@@ -39,15 +39,14 @@ its dependencies.
 
 #### 2.1 First time installation
 
-1. Install docker via the official installation instructions: https://docs.docker.com/get-docker/.
 
-**Note for VirtualBox users in Windows:** When working in Windows, the installation directs you to the installation of the "Docker Desktop for Windows". This is not compatible with VirtualBox. If you do not know what VirtualBox is then you are probably not using it. If you know what VirtualBox is and you want to keep using it, then we recommend creating an Ubuntu VM with VirtualBox and installing Docker inside that VM.
+1. Install docker via the official installation instructions: https://docs.docker.com/get-docker/, which are tailored to Mac, Windows and Linux. Note that Docker Desktop for Windows (and probably also Docker Desktop for Mac, but not tested yet) is not compatible with VirtualBox. If you do not know what VirtualBox is then you are probably not using it, but to be sure search your installed apps for VirtualBox. If you do have VirtualBox installed and you want to keep using it, then we recommend creating an Ubuntu Virtual Machine with VirtualBox and installing Docker inside it.
 
-2. Create a folder on your machine and name it 'HabitusDocker'.
+2. Create a folder on your machine and name it 'HabitusDocker', and inside it a folder named _code_.
 
-3. Go to https://github.com/habitus-eu/HabitusGUI/blob/main/Docker/Dockerfile and right click on Raw, and then left click on `Save link as ...` Save the file to the HabitusDocker folder.
+3. Go to https://github.com/habitus-eu/HabitusGUI/blob/main/Docker/Dockerfile and right click on Raw, and then left click on `Save link as ...` Save the file to the HabitusDocker folder. The name of the file should be _Dockerfile_ without .txt extension. Alternatively, if you are familiar with Git you can also clone the entire HabitusGUI repository and copy the file.
 
-4. Create a folder in the same directory as where you stored the Docker file and name it 'code' without quotes.
+4. Create a folder in the same directory as where you stored the _Dockerfile_ and name it 'code' without quotes.
 
 5. Go to https://github.com/habitus-eu/HabitusGUI/blob/main/Docker/code/app.R and right click on Raw, and then left click on `Save link as...`. Save the file in the folder 'code' you use created.
 
@@ -55,12 +54,13 @@ its dependencies.
 
 **In Windows:** Open Windows Powershell.
 **In Linux:** Open Linux Command prompt.
+**In Mac:** Open Terminal app.
 
 7. cd to the folder 'HabitusDocker' folder that you just created.
 
 8. Type `docker build -t habitus-app .`
 
-This will build a Docker image  with R, HabitusGUI and all it's software dependencies.
+This will build a Docker image with R, HabitusGUI and all it's software dependencies.
 
 #### 2.2 Run the docker image
 
@@ -74,9 +74,12 @@ This will build a Docker image  with R, HabitusGUI and all it's software depende
 
 4. Click on icon to launch in browser
 
-**In Linux:**
+**In Linux and Mac:**
 
-1. Open Linux Command prompt.
+1. Open command prompt
+
+**In Linux:** Open Linux Command prompt.
+**In Mac:** Open Terminal app.
 
 2. cd to the folder 'HabitusDocker' folder as created earlier
 
@@ -93,7 +96,7 @@ Here `/home/vincent/projects/fontys` should be replaced by the local directory y
 
 If you would ever when to remove the image then do:
 
-1. **Windows:** Open Windows Powershell. **Linux:** Open Linux Command prompt.
+1. Open command prompt
 
 2. `docker rmi habitus-app`
 
