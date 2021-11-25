@@ -12,15 +12,15 @@ HabitusGUI aims to facilate the embedding of both Python and R libraries. To eas
 6. Example input files, if not included in the software.
 7. Example configuration file that the software will accept. In .json or .csv format would be easier.
 8. .tsv file with for each configuration parametes the following description fields (columns):
-    a. parameter: the name of the parameter
-    b. display: TRUE or FALSE, to indicate whether parameter should visible to the HabitusGUI user
-    c. class: integer, double, set, or timezone
-    d. minimum: minimum value used if integer or double
-    e. maximum: maximum value used if integer or double
-    f. set: set of numbers or characters separated by a ';'
-    g. timezone: a timezone database name, also known as Olson names.
-    h. description: written description of the parameter that will be show to the app user
-    i. ... any other columns you would like to display, e.g. priority or parameter topic.
+    - parameter: the name of the parameter
+    - display: TRUE or FALSE, to indicate whether parameter should visible to the HabitusGUI user
+    - class: integer, double, set, or timezone
+    - minimum: minimum value used if integer or double
+    - maximum: maximum value used if integer or double
+    - set: set of numbers or characters separated by a ';'
+    - timezone: a timezone database name, also known as Olson names.
+    - description: written description of the parameter that will be show to the app user
+    - ... any other columns you would like to display, e.g. priority or parameter topic.
 9. List of research goals for which the tool is needed.
 
 Note: Please try to keep the above consistent across future releases of your tool. If you have to make a change then please let us know in time such that we can update HabitusGUI accordingly.
