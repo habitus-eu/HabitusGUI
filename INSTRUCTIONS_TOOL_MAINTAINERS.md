@@ -14,11 +14,10 @@ HabitusGUI aims to facilate the embedding of both Python and R libraries. To eas
 8. .tsv file with for each configuration parametes the following description fields (columns):
     - parameter: the name of the parameter
     - display: TRUE or FALSE, to indicate whether parameter should visible to the HabitusGUI user
-    - class: integer, double, set, or timezone
+    - class: integer, double, set, or timezone. Note that for timezone, we assume that timezone is stored as Olson timezone database name.
     - minimum: minimum value used if integer or double
     - maximum: maximum value used if integer or double
     - set: set of numbers or characters separated by a ';'
-    - timezone: a timezone database name, also known as Olson names.
     - description: written description of the parameter that will be show to the app user
     - ... any other columns you would like to display, e.g. priority or parameter topic.
 9. List of research goals for which the tool is needed.
