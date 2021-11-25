@@ -1,15 +1,16 @@
 ![GitHub Actions R-CMD-check](https://github.com/habitus-eu/HabitusGUI/workflows/R-CMD-check-full/badge.svg)
 [![codecov](https://codecov.io/gh/habitus-eu/HabitusGUI/branch/main/graph/badge.svg?token=GPRPJ3IXWC)](https://codecov.io/gh/habitus-eu/HabitusGUI)
 
-# 1 Installation
+HabitusGUI is a Shiny app designed to ease processing behavioural data with research software such as GGIR, activityCounts, PALMSpy and PALMSplus. If you are the maintainer of one of these software tools then please see our requirements on your tool [here](https://github.com/habitus-eu/HabitusGUI/INSTRUCTIONS_TOOL_MAINTAINERS.md).
 
-We anticipate that HabitusGUI will be installed on a server environment, where the typical user will not have to worry about the installation process.
 
-## 1.1 Install without Docker
+We anticipate that HabitusGUI will be installed on a server environment, where the typical user will not have to worry about the installation process as described below.
+
+## 1 Install without Docker
 
 This approach assumes that all HabitusGUI dependencies, such as GGIR, PALMSpy, and PALMSplus, are available in the work environment.
 
-#### 1.1.1 Install for the first time:
+#### 1.1 Install for the first time:
 
 1. Install R: https://cran.r-project.org/
 2. Start R: `R`
@@ -21,7 +22,7 @@ install.package(remotes); library("remotes"); remotes::install_github("habitus-e
 
 If you ever want to update the software in the future then repeat this step.
 
-#### 1.1.2 Using HabitusGUI
+#### 1.2 Using HabitusGUI
 
 1. Start R
 2. In the R command line type: `library("HabitusGUI")`
@@ -31,12 +32,12 @@ If you ever want to update the software in the future then repeat this step.
 
 4. Launch HabitusGUI app: `HabitusGUI::myApp(homedir=data_dir)`
 
-## 1.2 Install with Docker
+## 2 Install with Docker
 
 The HabitusGUI R package repository contains docker files needed for hosting Habitus Shiny app and
 its dependencies.
 
-#### 1.2.1 First time installation
+#### 2.1 First time installation
 
 1. Install docker via the official installation instructions: https://docs.docker.com/get-docker/.
 
@@ -58,7 +59,7 @@ When in Linux: Open Linux Command prompt.
 8. Type `docker build -t habitus-app .`
 
 
-#### 1.2.2 Run the installed HabitusGUI app with "Docker Desktop for Windows"
+#### 2.2 Run the installed HabitusGUI app with "Docker Desktop for Windows"
 
 1. Open the "Docker Desktop for Windows"
 2. Go to images
@@ -66,7 +67,7 @@ When in Linux: Open Linux Command prompt.
 4. Click on icon to launch in browser
 
 
-#### 1.2.3 Run the installed HabitusGUI app without "Docker Desktop for Windows"
+#### 2.3 Run the installed HabitusGUI app without "Docker Desktop for Windows"
 
 1. Open Command line:
 
@@ -89,7 +90,7 @@ When in Linux: Open Linux Command prompt.
 4. Open app in browser: `http://localhost:3838/`
 
 
-#### 1.2.4 Remove HabitusGUI image
+#### 2.4 Remove HabitusGUI image
 
 If you would ever when to remove the image then do:
 
@@ -97,40 +98,3 @@ If you would ever when to remove the image then do:
 
 2. `docker rmi habitus-app`
 
-
-# 2 Instructions for tool contributors
-
-This section describes what we expect from the maintainers of the external software tools that are used by HabitusGUI.
-
-### 2.1 Information we need from you about your software tool
-
-To help us integrate your tool we need the following information from you:
-
-1. Docker file with linux installation instruction
-2. Installation instruction for local installation without docker
-3. Single function call to interact with the package. This needs to be a function that takes as input the data location(s), configuration file, and output directory).
-4. Textual description of expected data input types, formats, and locations.
-5. .tsv file with for each parameter (rows) the following description fields (columns):
-  - parameter: the name of the parameter
-  - display: TRUE or FALSE, to indicate whether parameter should visible in the app
-  - class: integer, double, set, or timezone
-  - minimum: minimum value used if integer or double
-  - maximum: maximum value used if integer or double
-  - set: set of numbers or characters separated by a ';'
-  - description: written description of the parameter that will be show to the app user
-  - ... any other columns you would like to display, e.g. priority or parameter topic.
-6. Example configuration file that the software will accept. In .json or .csv format would be easier.
-7. Example input files, if not included in the software.
-8. List of research goals for which the tool is needed.
-9. If software tool takes as input the output from other software tools then describe what those other tools are and how they would have to be configured.
-
-Note: Please try to keep the above consistent across future releases of your tool. If you have to make a change then please let us know in time such that we can update our end of the code accordingly.
-
-### 2.2 What we expect from your software tool
-
-1. Is publicly available and has Open Source License file.
-2. Has an integration test to demonstrate that the software can be uninstalled.
-3. Has some unit test to test for core functionalities.
-4. Handles corrupt or invalid data files, and provides clear communication about the identification of such files with the user.
-5. Allows for using a configuration file to set all software parameters relevant to the end-user.
-6. To take advantage of parallel processing on CPU infrastructure if relevant.
