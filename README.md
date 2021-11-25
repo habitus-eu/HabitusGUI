@@ -64,7 +64,7 @@ This will build a Docker image with R, HabitusGUI and all it's software dependen
 
 #### 2.2 Run the docker image
 
-**In Windows via Docker Desktop for Windows:**
+##### 2.2.1 In Windows via Docker Desktop for Windows:
 
 1. Open the "Docker Desktop for Windows"
 2. Go to images
@@ -74,7 +74,7 @@ This will build a Docker image with R, HabitusGUI and all it's software dependen
 
 4. Click on icon to launch in browser
 
-**In Linux and Mac:**
+##### 2.2.2 In Linux and Mac:
 
 1. Open command prompt
 
