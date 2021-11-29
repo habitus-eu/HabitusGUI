@@ -50,7 +50,7 @@ WORKDIR /
 ## HabitusGUI and it's dependencies, such as R packages GGIR and activityCounts
 
 # get shiny server and R from the rocker project
-FROM rocker/shiny:4.0.5
+FROM rocker/shiny
 
 # system libraries
 # Try to only install system libraries you actually need
@@ -73,7 +73,7 @@ RUN R -e 'install.packages(c(\
               "activityCounts", \
               "remotes" \
             ), \
-            repos="https://packagemanager.rstudio.com/cran/__linux__/focal/2021-11-28"\
+            repos="https://packagemanager.rstudio.com/cran/__linux__/focal/latest"\
           )'
 RUN R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "adding_real_palmspy")'
 
