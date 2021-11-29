@@ -8,18 +8,16 @@
 #' @export
 
 PALMSpy_R = function(gps_path, acc_path, output_path, config_file =c()) {
-  
-  palmspy_pyfile = system.file("python/PALMSpy_python_wrapper.py", package = "HabitusGUI")[1]
-  
-  print(paste0("output_path = ",output_path))
-  print(paste0("acc_path = ",acc_path))
-  
-  basecommand = paste0("python3 ", palmspy_pyfile, " ", 
-                       gps_path, " ", acc_path, " ", output_path)
-  if (length(config_file) > 0) {
-    print(paste0("config_file = ",config_file))
-    system(paste0(basecommand, " ",config_file))
+  basecommand = paste0("palmspy --gps-path ", gps_path, " --acc-path ", acc_path)
+  if (length(config_file) > 0) { # configfile available
+    system(paste0(basecommand, " --config-file ",config_file))
+  } else { # configfile not available
+    system(basecommand)
+  }
+  if (!dir.exists("./PALMSpy_output")) {
+    warning("Folder PALMSpy_output not found")
   } else {
-    system(paste0(basecommand, " config_file not available"))
+    file.copy(from = "./PALMSpy_output", to = output_path, 
+              overwrite = TRUE, recursive = TRUE, copy.mode = TRUE)
   }
 }
