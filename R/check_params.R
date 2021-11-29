@@ -17,7 +17,7 @@ check_params = function(params = c(), tool = c()) {
     for (i in numi) {
       try(expr = {
         num_value = suppressWarnings(
-          as.numeric(unlist(lapply(strsplit(x = params$value[i], "[(]|[)]|[,]|c"), function(x){x[!x == ""]})))
+          as.numeric(unlist(lapply(strsplit(x = as.character(params$value[i]), "[(]|[)]|[,]|c"), function(x){x[!x == ""]})))
           )
       }, silent = TRUE)
       test_na = any(is.na(num_value))

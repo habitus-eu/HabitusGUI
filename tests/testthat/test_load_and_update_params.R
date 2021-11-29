@@ -10,14 +10,14 @@ test_that("Parameters can be loaded and updated from config files", {
   # Load PALMSpy .json file
   palmspy_config_json = system.file("testfiles_palmspy/palmspy-params.json", package = "HabitusGUI")[1]
   params_palmspy = load_params(file = palmspy_config_json, format = "json_palmspy")
-  expect_equal(ncol(params_palmspy), 8)
+  expect_equal(ncol(params_palmspy), 9)
   
   # Update PALMSpy .json file
-  params_palmspy$value[which(rownames(params_palmspy) == "interval")] = "35"
+  params_palmspy$value[which(rownames(params_palmspy) == "interval")] = "25"
   update_params(new_params = params_palmspy, file = palmspy_config_json, format = "json_palmspy")
   params_palmspy2 = load_params(file = palmspy_config_json, format = "json_palmspy")
-  expect_equal(ncol(params_palmspy2), 8) 
-  expect_equal(params_palmspy2$value[which(rownames(params_palmspy2) == "interval")] , "35")
+  expect_equal(ncol(params_palmspy2), 9) 
+  expect_equal(params_palmspy2$value[which(rownames(params_palmspy2) == "interval")] , "25")
   
   # Update GGIR .csv file
   params_ggir$value[which(rownames(params_ggir) == "idloc")] = "3"
