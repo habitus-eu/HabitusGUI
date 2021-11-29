@@ -1,3 +1,5 @@
+FROM continuumio/miniconda3:4.10.3
+
 LABEL software="HabitusGUI" \
       author="Vincent van Hees <v.vanhees@accelting.com>, Emiliano Molinaro <molinaro@imada.sdu.dk>" \
       version="0.1.2" \
@@ -13,8 +15,6 @@ MAINTAINER Vincent van Hees <v.vanhees@accelting.com>
 ## The following lines of code  should remain identical to
 ## https://github.com/habitus-eu/PALMSpy/blob/master/Docker/Dockerfile
 ## Do not edit without editing the orignal
-
-FROM continuumio/miniconda3:4.10.3
 
 ARG VERSION=${VERSION:-1.9.6}
 
@@ -59,7 +59,7 @@ RUN apt-get update && apt-get install -y \
     libcurl4-gnutls-dev \
     libssl-dev
 
-# install R packages required 
+# install R packages required
 # Change the packages list to suit your needs
 RUN R -e 'install.packages(c(\
               "shiny", \
@@ -75,7 +75,7 @@ RUN R -e 'install.packages(c(\
             ), \
             repos="https://packagemanager.rstudio.com/cran/__linux__/focal/2021-04-23"\
           )'
-RUN R -e 'remotes::install_github("habitus-eu/HabitusGUI")' 
+RUN R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "adding_real_palmspy")'
 
 RUN mkdir -p /code
 
