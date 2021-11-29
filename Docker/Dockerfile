@@ -1,4 +1,6 @@
 FROM continuumio/miniconda3:4.10.3
+# get shiny server and R from the rocker project
+FROM rocker/shiny:4.0.5
 
 LABEL software="HabitusGUI" \
       author="Vincent van Hees <v.vanhees@accelting.com>, Emiliano Molinaro <molinaro@imada.sdu.dk>" \
@@ -49,9 +51,6 @@ WORKDIR /
 ###################
 ## HabitusGUI and it's dependencies, such as R packages GGIR and activityCounts
 
-# get shiny server and R from the rocker project
-FROM rocker/shiny:4.0.5
-
 # system libraries
 # Try to only install system libraries you actually need
 # Package Manager is a good resource to help discover system deps
@@ -73,7 +72,7 @@ RUN R -e 'install.packages(c(\
               "activityCounts", \
               "remotes" \
             ), \
-            repos="https://packagemanager.rstudio.com/cran/__linux__/focal/2021-04-23"\
+            repos="https://packagemanager.rstudio.com/cran/__linux__/focal/2021-11-28"\
           )'
 RUN R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "adding_real_palmspy")'
 
