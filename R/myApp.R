@@ -9,7 +9,7 @@
 #' @import waiter
 #' @export
 
-# pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys")
+# pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") HabitusGUI::myApp(homedir="~/projects")
 # pkgload::load_all("."); myApp(homedir="~/projects/fontys")
 # roxygen2::roxygenise()
 
@@ -430,7 +430,7 @@ myApp <- function(homedir=getwd(), ...) {
                 GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), " For example, see ", expected_ggiroutput_file)
               }
             } else {
-              GGIRBrondCounts_message = "GGIR unsuccessful"
+              GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), " For example, see ", expected_ggiroutput_file)
             }
           } 
         }
@@ -474,15 +474,13 @@ myApp <- function(homedir=getwd(), ...) {
         on.exit(removeNotification(id_palmspy), add = TRUE)
         PALMSpy_R(gps_path = global$gps_in, acc_path = count_file_location,
                   output_path = global$data_out, config_file = isolate(configfilePALMSpy()))
-        for (i in seq_len(10)) {
-          Sys.sleep(1)
-        }
+  
         # Now check whether results are correctly generated:
-        expected_palmspy_results_file = paste0(global$data_out,"/testpython.csv")
-        if (file.exists(expected_palmspy_results_file) == TRUE) {
-          PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), " For example, see ", expected_palmspy_results_file)
+        expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
+        if (dir.exists(expected_palmspy_results_dir) == TRUE) {
+          PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), " See ", expected_palmspy_results_dir)
         } else {
-          PALMSpy_message = "PALMSpy unsuccessful"
+          PALMSpy_message = paste0("PALMSpy unsuccessful? Not able to find ", expected_palmspy_results_dir)
         }
       }
       return(PALMSpy_message)
