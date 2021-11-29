@@ -8,7 +8,9 @@
 #' @export
 
 PALMSpy_R = function(gps_path, acc_path, output_path, config_file =c()) {
-  basecommand = paste0("palmspy --gps-path ", gps_path, " --acc-path ", acc_path)
+  # Note command assumes that there is conda environment named palmspy with palmspy installed in it.
+  # /home/vincent/miniconda3/bin/conda
+  basecommand = paste0("/opt/conda/envs/palmspy/bin/conda run -n palmspy palmspy --gps-path ", gps_path, " --acc-path ", acc_path)
   if (length(config_file) > 0) { # configfile available
     system(paste0(basecommand, " --config-file ",config_file))
   } else { # configfile not available
