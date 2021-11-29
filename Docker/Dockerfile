@@ -1,6 +1,4 @@
 FROM continuumio/miniconda3:4.10.3
-# get shiny server and R from the rocker project
-FROM rocker/shiny:4.0.5
 
 LABEL software="HabitusGUI" \
       author="Vincent van Hees <v.vanhees@accelting.com>, Emiliano Molinaro <molinaro@imada.sdu.dk>" \
@@ -50,6 +48,9 @@ WORKDIR /
 
 ###################
 ## HabitusGUI and it's dependencies, such as R packages GGIR and activityCounts
+
+# get shiny server and R from the rocker project
+FROM rocker/shiny:4.0.5
 
 # system libraries
 # Try to only install system libraries you actually need
