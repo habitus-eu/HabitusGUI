@@ -5,14 +5,14 @@ LABEL software="HabitusGUI" \
       version="0.1.2" \
       license="MIT, Apache-2.0, LGPL-2.0" \
       description="HabitusGUI is a Shiny app that aids the researcher to work with \
-                   to work with PALMSpy, GGIR, and activityCount.\
+                   PALMSpy, GGIR, and activityCount.\
                    This dockerfile installs both the app and all it's depenencies."
 
 MAINTAINER Vincent van Hees <v.vanhees@accelting.com>
 
 ###################
 ## PALMSpy
-## The following lines of code  should remain identical to
+## The following lines of code should remain consistent with
 ## https://github.com/habitus-eu/PALMSpy/blob/master/Docker/Dockerfile
 ## Do not edit without editing the orignal
 
@@ -52,7 +52,6 @@ WORKDIR /
 # get shiny server and R from the rocker project
 FROM rocker/shiny
 
-
 SHELL ["/bin/bash",  "--login", "-c"]
 
 COPY --from=builder /opt/conda /opt/conda
@@ -63,20 +62,15 @@ ENV CONDA_PREFIX="/opt/conda/envs/palmspy"
 RUN echo "source activate palmspy" > ~/.bashrc
 
 # system libraries
-# Try to only install system libraries you actually need
-# Package Manager is a good resource to help discover system deps
 RUN apt-get update && apt-get install -y \
     libcurl4-gnutls-dev \
     libssl-dev 
 
 # install R packages required
-# Change the packages list to suit your needs
 RUN R -e 'install.packages(c(\
               "shiny", \
               "shinyFiles", \
               "GGIR", \
-              "bslib", \
-              "methods", \
               "jsonlite", \
               "DT", \
               "waiter", \
@@ -85,11 +79,11 @@ RUN R -e 'install.packages(c(\
             ), \
             repos="https://packagemanager.rstudio.com/cran/__linux__/focal/latest"\
           )'
+RUN R -e 'remotes::install_github("rstudio/bslib")' # development version because CRAN version has bug that affects us
 RUN R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "adding_real_palmspy")'
 
 RUN mkdir -p /code
 
-# run app by running the script
 COPY /code/app.R /srv/shiny-server/
 
 # run app
