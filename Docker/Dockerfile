@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3:4.10.3
+FROM continuumio/miniconda3:4.10.3 as builder
 
 LABEL software="HabitusGUI" \
       author="Vincent van Hees <v.vanhees@accelting.com>, Emiliano Molinaro <molinaro@imada.sdu.dk>" \
@@ -23,7 +23,7 @@ SHELL ["/bin/bash",  "--login", "-c"]
 ## Install software
 
 RUN apt-get update \
- && apt-get install -y git vim nano emacs build-essential --no-install-recommends \
+ && apt-get install -y git build-essential --no-install-recommends \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -52,12 +52,22 @@ WORKDIR /
 # get shiny server and R from the rocker project
 FROM rocker/shiny
 
+
+SHELL ["/bin/bash",  "--login", "-c"]
+
+COPY --from=builder /opt/conda /opt/conda
+
+ENV PATH /opt/conda/envs/palmspy/bin:$PATH
+ENV CONDA_PREFIX="/opt/conda/envs/palmspy"
+
+RUN echo "source activate palmspy" > ~/.bashrc
+
 # system libraries
 # Try to only install system libraries you actually need
 # Package Manager is a good resource to help discover system deps
 RUN apt-get update && apt-get install -y \
     libcurl4-gnutls-dev \
-    libssl-dev
+    libssl-dev 
 
 # install R packages required
 # Change the packages list to suit your needs
