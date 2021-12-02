@@ -38,7 +38,6 @@ ENV CONDA_PREFIX="/opt/conda/envs/palmspy"
 
 RUN conda create -n palmspy python=3.7 openjdk=8.0 make=4.2.1 -y \
  && conda activate palmspy \
- && echo "source activate palmspy" > ~/.bashrc \
  && make \
  && make install \
  && make check \
@@ -59,8 +58,6 @@ COPY --from=builder /opt/conda /opt/conda
 
 ENV PATH /opt/conda/envs/palmspy/bin:$PATH
 ENV CONDA_PREFIX="/opt/conda/envs/palmspy"
-
-RUN echo "source activate palmspy" > ~/.bashrc
 
 # system libraries
 # Try to only install system libraries you actually need
