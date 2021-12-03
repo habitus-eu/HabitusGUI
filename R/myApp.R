@@ -477,13 +477,13 @@ myApp <- function(homedir=getwd(), ...) {
       
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
-        inputcheck = paste0("check gps, ",dir.exists(global$gps_in), " cnt ", dir.exists(count_file_location),
-                            " out ", dir.exists(global$data_out), " conf ", file.exists(configfilePALMSpy()),
-                            " palmspyoutput", dir.exists(expected_palmspy_results_dir))
+        # inputcheck = paste0("check gps, ",dir.exists(global$gps_in), " cnt ", dir.exists(count_file_location),
+        #                     " out ", dir.exists(global$data_out), " conf ", file.exists(configfilePALMSpy()),
+        #                     " palmspyoutput", dir.exists(expected_palmspy_results_dir))
         if (dir.exists(expected_palmspy_results_dir) == TRUE) {
-          PALMSpy_message = paste0(inputcheck, " PALMSpy completed at ", Sys.time(), " See ", expected_palmspy_results_dir)
+          PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), " See ", expected_palmspy_results_dir)
         } else {
-          PALMSpy_message = paste0(inputcheck, " PALMSpy unsuccessful? Not able to find ", expected_palmspy_results_dir)
+          PALMSpy_message = paste0("PALMSpy unsuccessful? Not able to find ", expected_palmspy_results_dir)
         }
       }
       return(PALMSpy_message)
