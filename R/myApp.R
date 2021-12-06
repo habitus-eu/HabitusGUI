@@ -487,15 +487,22 @@ myApp <- function(homedir=getwd(), ...) {
         waiter <- waiter::Waiter$new(id = "start_palmspy", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         on.exit(removeNotification(id_palmspy), add = TRUE)
-        PALMSpy_R(gps_path = global$gps_in, acc_path = count_file_location,
-                  config_file = paste0(global$data_out, "/config.json")) ## point to local copy of the config file because that is what system will have access too
+        # PALMSpy_R(gps_path = global$gps_in, acc_path = count_file_location,
+        #           config_file = paste0(global$data_out, "/config.json")) ## point to local copy of the config file because that is what system will have access too
+        
+        basecommand = paste0("palmspy --gps-path ", global$gps_in,
+                             " --acc-path ", count_file_location,
+                             " --config-file ", paste0(global$data_out, "/config.json"))
+        system(command = basecommand)
+        
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
         if (!dir.exists(expected_palmspy_results_dir)) {
           dir.create(expected_palmspy_results_dir)
         }
-        if (dir.exists("./PALMSpy_output") & dir.exists(expected_palmspy_results_dir)) {
-          file.copy(from =dir("./PALMSpy_output", full.names = TRUE), to = expected_palmspy_results_dir, 
+        if (dir.exists("PALMSpy_output") & dir.exists(expected_palmspy_results_dir)) {
+          file.copy(from = dir("PALMSpy_output", full.names = TRUE),
+                    to = expected_palmspy_results_dir, 
                     overwrite = TRUE, recursive = TRUE, copy.mode = TRUE)
           # file.remove(dir("./PALMSpy_output", full.names = TRUE)) # remove data on server 
           PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), ". See ", expected_palmspy_results_dir,".") 
@@ -511,12 +518,12 @@ myApp <- function(homedir=getwd(), ...) {
           if (!dir.exists(expected_palmspy_results_dir)) {
             PALMSpy_message = paste0(PALMSpy_message, " Not able to find ", expected_palmspy_results_dir)
           }
-          if (!dir.exists("./PALMSpy_output")) {
-            PALMSpy_message = paste0(PALMSpy_message, " Not able to find ./PALMSpy_output")
+          if (!dir.exists("PALMSpy_output")) {
+            PALMSpy_message = paste0(PALMSpy_message, " Not able to find PALMSpy_output")
           }
         }
       }
-      PALMSpy_message = paste0(PALMSpy_message, " \n",paste0(global$data_out, "/config.json")," \n", global$gps_in)
+      PALMSpy_message = paste0(PALMSpy_message, " \n", basecommand)
       return(PALMSpy_message)
     })
     
