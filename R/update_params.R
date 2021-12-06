@@ -22,9 +22,12 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
           pars = "parameters"
           rowi = which(new_params$field == field & new_params$subfield == subfield)
           if (length(rowi) > 0) {
-            new = as.list(t(new_params[rowi, "value"]))
-            names(new) = rownames(new_params[rowi,])
-            config[[field]][[pars]][[subfield]] = new # only overwrite the matching fields
+            for (j in 1:length(rowi)) {
+              new = as.list(t(new_params[rowi[j], "value"]))
+              names(new) = rownames(new_params[rowi[j],])
+              item_to_replace = which(names(config[[field]][[pars]][[subfield]]) == names(new))
+              config[[field]][[pars]][[subfield]][item_to_replace] = new
+            }
           }
         }
       }

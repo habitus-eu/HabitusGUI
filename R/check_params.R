@@ -89,7 +89,7 @@ check_params = function(params = c(), tool = c()) {
   }
   block_params = blocked_params[order(blocked_params$name),]
   
-  green_message = "Configuration file has succesfully passed all checks"
+  green_message = "Configuration file has succesfully passed all formatting checks"
   message = c()
   if (nrow(block_params) > 0) {
     for (parError_i in 1:nrow(block_params)) {

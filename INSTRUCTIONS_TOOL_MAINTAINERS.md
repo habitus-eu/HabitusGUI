@@ -17,8 +17,9 @@ HabitusGUI aims to facilate the embedding of both Python and R libraries. To eas
     - class: integer, double, set, or timezone. Note that for timezone, we assume that timezone is stored as Olson timezone database name.
     - minimum: minimum value used if integer or double
     - maximum: maximum value used if integer or double
-    - set: set of numbers or characters separated by a ';'
+    - set: set of numbers or characters separated by a ';'. If you use a Boolean value in json format then specify TRUE;FALSE, even if the actual value in the json file is true or false.
     - description: written description of the parameter that will be show to the app user
+    - priority: 1 or 0, where 1 will be highlighted in yellow.
     - ... any other columns you would like to display, e.g. priority or parameter topic.
 9. List of research goals for which the tool is needed.
 

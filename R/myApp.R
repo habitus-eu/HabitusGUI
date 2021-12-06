@@ -15,7 +15,7 @@
 
 myApp <- function(homedir=getwd(), ...) {
   ui <- fluidPage(
-    theme = bslib::bs_theme(bootswatch = "sketchy"), #,"sandstone"),
+    theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
     # preview examples: https://bootswatch.com/
     # “cerulean”, “cosmo”, “cyborg”, “darkly”, “flatly”, “journal”, “litera”, “lumen”, 
     # “lux”, “materia”, “minty”, “morph”, “pulse”, “quartz”, “sandstone”, “simplex”, 
@@ -464,7 +464,7 @@ myApp <- function(homedir=getwd(), ...) {
           }
         } else {
           PALMSpy_message = paste0("Folder that is supposed to hold count files does not exist: ", 
-                                   count_file_location, "First run GGIR and BrondCounts.")
+                                   count_file_location, " First run GGIR and BrondCounts.")
         }
       }
       if (ready_to_run_palsmpy == TRUE) {

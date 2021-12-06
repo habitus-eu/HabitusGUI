@@ -9,7 +9,7 @@
 
 
 load_params = function(file=c(), format="json_palmspy") {
-  expected_tsv_columns = c("value", "field", "subfield", "display", "class", "minimum", "maximum",	"set", "description")
+  expected_tsv_columns = c("value", "field", "subfield", "display", "class", "minimum", "maximum",	"set", "description", "priority")
   if (format == "json_palmspy") {
     config = fromJSON(txt = file, simplifyDataFrame = TRUE)
     params_info_palmspy_file = system.file("testfiles_palmspy/params_description_palmspy.tsv", package = "HabitusGUI")[1]
@@ -24,7 +24,7 @@ load_params = function(file=c(), format="json_palmspy") {
         }
         for (subfield in subfields) {
           pars = "parameters"
-          params = as.data.frame(t(as.data.frame(config[[field]][[pars]][[subfield]])))
+          params = as.data.frame(as.matrix(config[[field]][[pars]][[subfield]]))
           colnames(params)[1] = "value"
           params$parameter = rownames(params)
           params_merged = merge(params_info_palmspy, params, by = "parameter")
