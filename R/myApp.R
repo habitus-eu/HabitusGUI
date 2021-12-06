@@ -139,7 +139,10 @@ myApp <- function(homedir=getwd(), ...) {
                                 ),
                                 waiter::use_waiter(),
                                 actionButton("start_ggir", "Start analysis", width = '300px'),
+                                p("\n"),
                                 textOutput("ggir_end_message"),
+                                p(""),
+                                DT::dataTableOutput("GGIRpart2"),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
@@ -414,23 +417,31 @@ myApp <- function(homedir=getwd(), ...) {
                     do.BrondCounts = do.BrondCounts)
           
           # Now check whether results are correctly generated:
-          expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_summary.csv")
+          
+          expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
+          expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
           if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
             if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
               expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
               if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
                 if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
-                  GGIRBrondCounts_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " For example, see ", 
+                  GGIRBrondCounts_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " Output is stored in ", 
                                                    expected_outputdir_brondcounts, " and ",
-                                                   expected_ggiroutput_file)
+                                                   expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
+                  GGIRpart2 = read.csv(expected_ggiroutput_file)
+                  output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
                 } else {
-                  GGIRBrondCounts_message = "BrondCounts unsuccessful"
+                  GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. No file found inside ", expected_outputdir_brondcounts)
                 }
               } else {
-                GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), " For example, see ", expected_ggiroutput_file)
+                GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. Dir ",expected_outputdir_brondcounts, " not found")
+                
               }
             } else {
-              GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), " For example, see ", expected_ggiroutput_file)
+              GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), ". Output is stored in ", 
+                                               expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
+              GGIRpart2 = read.csv(expected_ggiroutput_file)
+              output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
             }
           } 
         }
