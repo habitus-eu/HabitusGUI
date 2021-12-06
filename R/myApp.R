@@ -493,7 +493,7 @@ myApp <- function(homedir=getwd(), ...) {
         basecommand = paste0("palmspy --gps-path ", global$gps_in,
                              " --acc-path ", count_file_location,
                              " --config-file ", paste0(global$data_out, "/config.json"))
-        system(command = basecommand)
+        syslog = system(command = basecommand, intern = TRUE)
         
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
@@ -501,7 +501,7 @@ myApp <- function(homedir=getwd(), ...) {
           dir.create(expected_palmspy_results_dir)
         }
         if (dir.exists("PALMSpy_output") & dir.exists(expected_palmspy_results_dir)) {
-          file.copy(from = dir("PALMSpy_output", full.names = TRUE),
+          file.copy(from = "PALMSpy_output",
                     to = expected_palmspy_results_dir, 
                     overwrite = TRUE, recursive = TRUE, copy.mode = TRUE)
           # file.remove(dir("./PALMSpy_output", full.names = TRUE)) # remove data on server 
@@ -523,7 +523,7 @@ myApp <- function(homedir=getwd(), ...) {
           }
         }
       }
-      PALMSpy_message = paste0(PALMSpy_message, " \n <br/>", basecommand, "\n <br/>" ,getwd())
+      PALMSpy_message = paste0(PALMSpy_message, " \n ", basecommand, "\n ", syslog)
       return(PALMSpy_message)
     })
     
