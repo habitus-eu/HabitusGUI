@@ -112,12 +112,12 @@ modConfigServer = function(id, tool) {
                                      # , columnDefs = list(list(targets = 'priority', visible = FALSE))
                                      )) %>% DT::formatStyle(
                                                       'value', 'priority',
-                                                      backgroundColor = DT::styleEqual(c("0", "1"), c('lavender', 'yellow'))
+                                                      backgroundColor = DT::styleEqual(c("0", "1"), c('gray91', 'lightyellow'))
                                                       )
                       # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
       })
       output$config_instruction <- renderText({
-        "Review the parameter values, especially the values highlighted in yellow, and edit where needed by double clicking:"
+        "Review the parameter values, especially the ones in yellow, and edit where needed by double clicking:"
       })
     })
     output$config_instruction <- renderText({ # the default output before the configuration file is selected
