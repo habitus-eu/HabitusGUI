@@ -523,7 +523,7 @@ myApp <- function(homedir=getwd(), ...) {
           }
         }
       }
-      PALMSpy_message = paste0(PALMSpy_message, " \n", basecommand)
+      PALMSpy_message = paste0(PALMSpy_message, " \n <br/>", basecommand, "\n <br/>" ,getwd())
       return(PALMSpy_message)
     })
     
