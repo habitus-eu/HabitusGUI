@@ -490,11 +490,11 @@ myApp <- function(homedir=getwd(), ...) {
         # PALMSpy_R(gps_path = global$gps_in, acc_path = count_file_location,
         #           config_file = paste0(global$data_out, "/config.json")) ## point to local copy of the config file because that is what system will have access too
         
+        # /home/vincent/miniconda3/bin/conda run -n palmspy
         basecommand = paste0("palmspy --gps-path ", global$gps_in,
                              " --acc-path ", count_file_location,
                              " --config-file ", paste0(global$data_out, "/config.json"))
-        syslog = system(command = basecommand, intern = TRUE)
-        
+        system(command = basecommand)
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
         if (!dir.exists(expected_palmspy_results_dir)) {
@@ -507,10 +507,10 @@ myApp <- function(homedir=getwd(), ...) {
           # file.remove(dir("./PALMSpy_output", full.names = TRUE)) # remove data on server 
           PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), ". See ", expected_palmspy_results_dir,".") 
           # Now send content of 1 output file to UI
-          expected_palmspyoutput_file = dir(expected_palmspy_results_dir, full.names = TRUE, pattern = "csv")[1]
+          expected_palmspyoutput_file = dir(expected_palmspy_results_dir, recursive = TRUE, full.names = TRUE, pattern = "csv")[1]
           if (length(expected_palmspyoutput_file) > 0) {
             PALMSpy_message = paste0(PALMSpy_message, " The table below shows the top of ", basename(expected_palmspyoutput_file))
-            PALMSpy_file1 = read.csv(expected_palmspyoutput_file, nrow=100)
+            PALMSpy_file1 = read.csv(file = expected_palmspyoutput_file, nrow=100)
             output$PALMSpy_file1 <- DT::renderDataTable(PALMSpy_file1, options = list(scrollX = TRUE))
           }
         } else {
@@ -523,7 +523,7 @@ myApp <- function(homedir=getwd(), ...) {
           }
         }
       }
-      PALMSpy_message = paste0(PALMSpy_message, " \n ", basecommand, "\n ", syslog)
+      PALMSpy_message = paste0(PALMSpy_message, " \n ", basecommand)
       return(PALMSpy_message)
     })
     
