@@ -14,6 +14,7 @@ PALMSpy_R = function(gps_path, acc_path, output_path, config_file =c()) {
   # basecommand = paste0("/home/vincent/miniconda3/bin/conda run -n palmspy palmspy --gps-path ", gps_path, " --acc-path ", acc_path)
   basecommand = paste0("palmspy --gps-path ", gps_path, " --acc-path ", acc_path)
   if (length(config_file) > 0) {
+    print(paste0(basecommand, " --config-file ",config_file))
     system(paste0(basecommand, " --config-file ",config_file))
   } else {
     system(basecommand)
