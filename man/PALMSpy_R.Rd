@@ -4,14 +4,12 @@
 \alias{PALMSpy_R}
 \title{PALMSpy_R}
 \usage{
-PALMSpy_R(gps_path, acc_path, output_path, config_file = c())
+PALMSpy_R(gps_path, acc_path, config_file = c())
 }
 \arguments{
 \item{gps_path}{Path to gps data}
 
 \item{acc_path}{Path to acc data}
-
-\item{output_path}{Path to output directory, default to working directory}
 
 \item{config_file}{Path to configuration file}
 }
