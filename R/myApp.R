@@ -488,7 +488,7 @@ myApp <- function(homedir=getwd(), ...) {
         on.exit(waiter$hide())
         on.exit(removeNotification(id_palmspy), add = TRUE)
         PALMSpy_R(gps_path = global$gps_in, acc_path = count_file_location,
-                  config_file = configfilePALMSpy())
+                  config_file = configfilePALMSpy()$datapath)
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
         if (!dir.exists(expected_palmspy_results_dir)) {
@@ -516,6 +516,7 @@ myApp <- function(homedir=getwd(), ...) {
           }
         }
       }
+      PALMSpy_message = paste0(PALMSpy_message, " \n",configfilePALMSpy()$datapath," \n", global$gps_in)
       return(PALMSpy_message)
     })
     
