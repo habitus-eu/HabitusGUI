@@ -1,16 +1,21 @@
 ![GitHub Actions R-CMD-check](https://github.com/habitus-eu/HabitusGUI/workflows/R-CMD-check-full/badge.svg)
 [![codecov](https://codecov.io/gh/habitus-eu/HabitusGUI/branch/main/graph/badge.svg?token=GPRPJ3IXWC)](https://codecov.io/gh/habitus-eu/HabitusGUI)
 
-HabitusGUI is a Shiny app designed to ease processing behavioural data with research software such as GGIR, activityCounts, PALMSpy and PALMSplus. If you are the maintainer of one of these software tools then please see our requirements on your tool [here](https://github.com/habitus-eu/HabitusGUI/blob/main/INSTRUCTIONS_TOOL_MAINTAINERS.md).
+HabitusGUI is a Shiny app designed to ease processing behavioural data with research software such as GGIR, activityCounts, PALMSpy and PALMSplus. If you want to contribute to HabitusGUI then please find our contributing guidelines [here](https://github.com/wadpac/GGIR/blob/master/CONTRIBUTING.md).
 
+## 1 Instructions for tool contributors
+
+If you are the maintainer of a tool that has been or needs to be embedded in HabitusGUI then please see instructions   [here](https://github.com/habitus-eu/HabitusGUI/blob/main/INSTRUCTIONS_TOOL_MAINTAINERS.md).
+
+## 2 Installation instructions
 
 We anticipate that HabitusGUI will be installed on a server environment, where the typical user will not have to worry about the installation process as described below.
 
-## 1 Install without Docker
+### 2.1 without Docker
 
 This approach assumes that all HabitusGUI dependencies, such as GGIR, PALMSpy, and PALMSplus, are available in the work environment.
 
-#### 1.1 Install for the first time:
+#### 2.1.1 Install for the first time:
 
 1. Install R: https://cran.r-project.org/
 2. Start R: `R`
@@ -22,7 +27,7 @@ install.package(remotes); library("remotes"); remotes::install_github("habitus-e
 
 If you ever want to update the software in the future then repeat this step.
 
-#### 1.2 Using HabitusGUI
+#### 2.1.2 Using HabitusGUI
 
 1. Start R
 2. In the R command line type: `library("HabitusGUI")`
@@ -32,12 +37,12 @@ If you ever want to update the software in the future then repeat this step.
 
 4. Launch HabitusGUI app: `HabitusGUI::myApp(homedir=data_dir)`
 
-## 2 Install with Docker
+### 2.2 Install with Docker
 
 The HabitusGUI R package repository contains docker files needed for hosting Habitus Shiny app and
 its dependencies.
 
-#### 2.1 First time installation
+#### 2.2.1 First time installation
 
 
 1. Install docker via the official installation instructions: https://docs.docker.com/get-docker/, which are tailored to Mac, Windows and Linux. Note that Docker Desktop for Windows (and probably also Docker Desktop for Mac, but not tested yet) is not compatible with VirtualBox. If you do not know what VirtualBox is then you are probably not using it, but to be sure search your installed apps for VirtualBox. If you do have VirtualBox installed and you want to keep using it, then we recommend creating an Ubuntu Virtual Machine with VirtualBox and installing Docker inside it.
@@ -62,9 +67,9 @@ its dependencies.
 
 This will build a Docker image with R, HabitusGUI and all it's software dependencies.
 
-#### 2.2 Run the docker image
+#### 2.2.2 Run the docker image
 
-##### 2.2.1 In Windows via Docker Desktop for Windows:
+##### 2.2.2.1 In Windows via Docker Desktop for Windows:
 
 1. Open the "Docker Desktop for Windows"
 2. Go to images
@@ -74,7 +79,7 @@ This will build a Docker image with R, HabitusGUI and all it's software dependen
 
 4. Click on icon to launch in browser
 
-##### 2.2.2 In Linux and Mac:
+##### 2.2.2.2 In Linux and Mac:
 
 1. Open command prompt
 
@@ -92,7 +97,7 @@ Here `/home/vincent/projects/fontys` should be replaced by the local directory y
 4. Open app in browser: `http://localhost:3838/`
 
 
-#### 2.4 Remove HabitusGUI image
+#### 2.2.4 Remove HabitusGUI image
 
 If you would ever when to remove the image then do:
 
