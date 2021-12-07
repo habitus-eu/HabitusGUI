@@ -491,20 +491,17 @@ myApp <- function(homedir=getwd(), ...) {
         #           config_file = paste0(global$data_out, "/config.json")) ## point to local copy of the config file because that is what system will have access too
         
         # /home/vincent/miniconda3/bin/conda run -n palmspy
-        basecommand = paste0("palmspy --gps-path ", global$gps_in,
+        # /home/vincent/miniconda3/bin/conda run -n palmspy 
+        basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
                              " --acc-path ", count_file_location,
                              " --config-file ", paste0(global$data_out, "/config.json"))
         system(command = basecommand)
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
-        if (!dir.exists(expected_palmspy_results_dir)) {
-          dir.create(expected_palmspy_results_dir)
-        }
-        if (dir.exists("PALMSpy_output") & dir.exists(expected_palmspy_results_dir)) {
-          file.copy(from = "PALMSpy_output",
-                    to = expected_palmspy_results_dir, 
-                    overwrite = TRUE, recursive = TRUE, copy.mode = TRUE)
-          # file.remove(dir("./PALMSpy_output", full.names = TRUE)) # remove data on server 
+        # if (!dir.exists(expected_palmspy_results_dir)) {
+        #   dir.create(expected_palmspy_results_dir)
+        # }
+        if (dir.exists(expected_palmspy_results_dir)) { #dir.exists("PALMSpy_output") &
           PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), ". See ", expected_palmspy_results_dir,".") 
           # Now send content of 1 output file to UI
           expected_palmspyoutput_file = dir(expected_palmspy_results_dir, recursive = TRUE, full.names = TRUE, pattern = "csv")[1]
@@ -517,9 +514,6 @@ myApp <- function(homedir=getwd(), ...) {
           PALMSpy_message = "PALMSpy unsuccessful."
           if (!dir.exists(expected_palmspy_results_dir)) {
             PALMSpy_message = paste0(PALMSpy_message, " Not able to find ", expected_palmspy_results_dir)
-          }
-          if (!dir.exists("PALMSpy_output")) {
-            PALMSpy_message = paste0(PALMSpy_message, " Not able to find PALMSpy_output")
           }
         }
       }
