@@ -2,15 +2,15 @@ parameter	field	subfield	display	class	minimum	maximum	set	priority	description
 windowsizes	general		TRUE	integer	1	3600		0	Vector of sizes for: epoch, non-wear detection resolution, and non-wear detection window.
 desiredtz	general		TRUE	timezone				1	Timezone name according to the timezone database
 idloc	general		TRUE	set			1;2;3;4;5;6;7	1	How participant identifier should be extracted: idloc = 1 (default), ID number is stored in the  obvious header field. Note that for ActiGraph data the ID is never stored in the file  header.  For idloc value set to 2, 5, 6, and 7, GGIR looks at the filename and extracts the character string preceding the first occurance of a '_', ' ' (space), '.' (dot),     and '-', respecitvely.
-colid	sleep		FALSE	integer	1	100		0	Column in the sleep log spreadsheet in which the participant ID code is stored (default = 1) 
-coln1	sleep		FALSE	integer	1	1000		0	Column number in the sleep log spreadsheet where the onset of the first night starts
-criterror	sleep		FALSE	double	0	24		0	Relevant for do.visual == TRUE and outliers.only == TRUE. criterror specifies the number of minimum number of hours difference between sleep log and accelerometer estimate for the night to be included in the visualisation 
-do.visual	sleep		FALSE	set			TRUE;FALSE	0	If g.part4 is run with do.visual == TRUE then the function will generate a pdf with a visual representation of the overlap between the sleeplog entries and the accelerometer detections. This can be used to visualy verify that the sleeplog entries do not come with obvious mistakes.
+colid	sleep		TRUE	integer	1	100		0	Column in the sleep log spreadsheet in which the participant ID code is stored (default = 1) 
+coln1	sleep		TRUE	integer	1	1000		0	Column number in the sleep log spreadsheet where the onset of the first night starts
+criterror	sleep		TRUE	double	0	24		0	Relevant for do.visual == TRUE and outliers.only == TRUE. criterror specifies the number of minimum number of hours difference between sleep log and accelerometer estimate for the night to be included in the visualisation 
+do.visual	sleep		TRUE	set			TRUE;FALSE	0	If g.part4 is run with do.visual == TRUE then the function will generate a pdf with a visual representation of the overlap between the sleeplog entries and the accelerometer detections. This can be used to visualy verify that the sleeplog entries do not come with obvious mistakes.
 excludefirstlast	sleep		TRUE	set			TRUE;FALSE	0	If TRUE then the first and last night of the measurement are ignored for the sleep assessment.
-includenightcrit	sleep		FALSE	integer	0	24		0	Minimum number of valid hours per night (24 hour window between noon and noon)
-nnights	sleep		FALSE	integer	0	1000		0	Number of nights for which sleep log information should be available. It assumes that this is constant within a study. If sleep log information is missing for certain nights then leave these blank
-outliers.only	sleep		FALSE	set			TRUE;FALSE	0	Relevant for do.visual == TRUE. Outliers.only == FALSE will visualise all available nights in the data. Outliers.only == TRUE will visualise only for nights with a difference in onset or waking time larger than the variable of argument criterror.
-sleeplogidnum	sleep		FALSE	set			TRUE;FALSE	0	Boolean to indicate whether the participant identifier as stored in the sleeplog should be interpretted as a number (TRUE=default) or a character (FALSE)?
+includenightcrit	sleep		TRUE	integer	0	24		0	Minimum number of valid hours per night (24 hour window between noon and noon)
+nnights	sleep		TRUE	integer	0	1000		0	Number of nights for which sleep log information should be available. It assumes that this is constant within a study. If sleep log information is missing for certain nights then leave these blank
+outliers.only	sleep		TRUE	set			TRUE;FALSE	0	Relevant for do.visual == TRUE. Outliers.only == FALSE will visualise all available nights in the data. Outliers.only == TRUE will visualise only for nights with a difference in onset or waking time larger than the variable of argument criterror.
+sleeplogidnum	sleep		TRUE	set			TRUE;FALSE	0	Boolean to indicate whether the participant identifier as stored in the sleeplog should be interpretted as a number (TRUE=default) or a character (FALSE)?
 boutcriter.in	physical activity		TRUE	double	0	1		0	A number between 0 and 1 and defines what fraction of a bout needs to be below the light threshold 
 boutcriter.lig	physical activity		TRUE	double	0	1		0	A number between 0 and 1 and defines what fraction of a bout needs to be between the light and moderage threshold
 boutcriter.mvpa	physical activity		TRUE	double	0	1		0	A number between 0 and 1 and defines what fraction of a bout needs to be above the mvpathreshold

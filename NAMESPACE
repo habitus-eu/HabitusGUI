@@ -3,7 +3,6 @@
 export(BrondCounts)
 export(BrondCounts2csv)
 export(GGIRshiny)
-export(PALMSpy_R)
 export(check_params)
 export(create_test_GGIRconfig)
 export(create_test_files)

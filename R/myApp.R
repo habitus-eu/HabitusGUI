@@ -251,6 +251,13 @@ myApp <- function(homedir=getwd(), ...) {
         if ("GGIR" %in% input$tools) {
           file.copy(from = configfileGGIR(), to = paste0(global$data_out, "/config.csv"), 
                     overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+          if (length(sleepdiaryfile()) > 0) {
+            file.copy(from = sleepdiaryfile(), to = paste0(global$data_out, "/sleepdiary.csv"), 
+                    overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+            sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
+          } else  {
+            sleepdiaryfile_local = c()
+          }
         }
         if ("PALMSpy" %in% input$tools) {
           file.copy(from = configfilePALMSpy(), to = paste0(global$data_out, "/config.json"), 
@@ -415,8 +422,14 @@ myApp <- function(homedir=getwd(), ...) {
             do.BrondCounts = FALSE
           }
           on.exit(removeNotification(id_ggir), add = TRUE)
+          
+          if (file.exists(paste0(global$data_out, "/sleepdiary.csv"))) { # because this is not a global variable
+            sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
+          } else {
+            sleepdiaryfile_local = c()
+          }
           GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
-                    sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()),
+                    sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
                     do.BrondCounts = do.BrondCounts)
           
           # Now check whether results are correctly generated:
@@ -487,9 +500,7 @@ myApp <- function(homedir=getwd(), ...) {
         waiter <- waiter::Waiter$new(id = "start_palmspy", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         on.exit(removeNotification(id_palmspy), add = TRUE)
-        # PALMSpy_R(gps_path = global$gps_in, acc_path = count_file_location,
-        #           config_file = paste0(global$data_out, "/config.json")) ## point to local copy of the config file because that is what system will have access too
-        
+
         # /home/vincent/miniconda3/bin/conda run -n palmspy
         # /home/vincent/miniconda3/bin/conda run -n palmspy 
         basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
@@ -498,10 +509,8 @@ myApp <- function(homedir=getwd(), ...) {
         system(command = basecommand)
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
-        # if (!dir.exists(expected_palmspy_results_dir)) {
-        #   dir.create(expected_palmspy_results_dir)
-        # }
-        if (dir.exists(expected_palmspy_results_dir)) { #dir.exists("PALMSpy_output") &
+
+        if (dir.exists(expected_palmspy_results_dir)) {
           PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), ". See ", expected_palmspy_results_dir,".") 
           # Now send content of 1 output file to UI
           expected_palmspyoutput_file = dir(expected_palmspy_results_dir, recursive = TRUE, full.names = TRUE, pattern = "csv")[1]
