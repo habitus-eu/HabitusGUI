@@ -81,12 +81,11 @@ RUN R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "adding_real_pa
 
 RUN mkdir -p /code
 
-# Make all app files readable
 COPY /code/app.R /srv/shiny-server/
 
-EXPOSE 3838
+# Make all app files readable
+RUN chmod -R 777 /srv/shiny-server/
 
-RUN chmod -R 755 /srv/shiny-server/
 EXPOSE 3838
 
 # run app
