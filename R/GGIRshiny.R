@@ -12,6 +12,7 @@
 GGIRshiny = function(rawaccdir, outputdir, configfile=c(), sleepdiary=c(), do.BrondCounts = FALSE) {
   if (length(sleepdiary) == 0) sleepdiary = c()
   if (length(configfile) == 0) configfile = c()
+  setwd(outputdir)
   if (do.BrondCounts == FALSE) {
     GGIR::g.shell.GGIR(datadir = rawaccdir, outputdir = outputdir, overwrite = FALSE,
                        configfile = configfile, loglocation = sleepdiary, do.parallel=TRUE)
