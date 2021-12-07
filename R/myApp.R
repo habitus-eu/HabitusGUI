@@ -251,7 +251,7 @@ myApp <- function(homedir=getwd(), ...) {
         if ("GGIR" %in% input$tools) {
           file.copy(from = configfileGGIR(), to = paste0(global$data_out, "/config.csv"), 
                     overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
-          if (length(sleepdiaryfile()) > 0) {
+          if (length(as.character(sleepdiaryfile())) > 0) {
             file.copy(from = sleepdiaryfile(), to = paste0(global$data_out, "/sleepdiary.csv"), 
                     overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
             sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
