@@ -396,11 +396,15 @@ myApp <- function(homedir=getwd(), ...) {
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
       GGIRBrondCounts_message = ""
+      write("A",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
       if ("GGIR" %in% input$tools | "BrondCounts" %in% input$tools) {
+        write("B",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
         GGIRBrondCounts_message = "Error: Contact maintainer"
         # Basic check before running function:
         ready_to_run_ggirbrondcounts = FALSE
+        write("C",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
         if (dir.exists(global$raw_acc_in)) {
+          write("D",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
           acc_files_available = length(dir(path = global$raw_acc_in, pattern = "csv|bin|gt3x|bin|cwa|wav", recursive = FALSE, full.names = FALSE)) > 0
           if (acc_files_available == TRUE) {
             ready_to_run_ggirbrondcounts = TRUE
@@ -408,12 +412,16 @@ myApp <- function(homedir=getwd(), ...) {
             GGIRBrondCounts_message = paste0("No count files found in ", global$raw_acc_in)
           }
         } else {
+          write("E",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
           GGIRBrondCounts_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", global$raw_acc_in)
         }
+        write("F",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
         # Only run function when checks are met:
         if (ready_to_run_ggirbrondcounts == TRUE) {
+          write("G",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
           waiter <- waiter::Waiter$new(id = "start_ggir", html = waiter::spin_throbber())$show()
           on.exit(waiter$hide())
+          write("H",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
           if ("BrondCounts" %in% input$tools) {
             id_ggir = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
             do.BrondCounts = TRUE
@@ -423,20 +431,25 @@ myApp <- function(homedir=getwd(), ...) {
           }
           on.exit(removeNotification(id_ggir), add = TRUE)
           
+          write("I",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
+          
           if (file.exists(paste0(global$data_out, "/sleepdiary.csv"))) { # because this is not a global variable
             sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
           } else {
             sleepdiaryfile_local = c()
           }
+          write("J",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
           GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
                     sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
                     do.BrondCounts = do.BrondCounts)
-          
+          write("K",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
           # Now check whether results are correctly generated:
           
           expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
           expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
+          write("L",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
           if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
+            write("M",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
             if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
               expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
               if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
@@ -454,6 +467,7 @@ myApp <- function(homedir=getwd(), ...) {
                 
               }
             } else {
+              write("N",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
               GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), ". Output is stored in ", 
                                                expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
               GGIRpart2 = read.csv(expected_ggiroutput_file, nrow=100)
