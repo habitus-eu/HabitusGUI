@@ -332,6 +332,8 @@ myApp <- function(homedir=getwd(), ...) {
     # Create global with directories and give it default values -------
     global <- reactiveValues(data_in = homedir, data_out = homedir) #, pipeline = NULL)
     
+    
+    
     # Update global when input changes
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -342,6 +344,7 @@ myApp <- function(homedir=getwd(), ...) {
                    home <- normalizePath(homedir)
                    global$raw_acc_in <-
                      file.path(home, paste(unlist(rawaccdir()$path[-1]), collapse = .Platform$file.sep))
+                   write("A2",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -372,6 +375,7 @@ myApp <- function(homedir=getwd(), ...) {
                    home <- normalizePath(homedir)
                    global$data_out <-
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
+                   write("A3",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
                  })
     
     
