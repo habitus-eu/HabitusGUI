@@ -344,6 +344,7 @@ myApp <- function(homedir=getwd(), ...) {
                    home <- normalizePath(homedir)
                    global$raw_acc_in <-
                      file.path(home, paste(unlist(rawaccdir()$path[-1]), collapse = .Platform$file.sep))
+                   write("A23",file=paste0("myfile_without_path.txt"),append=TRUE)
                    write("A2",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
                  })
     observeEvent(ignoreNULL = TRUE,
@@ -375,6 +376,7 @@ myApp <- function(homedir=getwd(), ...) {
                    home <- normalizePath(homedir)
                    global$data_out <-
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
+                   write("A33",file=paste0("myfile_without_path.txt"),append=TRUE)
                    write("A3",file=paste0(global$data_out,"/myfile.txt"),append=TRUE)
                  })
     
