@@ -84,4 +84,6 @@ RUN mkdir -p /code
 COPY /code/app.R /srv/shiny-server/
 
 # run app
+WORKDIR /srv/shiny-server/data
 CMD ["/usr/bin/shiny-server"]
+
