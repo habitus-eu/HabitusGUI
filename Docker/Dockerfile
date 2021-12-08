@@ -46,7 +46,7 @@ RUN conda create -n palmspy python=3.7 openjdk=8.0 make=4.2.1 -y \
 WORKDIR /
 
 ###################
-## HabitusGUI and it's dependencies, such as R packages GGIR and activityCounts
+## HabitusGUI and it's R dependencies, such as R packages GGIR and activityCounts
 
 # get shiny server and R from the rocker project
 FROM rocker/shiny
@@ -65,7 +65,6 @@ RUN apt-get update && apt-get install -y \
 
 # install R packages required
 RUN R -e 'install.packages(c(\
-              "shiny", \
               "shinyFiles", \
               "GGIR", \
               "jsonlite", \
@@ -79,16 +78,13 @@ RUN R -e 'install.packages(c(\
 RUN R -e 'remotes::install_github("rstudio/bslib")' # development version because CRAN version has bug that affects us
 RUN R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "adding_real_palmspy")'
 
+# Copy code for running the app to the container
 RUN mkdir -p /code
-
 COPY /code/app.R /srv/shiny-server/
 
-# Make all app files readable
-RUN chmod -R 777 /srv/shiny-server/
-
-EXPOSE 3838
+# Change working directory to equal the location of the mounted volume
+WORKDIR /srv/shiny-server/data
 
 # run app
-WORKDIR /srv/shiny-server/data
 CMD ["/usr/bin/shiny-server"]
 
