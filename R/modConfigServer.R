@@ -3,6 +3,7 @@
 #' @param id ...
 #' @param tool ...
 #' @return No object returned, this is a shiny module
+#' @import dplyr
 #' @export
 
 modConfigServer = function(id, tool) {
@@ -52,28 +53,31 @@ modConfigServer = function(id, tool) {
         modifiable_column = "value" # modifiable columns
         isolate(
           if (j %in% match(modifiable_column, colnames(v$params))) {
+            do.replace = TRUE
             v$params[which(v$params$display == TRUE)[i], j] <<- DT::coerceValue(k, v$params[i, j])
           } else {
-            stop("You are not supposed to change this column.") # check to stop the user from editing only few columns
+            do.replace = FALSE
+            warning("You are not supposed to change this column.") # check to stop the user from editing only few columns
           }
         )
-        DT::replaceData(proxy, v$params, resetPaging = FALSE)  # replaces data displayed by the updated table
-        
-        params_errors = check_params(v$params, tool = tool())
-        output$config_issues <- renderUI({
-          HTML(params_errors$error_message)
-        })
-        output$config_green <- renderUI({
-          HTML(params_errors$green_message)
-        })
-        if (nrow(params_errors$blocked_params) != 0) {
-          v$params$display[which(rownames(v$params) %in% params_errors$blocked_params$name == TRUE)] = TRUE
-        }
-        # Auto-save after every change
-        if (tool() == "PALMSpy") {
-          update_params(new_params = v$params, file = input$configfile$datapath, format = "json_palmspy")
-        } else if (tool() == "GGIR") {
-          update_params(new_params = v$params, file = input$configfile$datapath, format = "csv_ggir")
+        if (do.replace == TRUE) {
+          DT::replaceData(proxy, v$params, resetPaging = FALSE)  # replaces data displayed by the updated table
+          params_errors = check_params(v$params, tool = tool())
+          output$config_issues <- renderUI({
+            HTML(params_errors$error_message)
+          })
+          output$config_green <- renderUI({
+            HTML(params_errors$green_message)
+          })
+          if (nrow(params_errors$blocked_params) != 0) {
+            v$params$display[which(rownames(v$params) %in% params_errors$blocked_params$name == TRUE)] = TRUE
+          }
+          # Auto-save after every change
+          if (tool() == "PALMSpy") {
+            update_params(new_params = v$params, file = input$configfile$datapath, format = "json_palmspy")
+          } else if (tool() == "GGIR") {
+            update_params(new_params = v$params, file = input$configfile$datapath, format = "csv_ggir")
+          }
         }
       })
       
@@ -100,14 +104,20 @@ modConfigServer = function(id, tool) {
       # Render table for use in UI
       output$mod_table <- DT::renderDataTable({
         rows2show = which(v$params$display == TRUE)
+        v$params = v$params[order(v$params$priority, decreasing = TRUE),]
         cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set", "display") == FALSE)
         DT::datatable(v$params[rows2show, cols2show], editable = TRUE,
                       options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
-                                                    pageLength = 5))
+                                                    pageLength = 5
+                                     # , columnDefs = list(list(targets = 'priority', visible = FALSE))
+                                     )) %>% DT::formatStyle(
+                                                      'value', 'priority',
+                                                      backgroundColor = DT::styleEqual(c("0", "1"), c('gray91', 'lightyellow'))
+                                                      )
                       # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
       })
       output$config_instruction <- renderText({
-        "Review the parameter values and edit where needed by double clicking:"
+        "Review the parameter values, especially the ones in yellow, and edit where needed by double clicking:"
       })
     })
     output$config_instruction <- renderText({ # the default output before the configuration file is selected

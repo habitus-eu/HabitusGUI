@@ -9,13 +9,13 @@
 #' @import waiter
 #' @export
 
-# pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys")
+# pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") HabitusGUI::myApp(homedir="~/projects")
 # pkgload::load_all("."); myApp(homedir="~/projects/fontys")
 # roxygen2::roxygenise()
 
 myApp <- function(homedir=getwd(), ...) {
   ui <- fluidPage(
-    theme = bslib::bs_theme(bootswatch = "sketchy"), #,"sandstone"),
+    theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
     # preview examples: https://bootswatch.com/
     # “cerulean”, “cosmo”, “cyborg”, “darkly”, “flatly”, “journal”, “litera”, “lumen”, 
     # “lux”, “materia”, “minty”, “morph”, “pulse”, “quartz”, “sandstone”, “simplex”, 
@@ -27,6 +27,7 @@ myApp <- function(homedir=getwd(), ...) {
                fluidRow(column(8, div(h1("Habitus"), style = "height:50px")),
                         column(4, div(imageOutput("logo_page1"), style = "height:50px;float:right"))
                ),
+               p("\n"),
                checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
                                   choiceNames = list("Raw acceleration (at least ten values per second per axis)", 
                                                      "Counts (in ActiGraph .csv format)",
@@ -59,6 +60,7 @@ myApp <- function(homedir=getwd(), ...) {
                fluidRow(column(8, div(h1("Habitus - Data selection"), style = "height:50px")),
                         column(4, div(imageOutput("logo_page2"), style = "height:50px;float:right"))
                ),
+               p("\n"),
                # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  && ",
                                                    "(input.tools.includes(`GGIR`) || ",
@@ -102,6 +104,7 @@ myApp <- function(homedir=getwd(), ...) {
                fluidRow(column(8, div(h1("Habitus - Parameter Configuration"), style = "height:50px")),
                         column(4, div(imageOutput("logo_page3"), style = "height:50px;float:right"))
                ),
+               p("\n"),
                conditionalPanel(condition = "input.tools.includes('GGIR')",
                                 h2("GGIR"),
                                 modConfigUI("edit_ggir_config"),
@@ -125,8 +128,11 @@ myApp <- function(homedir=getwd(), ...) {
                fluidRow(column(8, div(h1("Habitus - Analyses"), style = "height:50px")),
                         column(4, div(imageOutput("logo_page4"), style = "height:50px;float:right"))
                ),
+               p("\n"),
+               p("\n"),
                span(h4(textOutput("recommendorder")), style="color:purple"),
-               hr(),
+               # hr(),
+               p("\n"),
                conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
                                                    "input.tools.includes('BrondCounts')"),
                                 conditionalPanel(condition =
@@ -139,14 +145,20 @@ myApp <- function(homedir=getwd(), ...) {
                                 ),
                                 waiter::use_waiter(),
                                 actionButton("start_ggir", "Start analysis", width = '300px'),
+                                p("\n"),
                                 textOutput("ggir_end_message"),
+                                p(""),
+                                DT::dataTableOutput("GGIRpart2"),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
                                 h3("PALMSpy:"),
                                 waiter::use_waiter(),
                                 actionButton("start_palmspy", "Start analysis", width = '300px'),
+                                p("\n"),
                                 textOutput("palmspy_end_message"),
+                                p(""),
+                                DT::dataTableOutput("PALMSpy_file1"),
                                 hr()
                ),
                actionButton("page_43", "prev")
@@ -155,8 +167,6 @@ myApp <- function(homedir=getwd(), ...) {
   )
   
   server <- function(input, output, session) {
-    
-    
     getlogo = function() {
       renderImage({
         list(src = system.file("www/fontys_logo.png", package = "HabitusGUI")[1],
@@ -164,7 +174,6 @@ myApp <- function(homedir=getwd(), ...) {
              width = 100, height = 100)
       }, deleteFile = FALSE)
     }
-    
     output$logo_page1 = getlogo()
     output$logo_page2 = getlogo()
     output$logo_page3 = getlogo()
@@ -242,6 +251,13 @@ myApp <- function(homedir=getwd(), ...) {
         if ("GGIR" %in% input$tools) {
           file.copy(from = configfileGGIR(), to = paste0(global$data_out, "/config.csv"), 
                     overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+          if (length(as.character(sleepdiaryfile())) > 0) {
+            file.copy(from = sleepdiaryfile(), to = paste0(global$data_out, "/sleepdiary.csv"), 
+                    overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+            sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
+          } else  {
+            sleepdiaryfile_local = c()
+          }
         }
         if ("PALMSpy" %in% input$tools) {
           file.copy(from = configfilePALMSpy(), to = paste0(global$data_out, "/config.json"), 
@@ -262,7 +278,6 @@ myApp <- function(homedir=getwd(), ...) {
     # Update checkbox possible research goals depending on available data
     observeEvent(input$availabledata, {
       x <- input$availabledata
-      
       # Can use character(0) to remove all choices
       if (is.null(x)) x <- character(0)
       researchgoals = c()
@@ -314,9 +329,10 @@ myApp <- function(homedir=getwd(), ...) {
     outputdir <- reactive(input$outputdir)
     sleepdiaryfile <- reactive(input$sleepdiaryfile$datapath)
     
-    
     # Create global with directories and give it default values -------
     global <- reactiveValues(data_in = homedir, data_out = homedir) #, pipeline = NULL)
+    
+    
     
     # Update global when input changes
     observeEvent(ignoreNULL = TRUE,
@@ -379,7 +395,6 @@ myApp <- function(homedir=getwd(), ...) {
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"))
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"))
     
-    
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
       GGIRBrondCounts_message = ""
@@ -409,28 +424,40 @@ myApp <- function(homedir=getwd(), ...) {
             do.BrondCounts = FALSE
           }
           on.exit(removeNotification(id_ggir), add = TRUE)
+
+          if (file.exists(paste0(global$data_out, "/sleepdiary.csv"))) { # because this is not a global variable
+            sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
+          } else {
+            sleepdiaryfile_local = c()
+          }
           GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
-                    sleepdiary = isolate(sleepdiaryfile()), configfile = isolate(configfileGGIR()),
+                    sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
                     do.BrondCounts = do.BrondCounts)
-          
           # Now check whether results are correctly generated:
-          expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_summary.csv")
+          
+          expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
+          expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
           if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
             if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
               expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
               if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
                 if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
-                  GGIRBrondCounts_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " For example, see ", 
+                  GGIRBrondCounts_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " Output is stored in ", 
                                                    expected_outputdir_brondcounts, " and ",
-                                                   expected_ggiroutput_file)
+                                                   expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
+                  GGIRpart2 = read.csv(expected_ggiroutput_file)
+                  output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
                 } else {
-                  GGIRBrondCounts_message = "BrondCounts unsuccessful"
+                  GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. No file found inside ", expected_outputdir_brondcounts)
                 }
               } else {
-                GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), " For example, see ", expected_ggiroutput_file)
+                GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. Dir ",expected_outputdir_brondcounts, " not found")
               }
             } else {
-              GGIRBrondCounts_message = "GGIR unsuccessful"
+              GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), ". Output is stored in ", 
+                                               expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
+              GGIRpart2 = read.csv(expected_ggiroutput_file, nrow=100)
+              output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
             }
           } 
         }
@@ -454,7 +481,8 @@ myApp <- function(homedir=getwd(), ...) {
         }
         # Check whether both count and gps data exist
         if (dir.exists(count_file_location) == TRUE) {
-          cnt_files_available = length(dir(path = count_file_location, pattern = ".csv", recursive = FALSE, full.names = FALSE)) > 0
+          cnt_files_available = length(dir(path = count_file_location, pattern = ".csv", 
+                                           recursive = FALSE, full.names = FALSE)) > 0
           if (cnt_files_available == TRUE) {
             if (gps_files_available ==  TRUE) {
               ready_to_run_palsmpy = TRUE
@@ -464,7 +492,7 @@ myApp <- function(homedir=getwd(), ...) {
           }
         } else {
           PALMSpy_message = paste0("Folder that is supposed to hold count files does not exist: ", 
-                                   count_file_location, "First run GGIR and BrondCounts.")
+                                   count_file_location, " First run GGIR and BrondCounts.")
         }
       }
       if (ready_to_run_palsmpy == TRUE) {
@@ -472,19 +500,34 @@ myApp <- function(homedir=getwd(), ...) {
         waiter <- waiter::Waiter$new(id = "start_palmspy", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         on.exit(removeNotification(id_palmspy), add = TRUE)
-        PALMSpy_R(gps_path = global$gps_in, acc_path = count_file_location,
-                  output_path = global$data_out, config_file = isolate(configfilePALMSpy()))
-        for (i in seq_len(10)) {
-          Sys.sleep(1)
-        }
+
+        # /home/vincent/miniconda3/bin/conda run -n palmspy
+        # /home/vincent/miniconda3/bin/conda run -n palmspy 
+        # "cd ",global$data_out," ; /home/vincent/miniconda3/bin/conda run -n palmspy 
+        basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
+                             " --acc-path ", count_file_location,
+                             " --config-file ", paste0(global$data_out, "/config.json"))
+        system(command = basecommand)
         # Now check whether results are correctly generated:
-        expected_palmspy_results_file = paste0(global$data_out,"/testpython.csv")
-        if (file.exists(expected_palmspy_results_file) == TRUE) {
-          PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), " For example, see ", expected_palmspy_results_file)
+        expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
+
+        if (dir.exists(expected_palmspy_results_dir)) {
+          PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), ". See ", expected_palmspy_results_dir,".") 
+          # Now send content of 1 output file to UI
+          expected_palmspyoutput_file = dir(expected_palmspy_results_dir, recursive = TRUE, full.names = TRUE, pattern = "csv")[1]
+          if (length(expected_palmspyoutput_file) > 0) {
+            PALMSpy_message = paste0(PALMSpy_message, " The table below shows the top of ", basename(expected_palmspyoutput_file))
+            PALMSpy_file1 = read.csv(file = expected_palmspyoutput_file, nrow=100)
+            output$PALMSpy_file1 <- DT::renderDataTable(PALMSpy_file1, options = list(scrollX = TRUE))
+          }
         } else {
-          PALMSpy_message = "PALMSpy unsuccessful"
+          PALMSpy_message = "PALMSpy unsuccessful."
+          if (!dir.exists(expected_palmspy_results_dir)) {
+            PALMSpy_message = paste0(PALMSpy_message, " Not able to find ", expected_palmspy_results_dir)
+          }
         }
       }
+      PALMSpy_message = paste0(PALMSpy_message)
       return(PALMSpy_message)
     })
     
@@ -503,14 +546,10 @@ myApp <- function(homedir=getwd(), ...) {
     })
     # If button pressed send message to UI about success ----------------
     output$ggir_end_message <- renderText({
-      message = runGGIR() #ifelse(runGGIR() == TRUE,
-                       # yes = paste0("Processing succesful ", Sys.time()),
-                       # no = paste0("Processing unsuccesful ", Sys.time()))
+      message = runGGIR()
     })
     output$palmspy_end_message <- renderText({
-      message = runPALMSpy() #ifelse(runPALMSpy() == TRUE,
-                       # yes = paste0("Processing succesful ", Sys.time()),
-                       # no = paste0("Processing unsuccesful ", Sys.time()))
+      message = runPALMSpy()
     })
   }
   # Run the application 
