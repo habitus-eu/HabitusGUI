@@ -1,10 +1,38 @@
 parameter	field	subfield	display	class	minimum	maximum	set	priority	description
-interval	gps	general	TRUE	integer	1	3600		0	Epoch duration (in seconds). This is the time resolution for which the classifications are made
-insert_max_seconds	gps	general	TRUE	double	0	100000		1	max number of seconds to replace missing fixes with last valid fix (valid if --insert-until=true)
-filter_invalid_values	gps	filter_options	TRUE	set			TRUE;FALSE	1	Explanation blabal….
-max_speed	gps	filter_options	TRUE	double	0	500		0	fix is invalid if speed is greater than this value (in km/hr)
-max_ele_change	gps	filter_options	TRUE	double	-2000	2000		0	The maximmum elevation change allowed in meter units
-minutes_zeros_row	accelerometer	not_wearing_time	TRUE	integer	0	10000		0	Number of minutes with a movement count value of zero to trigger the non-wear detection
-activity_bout_duration	accelerometer	activity_bout	TRUE	double	0	10000		0	Minimum duration of an activity bout (minutes)
-moderate_cutoff	accelerometer	activity_classification	TRUE	double	0	10000		0	Cut-point for moderate activity
-light_cutoff	accelerometer	activity_classification	TRUE	double	0	10000		0	Cut-point for light activity
+interval	gps	general	TRUE	integer	1	3600		0	please insert description
+insert_missing	gps	general	TRUE	set			TRUE;FALSE	1	please insert description
+insert_until	gps	general	TRUE	set			TRUE;FALSE	0	please insert description
+insert_max_seconds	gps	general	TRUE	double	0	100000		1	please insert description
+los_max_duration	gps	general	TRUE	double	0	100000		0	please insert description
+remove_lone_fixes	gps	filter_options	TRUE	set			TRUE;FALSE	0	please insert description
+filter_invalid_values	gps	filter_options	TRUE	set			TRUE;FALSE	1	please insert description
+max_speed	gps	filter_options	TRUE	double	0	500		0	please insert description
+max_ele_change	gps	filter_options	TRUE	integer	0	2000		0	please insert description
+min_change_3_fixes	gps	filter_options	TRUE	integer	0	2000		0	please insert description
+detect_trip	gps	trip_detection	TRUE	set			TRUE;FALSE	0	please insert description
+min_distance	gps	trip_detection	TRUE	double	0	500		0	please insert description
+min_trip_length	gps	trip_detection	TRUE	double	0	500		0	please insert description
+min_trip_duration	gps	trip_detection	TRUE	double	0	500		0	please insert description
+min_pause_duration	gps	trip_detection	TRUE	double	0	500		0	please insert description
+max_pause_duration	gps	trip_detection	TRUE	double	0	500		0	please insert description
+detect_trip_mode	gps	mode_of_transportation	TRUE	set			TRUE;FALSE	0	please insert description
+vehicle_cutoff	gps	mode_of_transportation	TRUE	double	0	500		0	please insert description
+bicycle_cutoff	gps	mode_of_transportation	TRUE	double	0	500		0	please insert description
+walk_cutoff	gps	mode_of_transportation	TRUE	double	0	500		0	please insert description
+percentile_to_sample	gps	mode_of_transportation	TRUE	double	0	500		0	please insert description
+min_segment_length	gps	mode_of_transportation	TRUE	double	0	500		0	please insert description
+mark_not_wearing_time	accelerometer	not_wearing_time	TRUE	set			TRUE;FALSE	0	please insert description
+minutes_zeros_row	accelerometer	not_wearing_time	TRUE	integer	0	2000		0	please insert description
+detect_activity_bouts	accelerometer	activity_bout	TRUE	set			TRUE;FALSE	0	please insert description
+activity_bout_duration	accelerometer	activity_bout	TRUE	integer	0	2000		0	please insert description
+activity_bout_upper_limit	accelerometer	activity_bout	TRUE	integer	0	2000		0	please insert description
+activity_bout_lower_limit	accelerometer	activity_bout	TRUE	integer	0	2000		0	please insert description
+activity_bout_tolerance	accelerometer	activity_bout	TRUE	integer	0	2000		0	please insert description
+detect_sedentary_bouts	accelerometer	sedentary_bout	TRUE	set			TRUE;FALSE	0	please insert description
+sedentary_bout_duration	accelerometer	sedentary_bout	TRUE	integer	0	2000		0	please insert description
+"sedentary_bout_upper_limit"""	accelerometer	sedentary_bout	TRUE	integer	0	2000		0	please insert description
+sedentary_bout_tolerance	accelerometer	sedentary_bout	TRUE	integer	0	2000		0	please insert description
+very_hard_cutoff	accelerometer	activity_classification	TRUE	integer	0	2000		0	please insert description
+hard_cutoff	accelerometer	activity_classification	TRUE	integer	0	2000		0	please insert description
+moderate_cutoff	accelerometer	activity_classification	TRUE	double	0	10000		0	please insert description
+light_cutoff	accelerometer	activity_classification	TRUE	double	0	10000		0	please insert description
