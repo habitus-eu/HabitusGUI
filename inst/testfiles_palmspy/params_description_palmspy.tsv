@@ -25,14 +25,14 @@ mark_not_wearing_time	accelerometer	not_wearing_time	TRUE	set			TRUE;FALSE	0	ple
 minutes_zeros_row	accelerometer	not_wearing_time	TRUE	integer	0	2000		0	please insert description
 detect_activity_bouts	accelerometer	activity_bout	TRUE	set			TRUE;FALSE	0	please insert description
 activity_bout_duration	accelerometer	activity_bout	TRUE	integer	0	2000		0	please insert description
-activity_bout_upper_limit	accelerometer	activity_bout	TRUE	integer	0	2000		0	please insert description
+activity_bout_upper_limit	accelerometer	activity_bout	TRUE	integer	0	100000		0	please insert description
 activity_bout_lower_limit	accelerometer	activity_bout	TRUE	integer	0	2000		0	please insert description
 activity_bout_tolerance	accelerometer	activity_bout	TRUE	integer	0	2000		0	please insert description
 detect_sedentary_bouts	accelerometer	sedentary_bout	TRUE	set			TRUE;FALSE	0	please insert description
 sedentary_bout_duration	accelerometer	sedentary_bout	TRUE	integer	0	2000		0	please insert description
 "sedentary_bout_upper_limit"""	accelerometer	sedentary_bout	TRUE	integer	0	2000		0	please insert description
 sedentary_bout_tolerance	accelerometer	sedentary_bout	TRUE	integer	0	2000		0	please insert description
-very_hard_cutoff	accelerometer	activity_classification	TRUE	integer	0	2000		0	please insert description
-hard_cutoff	accelerometer	activity_classification	TRUE	integer	0	2000		0	please insert description
+very_hard_cutoff	accelerometer	activity_classification	TRUE	integer	0	500000		0	please insert description
+hard_cutoff	accelerometer	activity_classification	TRUE	integer	0	100000		0	please insert description
 moderate_cutoff	accelerometer	activity_classification	TRUE	double	0	10000		0	please insert description
 light_cutoff	accelerometer	activity_classification	TRUE	double	0	10000		0	please insert description
