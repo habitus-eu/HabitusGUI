@@ -77,7 +77,7 @@ BrondCounts2csv = function(outputdir = c(), configfile = c()) {
       fname = unlist(strsplit(rdafiles[i], "eta_|[.]RD"))
       fname = fname[length(fname) - 1]
       fname_full = paste0(actigraphdir,"/",fname, ".csv")
-      way_to_save = "original" #"original" # to aid investigating whether way to save file matters
+      way_to_save = "ruben" #"original" # to aid investigating whether way to save file matters
       if (way_to_save == "original") {
         cat(paste(header, "\n", collapse = ""), file = fname_full)
         write.table(counts15sec, file = fname_full, row.names = F, 
