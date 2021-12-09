@@ -63,7 +63,7 @@ its dependencies.
 
 7. cd to the folder 'HabitusDocker' folder that you just created.
 
-8. Type `docker build -t habitus-app .`
+8. Type `docker build -t habitus-gui .`
 
 This will build a Docker image with R, HabitusGUI and all it's software dependencies.
 
@@ -88,13 +88,13 @@ This will build a Docker image with R, HabitusGUI and all it's software dependen
 
 2. cd to the folder 'HabitusDocker' folder as created earlier
 
-3. Run the image and expose it to a data volume on the host:
+3. CD to the directory where the data is located.
 
-`docker run --rm -v /home/vincent/projects/fontys:/srv/shiny-server/data -p 3838:3838 habitus-app`
+4. Run the image and expose it to a data volume on the host:
 
-Here `/home/vincent/projects/fontys` should be replaced by the local directory you would like to expose to the app.
+`docker run --rm -v $PWD/:/srv/shiny-server/data/ -p 3838:3838 habitus-gui`
 
-4. Open app in browser: `http://localhost:3838/`
+5. Open app in browser: `http://localhost:3838/`
 
 
 #### 2.2.4 Remove HabitusGUI image
@@ -103,5 +103,5 @@ If you would ever when to remove the image then do:
 
 1. Open command prompt
 
-2. `docker rmi habitus-app`
+2. `docker rmi habitus-gui`
 
