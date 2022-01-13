@@ -1,5 +1,5 @@
 ![GitHub Actions R-CMD-check](https://github.com/habitus-eu/HabitusGUI/workflows/R-CMD-check-full/badge.svg)
-[![codecov](https://codecov.io/gh/habitus-eu/HabitusGUI/branch/main/graph/badge.svg?token=GPRPJ3IXWC)](https://codecov.io/gh/habitus-eu/HabitusGUI)
+[![codecov](https://codecov.io/gh/habitus-eu/HabitusGUI/branch/main/graph/badge.svg?token=GPRPJ3IXWC)](https://app.codecov.io/gh/habitus-eu/HabitusGUI)
 
 HabitusGUI is a Shiny app designed to ease processing behavioural data with research software such as GGIR, activityCounts, PALMSpy and PALMSplus. If you want to contribute to HabitusGUI then please find our contributing guidelines [here](https://github.com/wadpac/GGIR/blob/master/CONTRIBUTING.md).
 
