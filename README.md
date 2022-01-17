@@ -63,6 +63,7 @@ its dependencies.
 
 7. cd to the folder 'HabitusDocker' folder that you just created.
 
+Note to Linux users: You may need to configure docker to work as non-root user, see https://docs.docker.com/engine/install/linux-postinstall/
 8. Type `docker build -t habitus-gui .`
 
 This will build a Docker image with R, HabitusGUI and all it's software dependencies.
