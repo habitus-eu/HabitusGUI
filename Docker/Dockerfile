@@ -76,7 +76,7 @@ RUN R -e 'install.packages(c(\
             repos="https://packagemanager.rstudio.com/cran/__linux__/focal/latest"\
           )'
 RUN R -e 'remotes::install_github("rstudio/bslib")' # development version because CRAN version has bug that affects us
-RUN R -e 'remotes::install_github("habitus-eu/HabitusGUI")'
+RUN R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "adding_real_palmspy")'
 
 # Copy code for running the app to the container
 RUN mkdir -p /code
