@@ -19,7 +19,7 @@ make clean
 # Create symoblic link to be able to access all data in work work
 sudo mkdir /data
 sudo chown -R ucloud:ucloud /data
-ln -s /work/../* /data/
+ln -s /work/* /data/
 
 # R / HabitusGUI dependencies
 sudo apt-get update && apt-get install -y \
