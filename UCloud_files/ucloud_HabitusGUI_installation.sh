@@ -10,20 +10,18 @@ conda update conda -y
 # Python / PALMSpy dependencies
 conda create -n palmspy python=3.7 openjdk=8.0 make=4.2.1 -y
 conda activate palmspy
-# Install git and clone PALMSpy repo
-sudo apt install git-all
+# Install git and git clone PALMSpy repo
+conda install -c anaconda git
 git clone git@github.com:emolinaro/PALMSpy.git
 # Build PALMSpy
 cd PALMSpy
 make
 make install
 make clean
-
-
 # Create symoblic link to be able to access all data in work work
 sudo mkdir /srv/shiny-server/data
 sudo chown -R ucloud:ucloud /srv/shiny-server/data
-ln -s /work/HabitusGUI/*  /srv/shiny-server/data/
+ln -s /work/'HABITUS test'/*/  /srv/shiny-server/data/
 
 # R / HabitusGUI dependencies
 sudo apt-get update && apt-get install -y \

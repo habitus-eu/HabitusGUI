@@ -1,2 +1,2 @@
 library("HabitusGUI")
-HabitusGUI::myApp()
+HabitusGUI::myApp("/work")
