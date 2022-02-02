@@ -93,7 +93,7 @@ This will build a Docker image with R, HabitusGUI and all it's software dependen
 
 4. Run the image and expose it to a data volume on the host:
 
-`docker run --rm -v $PWD/:/srv/shiny-server/data/ -p 3838:3838 habitus-gui`
+`docker run --rm -v $PWD/:/srv/shiny-server/data/ -u shiny -p 3838:3838 habitus-gui`
 
 5. Open app in browser: `http://localhost:3838/`
 
