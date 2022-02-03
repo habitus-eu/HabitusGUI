@@ -4,12 +4,14 @@
 \alias{modConfigServer}
 \title{modConfigServer}
 \usage{
-modConfigServer(id, tool)
+modConfigServer(id, tool, homedir = getwd())
 }
 \arguments{
 \item{id}{...}
 
 \item{tool}{...}
+
+\item{homedir}{character to specify home directory}
 }
 \value{
 No object returned, this is a shiny module

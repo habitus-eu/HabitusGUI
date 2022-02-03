@@ -92,10 +92,15 @@ myApp <- function(homedir=getwd(), ...) {
                  )
                ),
                # Upload sleep diary ----------------------------------------------------
+               # conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1",
+               #                  div(fileInput("sleepdiaryfile", label = "",
+               #                                buttonLabel = "Select sleep diary file...", width = '100%'),
+               #                      style = "font-size:80%")),
                conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1",
-                                div(fileInput("sleepdiaryfile", label = "",
-                                              buttonLabel = "Select sleep diary file...", width = '100%'),
-                                    style = "font-size:80%")),
+                                shinyFiles::shinyFilesButton("sleepdiaryfile", label = "Sleepdiary file...",
+                                                             title = "Select sleep diary file", multiple = FALSE),
+                                verbatimTextOutput("sleepdiaryfile", placeholder = TRUE)
+               ),
                hr(),
                actionButton("page_21", "prev"),
                actionButton("page_23", "next")
@@ -249,19 +254,26 @@ myApp <- function(homedir=getwd(), ...) {
       if (configs_ready == TRUE) {
         showNotification("Saving configuration file(s) to output folder", type = "message", duration = 2)
         if ("GGIR" %in% input$tools) {
-          file.copy(from = configfileGGIR(), to = paste0(global$data_out, "/config.csv"), 
-                    overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
-          if (length(as.character(sleepdiaryfile())) > 0) {
-            file.copy(from = sleepdiaryfile(), to = paste0(global$data_out, "/sleepdiary.csv"), 
-                    overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+          if (configfileGGIR() != paste0(global$data_out, "/config.csv")) {
+            file.copy(from = configfileGGIR(), to = paste0(global$data_out, "/config.csv"), 
+                      overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+          }
+          current_sleepdiaryfile = as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
+          if (length(current_sleepdiaryfile) > 0) {
+            if (current_sleepdiaryfile != paste0(global$data_out, "/sleepdiary.csv")) {
+              file.copy(from = current_sleepdiaryfile, to = paste0(global$data_out, "/sleepdiary.csv"), 
+                        overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+            }
             sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
           } else  {
             sleepdiaryfile_local = c()
           }
         }
         if ("PALMSpy" %in% input$tools) {
-          file.copy(from = configfilePALMSpy(), to = paste0(global$data_out, "/config.json"), 
-                    overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+          if (configfilePALMSpy() != paste0(global$data_out, "/config.json")) {
+            file.copy(from = configfilePALMSpy(), to = paste0(global$data_out, "/config.json"), 
+                      overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+          }
         }
         switch_page(4)
       } else {
@@ -321,13 +333,15 @@ myApp <- function(homedir=getwd(), ...) {
     shinyDirChoose(input, 'countaccdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'gpsdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'outputdir',  roots = c(home = homedir))
+    shinyFileChoose(input, 'sleepdiaryfile',  roots = c(home = homedir))
+    
     
     # Capture provided directories in reactive object ----------------------------
     rawaccdir <- reactive(input$rawaccdir)
     countaccdir <- reactive(input$countaccdir)
     gpsdir <- reactive(input$gpsdir)
     outputdir <- reactive(input$outputdir)
-    sleepdiaryfile <- reactive(input$sleepdiaryfile$datapath)
+    sleepdiaryfile <- reactive(input$sleepdiaryfile) #$datapath
     
     # Create global with directories and give it default values -------
     global <- reactiveValues(data_in = homedir, data_out = homedir) #, pipeline = NULL)
@@ -376,6 +390,17 @@ myApp <- function(homedir=getwd(), ...) {
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
                  })
     
+    observeEvent(ignoreNULL = TRUE,
+                 eventExpr = {
+                   input$sleepdiaryfile # every time input$sleepdiaryfile updates ...
+                 },
+                 handlerExpr = { # ... we re-assign global$sleepdiaryfile
+                   if (!"path" %in% names(sleepdiaryfile())) return()
+                   home <- normalizePath(homedir)
+                   global$sleepdiaryfile <-
+                     file.path(home, paste(unlist(sleepdiaryfile()$path[-1]), collapse = .Platform$file.sep))
+                 })
+    
     
     # Send directories to UI --------------------------------------------
     output$rawaccdir <- renderText({
@@ -390,10 +415,13 @@ myApp <- function(homedir=getwd(), ...) {
     output$outputdir <- renderText({
       global$data_out
     })
+    output$sleepdiaryfile <- renderText({
+      global$sleepdiaryfile
+    })
     
     # Check and Edit config files ---------------------------------------
-    configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"))
-    configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"))
+    configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir)
+    configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir)
     
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
@@ -424,7 +452,7 @@ myApp <- function(homedir=getwd(), ...) {
             do.BrondCounts = FALSE
           }
           on.exit(removeNotification(id_ggir), add = TRUE)
-
+          
           if (file.exists(paste0(global$data_out, "/sleepdiary.csv"))) { # because this is not a global variable
             sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
           } else {
@@ -500,7 +528,7 @@ myApp <- function(homedir=getwd(), ...) {
         waiter <- waiter::Waiter$new(id = "start_palmspy", html = waiter::spin_throbber())$show()
         on.exit(waiter$hide())
         on.exit(removeNotification(id_palmspy), add = TRUE)
-
+        
         # /home/vincent/miniconda3/bin/conda run -n palmspy
         # /home/vincent/miniconda3/bin/conda run -n palmspy 
         # "cd ",global$data_out," ; /home/vincent/miniconda3/bin/conda run -n palmspy 
@@ -510,7 +538,7 @@ myApp <- function(homedir=getwd(), ...) {
         system(command = basecommand)
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
-
+        
         if (dir.exists(expected_palmspy_results_dir)) {
           PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), ". See ", expected_palmspy_results_dir,".") 
           # Now send content of 1 output file to UI
