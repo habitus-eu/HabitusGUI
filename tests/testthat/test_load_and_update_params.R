@@ -3,7 +3,7 @@ context("Load and update parameters from configuration files")
 test_that("Parameters can be loaded and updated from config files", {
  
   # Load GGIR .csv file
-  ggir_config_csv  = system.file("testfiles_ggir/config.csv", package = "HabitusGUI")[1]
+  ggir_config_csv = system.file("testfiles_ggir/config.csv", package = "HabitusGUI")[1]
   params_ggir = load_params(file = ggir_config_csv, format = "csv_ggir")
   expect_equal(ncol(params_ggir), 9)
   

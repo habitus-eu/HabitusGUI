@@ -51,6 +51,8 @@ load_params = function(file=c(), format="json_palmspy") {
     params_info_ggir_file = system.file("testfiles_ggir/params_description_ggir.tsv", package = "HabitusGUI")[1]
     params_info_ggir = read.table(file = params_info_ggir_file, sep = "\t", header = TRUE)
     params_merged = merge(params_info_ggir, params, by.x = "parameter", by.y = "argument")
+    dups = duplicated(params_merged)
+    params_merged = params_merged[!dups,]
     rownames(params_merged) = params_merged$parameter
     params = params_merged[, expected_tsv_columns]
     params = params[,-which(colnames(params) == "subfield")]
