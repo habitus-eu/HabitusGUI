@@ -5,14 +5,18 @@ chmod +x Miniconda3-latest-Linux-x86_64.sh
 ./Miniconda3-latest-Linux-x86_64.sh -b
 echo eval "$(~/miniconda3/bin/conda shell.bash hook)" >> ~/.bashrc
 eval "$(~/miniconda3/bin/conda shell.bash hook)"
-# now update conda and install pip
+# now update conda
 conda update conda -y
+
 # Python / PALMSpy dependencies
-conda create -n palmspy python=3.7 openjdk=8.0 make=4.2.1 -y
+conda create -n palmspy python=3.7 openjdk=8.0 make=4.2.1 r-essentials r-base -y
 conda activate palmspy
+
 # Install git and git clone PALMSpy repo
 conda install -c anaconda git
+apt-get install ssh-client -y
 git clone git@github.com:emolinaro/PALMSpy.git
+
 # Build PALMSpy
 cd PALMSpy
 make
