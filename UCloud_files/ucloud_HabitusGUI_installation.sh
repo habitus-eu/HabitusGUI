@@ -9,13 +9,12 @@ eval "$(~/miniconda3/bin/conda shell.bash hook)"
 conda update conda -y
 
 # Python / PALMSpy dependencies
-conda create -n palmspy python=3.7 openjdk=8.0 make=4.2.1 r-essentials r-base -y
+conda create -n palmspy python=3.7 openjdk=8.0 make=4.2.1
 conda activate palmspy
 
 # Install git and git clone PALMSpy repo
 conda install -c anaconda git
-apt-get install ssh-client -y
-git clone git@github.com:emolinaro/PALMSpy.git
+git clone https://github.com/emolinaro/PALMSpy.git
 
 # Build PALMSpy
 cd PALMSpy
