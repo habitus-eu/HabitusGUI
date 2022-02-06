@@ -4,7 +4,7 @@
 #' @param tool ...
 #' @param homedir character to specify home directory
 #' @return No object returned, this is a shiny module
-#' @import dplyr
+#' @import DT
 #' @export
 
 modConfigServer = function(id, tool, homedir = getwd()) {
