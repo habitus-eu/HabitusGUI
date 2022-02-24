@@ -532,7 +532,7 @@ myApp <- function(homedir=getwd(), ...) {
         # /home/vincent/miniconda3/bin/conda run -n palmspy
         # /home/vincent/miniconda3/bin/conda run -n palmspy 
         # "cd ",global$data_out," ; /home/vincent/miniconda3/bin/conda run -n palmspy 
-        basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
+        basecommand = paste0("cd ",global$data_out," ; conda activate palmspy ; palmspy --gps-path ", global$gps_in,
                              " --acc-path ", count_file_location,
                              " --config-file ", paste0(global$data_out, "/config.json"))
         system(command = basecommand)
