@@ -8,23 +8,24 @@ eval "$(~/miniconda3/bin/conda shell.bash hook)"
 # now update conda
 conda update conda -y
 
-# Python / PALMSpy dependencies
-conda create -n palmspy python=3.7 openjdk=8.0 make=4.2.1
-conda activate palmspy
-
 # Install git and git clone PALMSpy repo
 conda install -c anaconda git
 git clone https://github.com/emolinaro/PALMSpy.git
 
 # Build PALMSpy
 cd PALMSpy
+
+# Python / PALMSpy dependencies
+conda create -n palmspy python=3.7 openjdk=8.0 make=4.2.1
+conda activate palmspy
 make
 make install
 make clean
+
 # Create symoblic link to be able to access all data in work work
 sudo mkdir /srv/shiny-server/data
 sudo chown -R ucloud:ucloud /srv/shiny-server/data
-ln -s /work/'TestDataHabitus2022'/*  /srv/shiny-server/data/
+ln -s /work/TestDataHabitus2022/*  /srv/shiny-server/data/
 
 # R / HabitusGUI dependencies
 sudo apt-get update && apt-get install -y \
