@@ -15,12 +15,17 @@ git clone https://github.com/emolinaro/PALMSpy.git
 # Build PALMSpy
 cd PALMSpy
 
+#PATH=/home/ucloud/miniconda3/bin/conda/palmspy:$PATH
+#CONDA_PREFIX="/home/ucloud/miniconda3/bin/conda/palmspy"
+
 # Python / PALMSpy dependencies
 conda create -n palmspy python=3.7 openjdk=8.0 make=4.2.1
 conda activate palmspy
 make
 make install
 make clean
+
+
 
 # Create symoblic link to be able to access all data in work work
 sudo mkdir /srv/shiny-server/data

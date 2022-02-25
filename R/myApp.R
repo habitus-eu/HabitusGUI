@@ -535,7 +535,7 @@ myApp <- function(homedir=getwd(), ...) {
         basecommand = paste0("cd ",global$data_out," ; conda activate palmspy ; palmspy --gps-path ", global$gps_in,
                              " --acc-path ", count_file_location,
                              " --config-file ", paste0(global$data_out, "/config.json"))
-        system(command = basecommand)
+        stdout = system(command = basecommand, intern = TRUE)
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
         
@@ -545,14 +545,14 @@ myApp <- function(homedir=getwd(), ...) {
           expected_palmspyoutput_file = dir(expected_palmspy_results_dir, recursive = TRUE, full.names = TRUE, pattern = "csv")[1]
           if (length(expected_palmspyoutput_file) > 0) {
             PALMSpy_message = paste0(PALMSpy_message, " The table below shows the top of ", basename(expected_palmspyoutput_file))
-            PALMSpy_file1 = read.csv(file = expected_palmspyoutput_file, nrow=100)
+            PALMSpy_file1 = read.csv(file = expected_palmspyoutput_file, nrow = 100)
             output$PALMSpy_file1 <- DT::renderDataTable(PALMSpy_file1, options = list(scrollX = TRUE))
           }
         } else {
-          PALMSpy_message = "PALMSpy unsuccessful."
-          if (!dir.exists(expected_palmspy_results_dir)) {
-            PALMSpy_message = paste0(PALMSpy_message, " Not able to find ", expected_palmspy_results_dir)
-          }
+          PALMSpy_message = paste0("PALMSpy unsuccessful: stdout ", stdout, collapse = " ")
+          # if (!dir.exists(expected_palmspy_results_dir)) {
+          #   PALMSpy_message = paste0(PALMSpy_message, " Not able to find ", expected_palmspy_results_dir)
+          # }
         }
       }
       PALMSpy_message = paste0(PALMSpy_message)
