@@ -26,7 +26,7 @@ make clean
 
 echo "conda activate palmspy" >> ~/.bashrc
 
-# Create symoblic link to be able to access all data in work work
+# Create symoblic link to be able to access all data in work 
 sudo mkdir /srv/shiny-server/data
 sudo chown -R ucloud:ucloud /srv/shiny-server/data
 ln -s /work/TestDataHabitus2022/*  /srv/shiny-server/data/
@@ -39,3 +39,14 @@ sudo apt-get update && sudo apt-get install -y \
 R -e 'install.packages(c("shinyFiles", "shiny", "GGIR", "jsonlite", "DT", "waiter", "activityCounts", "remotes"), repos = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", dependencies = TRUE)'
 R -e 'remotes::install_github("rstudio/bslib")' # development version because CRAN version has bug that affects us
 R -e 'remotes::install_github("habitus-eu/HabitusGUI")'
+
+# Assuming that app.R is in the same folder as this script
+APP_PATH=$(find /work/ -name app.R)
+FOLDER=$(dirname "$APP_PATH")
+
+# configure shiny-server
+sudo sed -i "s+myshinyapp-dir+$FOLDER+" /etc/shiny-server/shiny-server.conf
+
+## launch shiny-server
+shiny-server
+
