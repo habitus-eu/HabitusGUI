@@ -4,7 +4,6 @@
 #' @param tool ...
 #' @param homedir character to specify home directory
 #' @return No object returned, this is a shiny module
-#' @import shiny
 #' @import shinyFiles
 #' @importFrom magrittr %>%
 #' @export
