@@ -2,6 +2,7 @@
 #'
 #' @param id ...
 #' @return No object returned, this is a shiny module
+#' @import shiny
 #' @export
 
 
@@ -16,8 +17,8 @@ modConfigUI <- function(id) {
            #           buttonLabel = "File ..."),
            shinyFiles::shinyFilesButton(NS(id, "configfile"), label = "Configuration file...",
                                         title = "", multiple = FALSE, fileType = c(".json", ".csv")),
-           downloadButton(NS(id, "download"), "Download template", class = "info-xs"),
-           actionButton(NS(id, "reset"), "Reset"),
+           shiny::downloadButton(NS(id, "download"), "Download template", class = "info-xs"),
+           shiny::actionButton(NS(id, "reset"), "Reset"),
            tags$hr(),
     ),
     column(9,

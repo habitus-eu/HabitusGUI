@@ -4,7 +4,9 @@
 #' @param tool ...
 #' @param homedir character to specify home directory
 #' @return No object returned, this is a shiny module
-#' @import DT
+#' @import shiny
+#' @import shinyFiles
+#' @importFrom magrittr %>%
 #' @export
 
 modConfigServer = function(id, tool, homedir = getwd()) {
@@ -109,14 +111,14 @@ modConfigServer = function(id, tool, homedir = getwd()) {
             HTML(params_errors$green_message)
           })
         })
-        
+        # Prepare data to be visualised:
+        rows2show = which(v$params$display == TRUE)
+        v$params = v$params[order(v$params$priority, decreasing = TRUE),]
+        cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set", "display") == FALSE)
+        data2vis = reactive(v$params[rows2show, cols2show])
         # Render table for use in UI
         output$mod_table <- DT::renderDataTable({
-          rows2show = which(v$params$display == TRUE)
-          v$params = v$params[order(v$params$priority, decreasing = TRUE),]
-          cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set", "display") == FALSE)
-          data2vis = reactive(v$params[rows2show, cols2show])
-          DT::datatable(data2vis(), editable = TRUE,
+            DT::datatable(data2vis(), editable = TRUE,
                         options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
                                        pageLength = 5
                                        # , columnDefs = list(list(targets = 'priority', visible = FALSE))

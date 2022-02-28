@@ -5,8 +5,6 @@
 #' @return no object is returned, just an app
 #' @import shiny
 #' @import shinyFiles
-#' @import bslib
-#' @import waiter
 #' @export
 
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") HabitusGUI::myApp(homedir="~/projects")
