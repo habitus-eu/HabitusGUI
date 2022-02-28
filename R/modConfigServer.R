@@ -34,12 +34,16 @@ modConfigServer = function(id, tool, homedir = getwd()) {
     shinyFileChoose(input, "configfile",  roots = c(home = homedir))
     configfile <- reactive(input$configfile)
 
-    
-    
     observeEvent(input$configfile, {
       # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
-      current_config = as.character(parseFilePaths(c(home = homedir),configfile())$datapath)
+      cat("\nparseFilepaths:\n")
+      print(parseFilePaths(c(home = homedir), configfile()))
+      current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
       if (length(current_config) > 0) {
+        cat("\ncurrentconfig:\n")
+        cat(current_config)
+        cat("\nfile exists?:\n")
+        cat(file.exists(current_config))
         if (tool() == "PALMSpy") {
           params = load_params(file = current_config, format = "json_palmspy") #$datapath
         } else if (tool() == "GGIR") {
