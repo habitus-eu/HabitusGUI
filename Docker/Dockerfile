@@ -80,7 +80,7 @@ RUN R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "adding_real_pa
 
 # Copy code for running the app to the container
 RUN mkdir -p /code
-COPY /code/app.R /srv/shiny-server/
+COPY /code/appD.R /srv/shiny-server/
 
 # Change working directory to equal the location of the mounted volume
 WORKDIR /srv/shiny-server/data
