@@ -115,7 +115,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
           rows2show = which(v$params$display == TRUE)
           v$params = v$params[order(v$params$priority, decreasing = TRUE),]
           cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set", "display") == FALSE)
-          DT::datatable(v$params[rows2show, cols2show], editable = TRUE,
+          data2vis = reactive(v$params[rows2show, cols2show])
+          DT::datatable(data2vis(), editable = TRUE,
                         options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
                                        pageLength = 5
                                        # , columnDefs = list(list(targets = 'priority', visible = FALSE))
