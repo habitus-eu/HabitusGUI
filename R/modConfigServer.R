@@ -36,21 +36,13 @@ modConfigServer = function(id, tool, homedir = getwd()) {
     
     observeEvent(input$configfile, {
       # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
-      cat("\nparseFilepaths:\n")
-      print(parseFilePaths(c(home = homedir), configfile()))
       current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
       if (length(current_config) > 0) {
-        cat("\ncurrentconfig:\n")
-        cat(current_config)
-        cat("\nfile exists?:\n")
-        cat(file.exists(current_config))
         if (tool() == "PALMSpy") {
           params = load_params(file = current_config, format = "json_palmspy") #$datapath
         } else if (tool() == "GGIR") {
           params = load_params(file = current_config, format = "csv_ggir") #$datapath
         }
-        
-        
         params_errors = check_params(params, tool = tool())
         output$config_issues <- renderUI({
           HTML(params_errors$error_message)
@@ -58,7 +50,7 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         output$config_green <- renderUI({
           HTML(params_errors$green_message)
         })
-        v <- reactiveValues(params=params)
+        v <- reactiveValues(params = params)
         proxy = DT::dataTableProxy("mod_table", session)
         observeEvent(input$mod_table_cell_edit, {
           info = input$mod_table_cell_edit
@@ -95,12 +87,11 @@ modConfigServer = function(id, tool, homedir = getwd()) {
             }
           }
         })
-        
         ### Reset Table
         observeEvent(input$reset, {
           showNotification("Resetting values", type = "message")
           v$params <- params # your default data
-          current_config = as.character(parseFilePaths(c(home = homedir),configfile())$datapath)
+          current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
           # also saving to file
           if (tool() == "PALMSpy") { 
             update_params(new_params = v$params, file = current_config, format = "json_palmspy") #$datapath
@@ -123,16 +114,15 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         data2vis = reactive(v$params[rows2show, cols2show])
         # Render table for use in UI
         output$mod_table <- DT::renderDT({
-            DT::datatable(data2vis())
-          # , editable = TRUE,
-          #               options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
-          #                              pageLength = 5
-          #                              # , columnDefs = list(list(targets = 'priority', visible = FALSE))
-          #               )) %>% DT::formatStyle(
-          #                 'value', 'priority',
-          #                 backgroundColor = DT::styleEqual(c("0", "1"), c('gray91', 'lightyellow'))
-          #               )
-          # # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
+            DT::datatable(data2vis(), editable = TRUE,
+                        options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
+                                       pageLength = 5
+                                       # , columnDefs = list(list(targets = 'priority', visible = FALSE))
+                        )) %>% DT::formatStyle(
+                          'value', 'priority',
+                          backgroundColor = DT::styleEqual(c("0", "1"), c('gray91', 'lightyellow'))
+                        )
+          # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
         })
         output$config_instruction <- renderText({
           "Review the parameter values, especially the ones in yellow, and edit where needed by double clicking:"
