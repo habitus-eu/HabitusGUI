@@ -39,15 +39,6 @@ modConfigServer = function(id, tool, homedir = getwd()) {
       cat("\nparseFilepaths:\n")
       print(parseFilePaths(c(home = homedir), configfile()))
       current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
-      
-      # start code added for debugging:
-      output$configfile_check <- renderText(
-        paste0("TESTING PATH (this message will not be in final app): ", current_config, " ",
-               as.character(file.exists(current_config)), " ",
-               paste0(dir("../../."),collapse = "|"))
-      )
-      # end of added code for debugging
-      
       if (length(current_config) > 0) {
         cat("\ncurrentconfig:\n")
         cat(current_config)
@@ -58,6 +49,14 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         } else if (tool() == "GGIR") {
           params = load_params(file = current_config, format = "csv_ggir") #$datapath
         }
+        
+        # start code added for debugging:
+        output$configfile_check <- renderText(
+          paste0("TESTING PATH (this message will not be in final app): ", current_config, " ",
+                 as.character(file.exists(current_config)), " ",
+                 params)
+        )
+        # end of added code for debugging
         params_errors = check_params(params, tool = tool())
         output$config_issues <- renderUI({
           HTML(params_errors$error_message)
