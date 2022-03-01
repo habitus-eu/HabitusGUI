@@ -39,3 +39,7 @@ vignettes/*.pdf
 .Renviron
 
 *.Rproj
+
+# template files
+inst/testfiles_palmspy/palmspy-params.json
+inst/testfiles_ggir/config.csv
