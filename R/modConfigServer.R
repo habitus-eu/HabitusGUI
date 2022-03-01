@@ -50,13 +50,7 @@ modConfigServer = function(id, tool, homedir = getwd()) {
           params = load_params(file = current_config, format = "csv_ggir") #$datapath
         }
         
-        # start code added for debugging:
-        output$configfile_check <- renderText(
-          paste0("TESTING PATH (this message will not be in final app): ", current_config, " ",
-                 as.character(file.exists(current_config)), " ",
-                 params)
-        )
-        # end of added code for debugging
+        
         params_errors = check_params(params, tool = tool())
         output$config_issues <- renderUI({
           HTML(params_errors$error_message)
@@ -65,7 +59,7 @@ modConfigServer = function(id, tool, homedir = getwd()) {
           HTML(params_errors$green_message)
         })
         v <- reactiveValues(params=params)
-        proxy = DT::dataTableProxy("mod_table")
+        proxy = DT::dataTableProxy("mod_table", session)
         observeEvent(input$mod_table_cell_edit, {
           info = input$mod_table_cell_edit
           i = info$row
@@ -128,6 +122,12 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set", "display") == FALSE)
         data2vis = reactive(v$params[rows2show, cols2show])
         # Render table for use in UI
+        # start code added for debugging:
+        output$configfile_check <- renderText(
+          paste0("TESTING PATH (this message will not be in final app): dimensions of data to be displayed ",
+                 paste0(dim(isolate(data2vis())), collapse = ","))
+        )
+        # end of added code for debugging
         output$mod_table <- DT::renderDataTable({
             DT::datatable(data2vis(), editable = TRUE,
                         options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
