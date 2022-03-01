@@ -33,12 +33,21 @@ modConfigServer = function(id, tool, homedir = getwd()) {
     
     shinyFileChoose(input, "configfile",  roots = c(home = homedir))
     configfile <- reactive(input$configfile)
-
+    
     observeEvent(input$configfile, {
       # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
       cat("\nparseFilepaths:\n")
       print(parseFilePaths(c(home = homedir), configfile()))
       current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
+      
+      # start code added for debugging:
+      output$configfile_check <- renderText(
+        paste0("TESTING PATH (this message will not be in final app): ", current_config, " ",
+               as.character(file.exists(current_config)), " ",
+               paste0(dir("../../."),collapse = "|"))
+      )
+      # end of added code for debugging
+      
       if (length(current_config) > 0) {
         cat("\ncurrentconfig:\n")
         cat(current_config)
