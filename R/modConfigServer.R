@@ -113,19 +113,19 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set", "display") == FALSE)
         data2vis = reactive(v$params[rows2show, cols2show])
         
-        # start code added for debugging:
-        output$configfile_check <- renderText(
-          paste0("TESTING PATH (this message will not be in final app): ", current_config, " ",
-                 as.character(file.exists(current_config)), " ",
-                 paste0(isolate(data2vis())[,1:2], collapse = " $ "))
-        )
+        # # start code added for debugging:
+        # output$configfile_check <- renderText(
+        #   paste0("TESTING PATH (this message will not be in final app): ", current_config, " ",
+        #          as.character(file.exists(current_config)), " ",
+        #          paste0(isolate(data2vis())[,1:2], collapse = " $ "))
+        # )
         # end of added code for debugging
-        data2vis_dummmy = data.frame(value = c("Europe/Amsterdam"), field = c("desiredtz"), description = "test", priority = 0)
+        # data2vis_dummmy = data.frame(value = c("Europe/Amsterdam"), field = c("desiredtz"), description = "test", priority = 0)
         
         # Render table for use in UI
-        # data2vis()
+        # 
         output$mod_table <- DT::renderDT({
-            DT::datatable(data2vis_dummmy, editable = TRUE,
+            DT::datatable(data2vis(), editable = TRUE,
                         options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
                                        pageLength = 5
                                        # , columnDefs = list(list(targets = 'priority', visible = FALSE))
