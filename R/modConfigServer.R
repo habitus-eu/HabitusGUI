@@ -122,23 +122,29 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set", "display") == FALSE)
         data2vis = reactive(v$params[rows2show, cols2show])
         # Render table for use in UI
-        # start code added for debugging:
-        output$configfile_check <- renderText(
-          paste0("TESTING PATH (this message will not be in final app): dimensions of data to be displayed ",
-                 paste0(dim(isolate(data2vis())), collapse = ","))
-        )
-        # end of added code for debugging
+        # # start code added for debugging:
+        # output$configfile_check <- renderText(
+        #   paste0("TESTING PATH (this message will not be in final app): dimensions of data to be displayed ",
+        #          paste0(dim(isolate(data2vis())), collapse = ","))
+        # )
+        # # end of added code for debugging
+        
+        
         output$mod_table <- DT::renderDataTable({
-            DT::datatable(data2vis(), editable = TRUE,
-                        options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
-                                       pageLength = 5
-                                       # , columnDefs = list(list(targets = 'priority', visible = FALSE))
-                        )) %>% DT::formatStyle(
-                          'value', 'priority',
-                          backgroundColor = DT::styleEqual(c("0", "1"), c('gray91', 'lightyellow'))
-                        )
-          # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
+          DT::datatable(data2vis())
         })
+        
+        # output$mod_table <- DT::renderDataTable({
+        #     DT::datatable(data2vis(), editable = TRUE,
+        #                 options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
+        #                                pageLength = 5
+        #                                # , columnDefs = list(list(targets = 'priority', visible = FALSE))
+        #                 )) %>% DT::formatStyle(
+        #                   'value', 'priority',
+        #                   backgroundColor = DT::styleEqual(c("0", "1"), c('gray91', 'lightyellow'))
+        #                 )
+        #   # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
+        # })
         output$config_instruction <- renderText({
           "Review the parameter values, especially the ones in yellow, and edit where needed by double clicking:"
         })
