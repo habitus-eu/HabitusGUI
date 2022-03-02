@@ -34,6 +34,20 @@ modConfigServer = function(id, tool, homedir = getwd()) {
     shinyFileChoose(input, "configfile",  roots = c(home = homedir))
     configfile <- reactive(input$configfile)
     
+    # dummy tables to investigate UCloud-local machine inconsistency
+    output$test_dt_table1 <- DT::renderDT({
+      data.frame(a = 1:3, b = rep("DT renderDT", 3), c = 3:1)
+    })
+    output$test_dt_table2 <- DT::renderDataTable({
+      data.frame(a = 91:93, b = rep("DT renderDataTable", 3), c = 93:91)
+    })
+    output$test_dt_table3 <- DT::renderDT({
+      DT::datatable(data.frame(a = 1:50, b = rep("DT randerDT datatable", 50), c = 50:1), editable = TRUE,
+      options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
+                     pageLength = 5))
+    })
+    output$test_shinytable1 <- renderDataTable(data.frame(a = 1:3, b = rep("shinytable", 3), c = 3:1))
+    
     observeEvent(input$configfile, {
       # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
       current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
