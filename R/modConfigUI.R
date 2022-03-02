@@ -3,7 +3,6 @@
 #' @param id ...
 #' @return No object returned, this is a shiny module
 #' @import shiny
-#' @import DT
 #' @export
 
 
@@ -25,7 +24,8 @@ modConfigUI <- function(id) {
     column(9,
            span(h4(textOutput(NS(id, "config_instruction"))), style="color:purple"),
            DT::DTOutput(NS(id, "mod_table")),
-           # shiny::dataTableOutput(NS(id, 'test_shinytable1')),
+           # This line has no function locally, but seems critical for the app to work on UCloud:
+           shiny::dataTableOutput(NS(id, 'test_shinytable1')),
            span(htmlOutput(NS(id, "configfile_check")), style="color:blue"),
            span(htmlOutput(NS(id, "config_issues")), style="color:red"),
            span(htmlOutput(NS(id, "config_green")), style="color:green"),
