@@ -27,7 +27,7 @@ modConfigUI <- function(id) {
            # DT::DTOutput(NS(id, "test_dt_table1")),
            # DT::DTOutput(NS(id, "test_dt_table2")),
            # DT::DTOutput(NS(id, "test_dt_table3")),
-           shiny::dataTableOutput(NS(id, 'test_shinytable1')),
+           # shiny::dataTableOutput(NS(id, 'test_shinytable1')),
            span(htmlOutput(NS(id, "configfile_check")), style="color:blue"),
            span(htmlOutput(NS(id, "config_issues")), style="color:red"),
            span(htmlOutput(NS(id, "config_green")), style="color:green"),
