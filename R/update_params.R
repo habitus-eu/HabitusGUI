@@ -34,7 +34,7 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
     } else {
       warning(paste0("\nparameters section not found in ", file))
     }
-    exportJson <- toJSON(config)
+    exportJson <- toJSON(x = config, auto_unbox = TRUE)
     write(exportJson, file = file)
   } else if (format == "csv_ggir") {
     params = read.csv(file = file)
