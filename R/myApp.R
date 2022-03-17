@@ -527,13 +527,13 @@ myApp <- function(homedir=getwd(), ...) {
         on.exit(waiter$hide())
         on.exit(removeNotification(id_palmspy), add = TRUE)
         
-        # /home/vincent/miniconda3/bin/conda run -n palmspy
-        # /home/vincent/miniconda3/bin/conda run -n palmspy 
-        # "cd ",global$data_out," ; /home/vincent/miniconda3/bin/conda run -n palmspy 
         basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
                              " --acc-path ", count_file_location,
                              " --config-file ", paste0(global$data_out, "/config.json"))
-        stdout = system(command = basecommand, intern = TRUE)
+        # stdout = system(command = basecommand, intern = TRUE) # old command
+        system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
+                stdout = "stdout_palmspy.log", stderr = "stderr_palmspy.log", wait = TRUE)
+        
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
         
@@ -547,7 +547,7 @@ myApp <- function(homedir=getwd(), ...) {
             output$PALMSpy_file1 <- DT::renderDataTable(PALMSpy_file1, options = list(scrollX = TRUE))
           }
         } else {
-          PALMSpy_message = paste0("PALMSpy unsuccessful: stdout ", stdout, collapse = " ")
+          PALMSpy_message = "PALMSpy unsuccessful: see stdout_palmspy.log and stderr_palmspy.log in your output folder"
           # if (!dir.exists(expected_palmspy_results_dir)) {
           #   PALMSpy_message = paste0(PALMSpy_message, " Not able to find ", expected_palmspy_results_dir)
           # }
