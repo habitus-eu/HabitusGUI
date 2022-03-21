@@ -146,12 +146,21 @@ myApp <- function(homedir=getwd(), ...) {
                                 conditionalPanel(condition = "input.tools.indexOf(`BrondCounts`) == -1", 
                                                  h3("GGIR:")
                                 ),
-                                waiter::use_waiter(),
+                                # waiter::use_waiter(),
+                                shinyjs::useShinyjs(),
                                 actionButton("start_ggir", "Start analysis", width = '300px'),
                                 p("\n"),
                                 textOutput("ggir_end_message"),
                                 p(""),
                                 DT::dataTableOutput("GGIRpart2"),
+                                p("\n"),
+                                verbatimTextOutput("GGIRlog"),
+                                tags$head(tags$style(HTML("#GGIRlog {
+                                                                font-size: 10px;
+                                                                max-height: 100px
+                                                              }
+                                                          "))),
+                                
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
@@ -421,6 +430,38 @@ myApp <- function(homedir=getwd(), ...) {
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir)
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir)
     
+    # Check for existence of GGIR log file
+    # observeEvent(input$start_ggir, 
+    #              timerGGIR <- reactiveLater(500)
+    # )
+    GGIRlog <- reactive({
+      print("A")
+      # timerGGIR()
+      on.exit(invalidateLater(500))
+      GGIRlogfile = paste0(isolate(global$data_out), "/GGIR.log")
+      print("B")
+      print(GGIRlogfile)
+      GGIRlog = NULL
+      print(file.exists(GGIRlogfile))
+      if (!file.exists(GGIRlogfile)) {
+        logtext = "Analysis started: waiting for log file to be created\n...\n...\n...\n...\n...\n"
+      } else {
+        print("C")
+        print(file.exists(GGIRlogfile))
+        print(Sys.time())
+        logtext = utils::tail(read.csv(GGIRlogfile), n = 1000)
+        logtext = gsub(replacement = "", pattern = "\"", as.character(logtext))
+        logtext = gsub(replacement = "\n", pattern = ",", logtext)
+        logtext = substring(logtext, 3, nchar(logtext) - 1)
+      }
+      GGIRlog = paste(logtext, collapse = "\n")
+      
+      
+      
+      return(GGIRlog)
+    })
+    output$GGIRlog = renderText(GGIRlog())
+    
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
       GGIRBrondCounts_message = ""
@@ -440,8 +481,9 @@ myApp <- function(homedir=getwd(), ...) {
         }
         # Only run function when checks are met:
         if (ready_to_run_ggirbrondcounts == TRUE) {
-          waiter <- waiter::Waiter$new(id = "start_ggir", html = waiter::spin_throbber())$show()
-          on.exit(waiter$hide())
+          shinyjs::hide(id = "start_ggir")
+          # waiter <- waiter::Waiter$new(id = "start_ggir", html = waiter::spin_throbber())$show()
+          # on.exit(waiter$hide())
           if ("BrondCounts" %in% input$tools) {
             id_ggir = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
             do.BrondCounts = TRUE
@@ -456,9 +498,18 @@ myApp <- function(homedir=getwd(), ...) {
           } else {
             sleepdiaryfile_local = c()
           }
+         
+          
+          # sent all GGIR console output to a GGIR.log file
+          GGIRlogfile = paste0(isolate(global$data_out), "/GGIR.log")
+          con <- file(GGIRlogfile)
+          sink(con, append=TRUE)
+          sink(con, append=TRUE, type="message")
           GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
                     sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
                     do.BrondCounts = do.BrondCounts)
+          sink() 
+          sink(type="message")
           # Now check whether results are correctly generated:
           
           expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
