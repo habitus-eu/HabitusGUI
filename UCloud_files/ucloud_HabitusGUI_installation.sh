@@ -36,7 +36,7 @@ sudo apt-get update && sudo apt-get install -y \
     libcurl4-gnutls-dev \
     libssl-dev
 
-R -e 'install.packages(c("shinyFiles", "shiny", "GGIR", "jsonlite", "DT", "waiter", "activityCounts", "remotes"), repos = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", dependencies = TRUE)'
+R -e 'install.packages(c("shinyFiles", "shiny", "GGIR", "jsonlite", "DT", "waiter", "activityCounts", "remotes", "shinyjs"), repos = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", dependencies = TRUE)'
 R -e 'remotes::install_github("rstudio/bslib")' # development version because CRAN version has bug that affects us
 R -e 'remotes::install_github("habitus-eu/HabitusGUI")'
 
