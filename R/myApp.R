@@ -154,12 +154,14 @@ myApp <- function(homedir=getwd(), ...) {
                                 p(""),
                                 DT::dataTableOutput("GGIRpart2"),
                                 p("\n"),
-                                verbatimTextOutput("GGIRlog"),
-                                tags$head(tags$style(HTML("#GGIRlog {
-                                                                font-size: 10px;
-                                                                max-height: 100px
-                                                              }
-                                                          "))),
+                                # htmlOutput("GGIRlog"),
+                                # p("\n"),
+                                # verbatimTextOutput("GGIRlog"),
+                                # tags$head(tags$style(HTML("#GGIRlog {
+                                #                                 font-size: 10px;
+                                #                                 max-height: 100px
+                                #                               }
+                                #                           "))),
                                 
                                 hr()
                ),
@@ -434,33 +436,32 @@ myApp <- function(homedir=getwd(), ...) {
     # observeEvent(input$start_ggir, 
     #              timerGGIR <- reactiveLater(500)
     # )
-    GGIRlog <- reactive({
-      print("A")
-      # timerGGIR()
-      on.exit(invalidateLater(500))
-      GGIRlogfile = paste0(isolate(global$data_out), "/GGIR.log")
-      print("B")
-      print(GGIRlogfile)
-      GGIRlog = NULL
-      print(file.exists(GGIRlogfile))
-      if (!file.exists(GGIRlogfile)) {
-        logtext = "Analysis started: waiting for log file to be created\n...\n...\n...\n...\n...\n"
-      } else {
-        print("C")
-        print(file.exists(GGIRlogfile))
-        print(Sys.time())
-        logtext = utils::tail(read.csv(GGIRlogfile), n = 1000)
-        logtext = gsub(replacement = "", pattern = "\"", as.character(logtext))
-        logtext = gsub(replacement = "\n", pattern = ",", logtext)
-        logtext = substring(logtext, 3, nchar(logtext) - 1)
-      }
-      GGIRlog = paste(logtext, collapse = "\n")
-      
-      
-      
-      return(GGIRlog)
-    })
-    output$GGIRlog = renderText(GGIRlog())
+    # GGIRlog <- reactive({
+    #   print("A")
+    #   # timerGGIR()
+    #   on.exit(invalidateLater(500))
+    #   GGIRlogfile = paste0(isolate(global$data_out), "/GGIR.log")
+    #   print("B")
+    #   print(GGIRlogfile)
+    #   GGIRlog = NULL
+    #   print(file.exists(GGIRlogfile))
+    #   if (!file.exists(GGIRlogfile)) {
+    #     logtext = "Analysis started: waiting for log file to be created\n...\n...\n...\n...\n...\n"
+    #   } else {
+    #     print("C")
+    #     print(file.exists(GGIRlogfile))
+    #     print(Sys.time())
+    #     logtext = utils::tail(read.csv(GGIRlogfile), n = 1000)
+    #     logtext = gsub(replacement = "", pattern = "\"", as.character(logtext))
+    #     logtext = gsub(replacement = "\n", pattern = ",", logtext)
+    #     logtext = substring(logtext, 3, nchar(logtext) - 1)
+    #   }
+    #   GGIRlog = paste(logtext, collapse = "\n")
+    #   return(GGIRlog)
+    # })
+    # output$GGIRlog = renderText(GGIRlog())
+    
+    
     
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
@@ -498,20 +499,21 @@ myApp <- function(homedir=getwd(), ...) {
           } else {
             sleepdiaryfile_local = c()
           }
-         
           
           # sent all GGIR console output to a GGIR.log file
-          GGIRlogfile = paste0(isolate(global$data_out), "/GGIR.log")
-          con <- file(GGIRlogfile)
-          sink(con, append=TRUE)
-          sink(con, append=TRUE, type="message")
+          logfile_tmp <- tempfile(fileext = ".log")
+          con <- file(logfile_tmp)
+          sink(con, append = TRUE)
+          sink(con, append = TRUE, type = "message")
           GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
                     sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
                     do.BrondCounts = do.BrondCounts)
-          sink() 
-          sink(type="message")
-          # Now check whether results are correctly generated:
+          sink()
+          sink(type = "message")
+          # move file to user when connection is closed
+          file.rename(from = logfile_tmp, to = paste0(isolate(global$data_out), "/GGIR.log"))
           
+          # Now check whether results are correctly generated:
           expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
           expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
           if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
