@@ -461,6 +461,10 @@ myApp <- function(homedir=getwd(), ...) {
     # })
     # output$GGIRlog = renderText(GGIRlog())
     
+    logfile_tmp <- tempfile(fileext = ".log")
+    logfile = paste0(isolate(global$data_out), "/GGIR.log")
+    # move file to user when connection is closed
+    
     
     
     # Apply GGIR after button is pressed ---------------------------------
@@ -499,19 +503,42 @@ myApp <- function(homedir=getwd(), ...) {
           } else {
             sleepdiaryfile_local = c()
           }
-          
+          # # Start observer to copy files
+          # observe({
+          #   invalidateLater(3000, session)
+          #   if (file.exists(logfile_tmp)) {
+          #     ftsize = file.info(logfile_tmp)$size
+          #     docopy = TRUE
+          #     if (file.exists(logfile)) {
+          #       fsize = file.info(logfile)$size
+          #       print("-------------")
+          #       print("compare sizes")
+          #       print(fsize)
+          #       print(ftsize)
+          #       if (round(fsize/100) == round(ftsize/100)) {
+          #         print("equal")
+          #         docopy = FALSE
+          #       }
+          #     }
+          #     if (docopy == TRUE) {
+          #       print("copying file...")
+          #       print(logfile)
+          #       print(file.exists(logfile))
+          #       file.copy(from = logfile_tmp, to = logfile)
+          #     }
+          #   }
+          # })
           # sent all GGIR console output to a GGIR.log file
-          logfile_tmp <- tempfile(fileext = ".log")
           con <- file(logfile_tmp)
           sink(con, append = TRUE)
           sink(con, append = TRUE, type = "message")
+          # Start GGIR
           GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
                     sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
                     do.BrondCounts = do.BrondCounts)
           sink()
           sink(type = "message")
-          # move file to user when connection is closed
-          file.rename(from = logfile_tmp, to = paste0(isolate(global$data_out), "/GGIR.log"))
+          file.copy(from = logfile_tmp, to = logfile)
           
           # Now check whether results are correctly generated:
           expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
