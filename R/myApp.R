@@ -29,27 +29,35 @@ myApp <- function(homedir=getwd(), ...) {
                checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
                                   choiceNames = list("Raw acceleration (at least ten values per second per axis)", 
                                                      "Counts (in ActiGraph .csv format)",
-                                                     "GPS (in .csv format)", "GIS", "Sleep Diary (in GGIR compatible .csv format)"),
-                                  choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "SleepDiary"), width = '100%'),
+                                                     "GPS (in .csv format)", 
+                                                     "GIS", 
+                                                     "PALMSpy_output (output from previous run)",
+                                                     "Sleep Diary (in GGIR compatible .csv format)"),
+                                  choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out", "SleepDiary"), width = '100%'),
                
                # If there is AccRaw or ACount data then show second text box that asks user about research goals
-               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
-                                                   "(input.availabledata.indexOf(`ACount`) > -1 &&",
-                                                   "input.availabledata.indexOf(`GPS`) > -1)"),
+               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ", # GGIR
+                                                   "(input.availabledata.indexOf(`ACount`) > -1 &&", # PALMSpy
+                                                   "input.availabledata.indexOf(`GPS`) > -1) || ", 
+                                                   "(input.availabledata.indexOf(`PALMSpy_out`) > -1 &&", #PALMSplus
+                                                   "input.availabledata.indexOf(`GIS`) > -1)"),
                                 hr(),
                                 checkboxGroupInput("researchgoals", label = "", 
                                                    choiceNames = "", choiceValues = "", width = '100%')
                ), 
                # Show possible pipelines:
                textOutput("pipeline"),
-               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",
-                                                   "(input.availabledata.indexOf(`ACount`) > -1 &&",
-                                                   "input.availabledata.indexOf(`GPS`) > -1)"),
+               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",  # GGIR
+                                                   "(input.availabledata.indexOf(`ACount`) > -1 &&", # PALMSpy
+                                                   "input.availabledata.indexOf(`GPS`) > -1)",
+                                                   "(input.availabledata.indexOf(`PALMSpy_out`) > -1 &&", #PALMSplus
+                                                   "input.availabledata.indexOf(`GIS`) > -1)"),
                                 hr(),
                                 checkboxGroupInput("tools", label = "Select the tools you would like to use:",
                                                    choiceNames = list("GGIR (R package)",
                                                                       "BrondCounts (R packages activityCounts + GGIR)",
-                                                                      "PALMSpy (Python library)", "PALMSplus (R package)"),
+                                                                      "PALMSpy (Python library)",
+                                                                      "PALMSplus (R package)"),
                                                    choiceValues = list("GGIR", "BrondCounts", "PALMSpy", "PALMSplus"), width = '100%'),
                ),
                actionButton("page_12", "next")
@@ -60,7 +68,7 @@ myApp <- function(homedir=getwd(), ...) {
                ),
                p("\n"),
                # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
-               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  && ",
+               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1 && ",
                                                    "(input.tools.includes(`GGIR`) || ",
                                                    "input.tools.includes(`BrondCounts`))"),
                                 shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
@@ -76,10 +84,32 @@ myApp <- function(homedir=getwd(), ...) {
                                 verbatimTextOutput("countaccdir", placeholder = TRUE)
                ),
                # Select input folder gps data -----------------------------------
-               conditionalPanel(condition = "input.availabledata.indexOf(`GPS`) > -1 && input.tools.includes('PALMSpy')",
+               conditionalPanel(condition = "input.availabledata.indexOf(`GPS`) > -1 && input.tools.includes(`PALMSpy`)",
                                 shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
                                                            title = "Select GPS data directory"),
                                 verbatimTextOutput("gpsdir", placeholder = TRUE)
+               ),
+               # # Select input folder GIS data -----------------------------------
+               # conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`PALMSplus`)",
+               #                  shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
+               #                                             title = "Select GIS data directory"),
+               #                  verbatimTextOutput("gisdir", placeholder = TRUE)
+               # ),
+               # # Select input folder PALMSpy output data -----------------------------------
+               # conditionalPanel(condition = "input.availabledata.indexOf(`PALMSpy_out`) > -1 && input.tools.includes(`PALMSplus`)",
+               #                  shinyFiles::shinyDirButton("palmspyoutdir", label = "PALMSpy output data directory...",
+               #                                             title = "Select PALMSpy output data directory"),
+               #                  verbatimTextOutput("palmspyoutdir", placeholder = TRUE)
+               # ),
+               # Upload sleep diary ----------------------------------------------------
+               # conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1",
+               #                  div(fileInput("sleepdiaryfile", label = "",
+               #                                buttonLabel = "Select sleep diary file...", width = '100%'),
+               #                      style = "font-size:80%")),
+               conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1 && input.tools.includes(`GGIR`)",
+                                shinyFiles::shinyFilesButton("sleepdiaryfile", label = "Sleepdiary file...",
+                                                             title = "Select sleep diary file", multiple = FALSE),
+                                verbatimTextOutput("sleepdiaryfile", placeholder = TRUE)
                ),
                # Specify output directory ----------------------------------------------
                fluidRow(
@@ -88,16 +118,6 @@ myApp <- function(homedir=getwd(), ...) {
                                                    title = "Select directory where output should be stored"),
                         verbatimTextOutput("outputdir", placeholder = TRUE)
                  )
-               ),
-               # Upload sleep diary ----------------------------------------------------
-               # conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1",
-               #                  div(fileInput("sleepdiaryfile", label = "",
-               #                                buttonLabel = "Select sleep diary file...", width = '100%'),
-               #                      style = "font-size:80%")),
-               conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1",
-                                shinyFiles::shinyFilesButton("sleepdiaryfile", label = "Sleepdiary file...",
-                                                             title = "Select sleep diary file", multiple = FALSE),
-                                verbatimTextOutput("sleepdiaryfile", placeholder = TRUE)
                ),
                hr(),
                actionButton("page_21", "prev"),
@@ -199,13 +219,22 @@ myApp <- function(homedir=getwd(), ...) {
             if ("PALMSpy" %in% input$tools == TRUE & "GPS" %in% input$availabledata == FALSE) {
               showNotification("PALMSpy not possible without access to GPS data", type = "error")
             } else {
-              if ("PALMSplus" %in% input$tools == TRUE & "GIS" %in% input$availabledata == FALSE) {
-                showNotification("PALMSplus not possible without access to GIS data", type = "error")
+              if ("PALMSpy" %in% input$tools == TRUE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE)) {
+                showNotification("PALMSpy not possible without access to Accelerometer data", type = "error")
               } else {
-                if ("BrondCounts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
-                  showNotification("BrondCounts not possible without access to raw accelerometer data", type = "error")
+                if ("PALMSplus" %in% input$tools == TRUE & "GIS" %in% input$availabledata == FALSE) {
+                  showNotification("PALMSplus not possible without access to GIS data", type = "error")
                 } else {
-                  switch_page(2)
+                  if ("PALMSplus" %in% input$tools == TRUE & ("PALMSpy_out" %in% input$availabledata == FALSE &
+                      "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
+                    showNotification("PALMSplus requires either old PALMSpy output or GPS and Accelerometer data to run PALMSpy", type = "error")
+                  } else {
+                    if ("BrondCounts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
+                      showNotification("BrondCounts not possible without access to raw accelerometer data", type = "error")
+                    } else {
+                      switch_page(2)
+                    }
+                  }
                 }
               }
             }
@@ -230,7 +259,16 @@ myApp <- function(homedir=getwd(), ...) {
               if ("SleepDiary" %in% input$availabledata & "GGIR" %in% input$tools & length(as.character(sleepdiaryfile())) == 0) {
                 showNotification("Select sleepdiary file", type = "error")
               } else {
-                switch_page(3)
+                if ("GIS" %in% input$availabledata & "PALMSplus" %in% input$tools & as.character(input$gisdir)[1] == "0") {
+                  showNotification("Select GIS data directory", type = "error")
+                } else {
+                  if ("PALMSpy_out" %in% input$availabledata & "PALMSplus" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0") {
+                    showNotification("Select PALMSpy_output directory", type = "error")
+                  } else {
+                    switch_page(3)
+                  }
+                }
+                
               }
             }
           }
@@ -294,6 +332,7 @@ myApp <- function(homedir=getwd(), ...) {
       researchgoals = c()
       if ("GPS" %in% x & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
       if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
+      if (all(c("PALMSpy_out", "GIS") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
       if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PB", "QC")
       if ("AccRaw" %in% x) researchgoals = c(researchgoals, "QC")
       if ("ACount" %in% x == TRUE & "GPS" %in% x == FALSE & "AccRaw" %in% x == FALSE) researchgoals = c()
@@ -331,6 +370,8 @@ myApp <- function(homedir=getwd(), ...) {
     shinyDirChoose(input, 'rawaccdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'countaccdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'gpsdir',  roots = c(home = homedir))
+    shinyDirChoose(input, 'gisdir',  roots = c(home = homedir))
+    shinyDirChoose(input, 'palmspyoutdir',  roots = c(home = homedir)) # Allow for old output to be used as input
     shinyDirChoose(input, 'outputdir',  roots = c(home = homedir))
     shinyFileChoose(input, 'sleepdiaryfile',  roots = c(home = homedir))
     
@@ -339,6 +380,8 @@ myApp <- function(homedir=getwd(), ...) {
     rawaccdir <- reactive(input$rawaccdir)
     countaccdir <- reactive(input$countaccdir)
     gpsdir <- reactive(input$gpsdir)
+    gisdir <- reactive(input$gisdir)
+    palmspyoutdir <- reactive(input$palmspyoutdir) # Allow for old output to be used as input
     outputdir <- reactive(input$outputdir)
     sleepdiaryfile <- reactive(input$sleepdiaryfile) #$datapath
     
@@ -380,6 +423,28 @@ myApp <- function(homedir=getwd(), ...) {
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
+                   input$gisdir # every time input$gisdir updates ...
+                 },
+                 handlerExpr = { # ... we re-assign global$gis_in
+                   if (!"path" %in% names(gisdir())) return()
+                   home <- normalizePath(homedir)
+                   global$gis_in <-
+                     file.path(home, paste(unlist(gisdir()$path[-1]), collapse = .Platform$file.sep))
+                 })
+    observeEvent(ignoreNULL = TRUE,
+                 eventExpr = {
+                   input$palmspyoutdir # every time input$palmspyoutdir updates ...
+                 },
+                 handlerExpr = { # ... we re-assign global$palmspyout_in
+                   if (!"path" %in% names(palmspyoutdir())) return()
+                   home <- normalizePath(homedir)
+                   global$palmspyout_in <-
+                     file.path(home, paste(unlist(palmspyoutdir()$path[-1]), collapse = .Platform$file.sep))
+                 })
+    
+    
+    observeEvent(ignoreNULL = TRUE,
+                 eventExpr = {
                    input$outputdir # every time input$outputdir updates ...
                  },
                  handlerExpr = { # ... we re-assign global$data_out
@@ -411,6 +476,13 @@ myApp <- function(homedir=getwd(), ...) {
     output$gpsdir <- renderText({
       global$gps_in
     })
+    output$gisdir <- renderText({
+      global$gis_in
+    })
+    output$palmspyoutdir <- renderText({
+      global$palmspyout_in
+    })
+    
     output$outputdir <- renderText({
       global$data_out
     })

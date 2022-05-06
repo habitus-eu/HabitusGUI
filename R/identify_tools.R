@@ -11,7 +11,7 @@
 # S4 class needs to be defined outside function
 setClass(Class = "toolio", slots = list(input = "character", output = "character", usecases = "character"))
 
-identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS"),
+identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out"),
                           goals = c("PA", "QC", "Trips", "Environment"),
                           available_tools = c("GGIR", "PALMSpy", "PALMSplus", "BrondCounts")) {
   iotools = list(GGIR = new("toolio",
