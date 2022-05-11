@@ -34,32 +34,28 @@ myApp <- function(homedir=getwd(), ...) {
                                                      "PALMSpy_output (output from previous run)",
                                                      "Sleep Diary (in GGIR compatible .csv format)"),
                                   choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out", "SleepDiary"), width = '100%'),
-               
-               # If there is AccRaw or ACount data then show second text box that asks user about research goals
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ", # GGIR
-                                                   "(input.availabledata.indexOf(`ACount`) > -1 &&", # PALMSpy
-                                                   "input.availabledata.indexOf(`GPS`) > -1) || ", 
-                                                   "(input.availabledata.indexOf(`PALMSpy_out`) > -1 &&", #PALMSplus
+                                                   "(input.availabledata.indexOf(`ACount`) > -1 && ", # PALMSpy
+                                                   "input.availabledata.indexOf(`GPS`) > -1) || ",
+                                                   "(input.availabledata.indexOf(`ACount`) > -1 && ", # PALMSplus variant 1
+                                                   "input.availabledata.indexOf(`GPS`) > -1 && ",
+                                                   "input.availabledata.indexOf(`GIS`) > -1) || ", 
+                                                   "(input.availabledata.indexOf(`PALMSpy_out`) > -1 && ", #PALMSplus variant 2
                                                    "input.availabledata.indexOf(`GIS`) > -1)"),
                                 hr(),
+                                # If there is enough input data then show second check box to ask user about their research goals
                                 checkboxGroupInput("researchgoals", label = "", 
-                                                   choiceNames = "", choiceValues = "", width = '100%')
-               ), 
-               # Show possible pipelines:
-               textOutput("pipeline"),
-               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ",  # GGIR
-                                                   "(input.availabledata.indexOf(`ACount`) > -1 &&", # PALMSpy
-                                                   "input.availabledata.indexOf(`GPS`) > -1)",
-                                                   "(input.availabledata.indexOf(`PALMSpy_out`) > -1 &&", #PALMSplus
-                                                   "input.availabledata.indexOf(`GIS`) > -1)"),
+                                                   choiceNames = "", choiceValues = "", width = '100%'),
+                                # Show possible pipelines:
+                                textOutput("pipeline"),
                                 hr(),
                                 checkboxGroupInput("tools", label = "Select the tools you would like to use:",
                                                    choiceNames = list("GGIR (R package)",
                                                                       "BrondCounts (R packages activityCounts + GGIR)",
                                                                       "PALMSpy (Python library)",
                                                                       "PALMSplus (R package)"),
-                                                   choiceValues = list("GGIR", "BrondCounts", "PALMSpy", "PALMSplus"), width = '100%'),
-               ),
+                                                   choiceValues = list("GGIR", "BrondCounts", "PALMSpy", "PALMSplus"), width = '100%')
+               ), 
                actionButton("page_12", "next")
       ),
       tabPanel("page_2",
@@ -89,23 +85,19 @@ myApp <- function(homedir=getwd(), ...) {
                                                            title = "Select GPS data directory"),
                                 verbatimTextOutput("gpsdir", placeholder = TRUE)
                ),
-               # # Select input folder GIS data -----------------------------------
-               # conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`PALMSplus`)",
-               #                  shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
-               #                                             title = "Select GIS data directory"),
-               #                  verbatimTextOutput("gisdir", placeholder = TRUE)
-               # ),
-               # # Select input folder PALMSpy output data -----------------------------------
-               # conditionalPanel(condition = "input.availabledata.indexOf(`PALMSpy_out`) > -1 && input.tools.includes(`PALMSplus`)",
-               #                  shinyFiles::shinyDirButton("palmspyoutdir", label = "PALMSpy output data directory...",
-               #                                             title = "Select PALMSpy output data directory"),
-               #                  verbatimTextOutput("palmspyoutdir", placeholder = TRUE)
-               # ),
+               # Select input folder GIS data -----------------------------------
+               conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`PALMSplus`)",
+                                shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
+                                                           title = "Select GIS data directory"),
+                                verbatimTextOutput("gisdir", placeholder = TRUE)
+               ),
+               # Select input folder PALMSpy output data -----------------------------------
+               conditionalPanel(condition = "input.availabledata.indexOf(`PALMSpy_out`) > -1 && input.tools.includes(`PALMSplus`)",
+                                shinyFiles::shinyDirButton("palmspyoutdir", label = "PALMSpy output data directory...",
+                                                           title = "Select PALMSpy output data directory"),
+                                verbatimTextOutput("palmspyoutdir", placeholder = TRUE)
+               ),
                # Upload sleep diary ----------------------------------------------------
-               # conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1",
-               #                  div(fileInput("sleepdiaryfile", label = "",
-               #                                buttonLabel = "Select sleep diary file...", width = '100%'),
-               #                      style = "font-size:80%")),
                conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1 && input.tools.includes(`GGIR`)",
                                 shinyFiles::shinyFilesButton("sleepdiaryfile", label = "Sleepdiary file...",
                                                              title = "Select sleep diary file", multiple = FALSE),
