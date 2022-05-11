@@ -389,7 +389,7 @@ myApp <- function(homedir=getwd(), ...) {
     sleepdiaryfile <- reactive(input$sleepdiaryfile) #$datapath
     
     # Create global with directories and give it default values -------
-    global <- reactiveValues(data_in = homedir, data_out = homedir) #, pipeline = NULL)
+    global <- reactiveValues(data_out = homedir) #, pipeline = NULL)
     
     
     
@@ -434,21 +434,16 @@ myApp <- function(homedir=getwd(), ...) {
                    global$gis_in <-
                      file.path(home, paste(unlist(gisdir()$path[-1]), collapse = .Platform$file.sep))
                  })
-    
-    
-    
-    observeEvent(ignoreNULL = TRUE,
+      observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
                    input$gislinkfile # every time input$gislinkfile updates ...
                  },
                  handlerExpr = { # ... we re-assign global$gis_in
-                   # if (!"path" %in% names(gislinkfile())) return()
+                   if (!"files" %in% names(gislinkfile())) return()
                    home <- normalizePath(homedir)
                    global$gislinkfile_in <-
                      as.character(parseFilePaths(c(home = homedir), gislinkfile())$datapath)
-                     # file.path(home, paste(unlist(gislinkfile()$path[-1]), collapse = .Platform$file.sep))
                  })
-    
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
                    input$palmspyoutdir # every time input$palmspyoutdir updates ...
@@ -459,8 +454,6 @@ myApp <- function(homedir=getwd(), ...) {
                    global$palmspyout_in <-
                      file.path(home, paste(unlist(palmspyoutdir()$path[-1]), collapse = .Platform$file.sep))
                  })
-    
-    
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
                    input$outputdir # every time input$outputdir updates ...
@@ -471,17 +464,15 @@ myApp <- function(homedir=getwd(), ...) {
                    global$data_out <-
                      file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
                  })
-    
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
                    input$sleepdiaryfile # every time input$sleepdiaryfile updates ...
                  },
                  handlerExpr = { # ... we re-assign global$sleepdiaryfile
-                   # if (!"path" %in% names(sleepdiaryfile())) return()
+                   if (!"files" %in% names(sleepdiaryfile())) return()
                    home <- normalizePath(homedir)
                    global$sleepdiaryfile <-
                      as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
-                     # file.path(home, paste(unlist(sleepdiaryfile()$path[-1]), collapse = .Platform$file.sep))
                  })
     
     
@@ -504,7 +495,6 @@ myApp <- function(homedir=getwd(), ...) {
     output$palmspyoutdir <- renderText({
       global$palmspyout_in
     })
-    
     output$outputdir <- renderText({
       global$data_out
     })
