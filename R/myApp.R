@@ -30,7 +30,7 @@ myApp <- function(homedir=getwd(), ...) {
                                   choiceNames = list("Raw acceleration (at least ten values per second per axis)", 
                                                      "Counts (in ActiGraph .csv format)",
                                                      "GPS (in .csv format)", 
-                                                     "GIS", 
+                                                     "GIS (shape files + linkage file)", 
                                                      "PALMSpy_output (output from previous run)",
                                                      "Sleep Diary (in GGIR compatible .csv format)"),
                                   choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out", "SleepDiary"), width = '100%'),
@@ -85,12 +85,15 @@ myApp <- function(homedir=getwd(), ...) {
                                                            title = "Select GPS data directory"),
                                 verbatimTextOutput("gpsdir", placeholder = TRUE)
                ),
-               # Select input folder GIS data -----------------------------------
+               # Select input folder GIS data and GIS linkage file -----------------------------------
                conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`PALMSplus`)",
                                 shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
                                                            title = "Select GIS data directory"),
-                                verbatimTextOutput("gisdir", placeholder = TRUE)
-               ),
+                                verbatimTextOutput("gisdir", placeholder = TRUE),
+                                shinyFiles::shinyFilesButton("gislinkfile", label = "GIS linkage file...",
+                                                           title = "Select GIS linkage file", multiple = FALSE),
+                                verbatimTextOutput("gislinkfile", placeholder = TRUE)
+                                ),
                # Select input folder PALMSpy output data -----------------------------------
                conditionalPanel(condition = "input.availabledata.indexOf(`PALMSpy_out`) > -1 && input.tools.includes(`PALMSplus`)",
                                 shinyFiles::shinyDirButton("palmspyoutdir", label = "PALMSpy output data directory...",
@@ -248,11 +251,17 @@ myApp <- function(homedir=getwd(), ...) {
             if ("GPS" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$gpsdir)[1] == "0") {
               showNotification("Select GPS data directory", type = "error")
             } else {
-              if ("SleepDiary" %in% input$availabledata & "GGIR" %in% input$tools & length(as.character(sleepdiaryfile())) == 0) {
+              current_sleepdiary = as.character(parseFilePaths(c(home = homedir), input$sleepdiaryfile)$datapath)
+              if ("SleepDiary" %in% input$availabledata & "GGIR" %in% input$tools &
+                  length(current_sleepdiary) == 0) { 
                 showNotification("Select sleepdiary file", type = "error")
               } else {
-                if ("GIS" %in% input$availabledata & "PALMSplus" %in% input$tools & as.character(input$gisdir)[1] == "0") {
-                  showNotification("Select GIS data directory", type = "error")
+                current_gislinkfile = as.character(parseFilePaths(c(home = homedir), input$gislinkfile)$datapath)
+                if ("GIS" %in% input$availabledata &
+                    "PALMSplus" %in% input$tools &
+                    as.character(input$gisdir)[1] == "0" &
+                    length(current_gislinkfile) == 0) {
+                  showNotification("Select GIS data directory and GIS linkage file", type = "error")
                 } else {
                   if ("PALMSpy_out" %in% input$availabledata & "PALMSplus" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0") {
                     showNotification("Select PALMSpy_output directory", type = "error")
@@ -363,6 +372,7 @@ myApp <- function(homedir=getwd(), ...) {
     shinyDirChoose(input, 'countaccdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'gpsdir',  roots = c(home = homedir))
     shinyDirChoose(input, 'gisdir',  roots = c(home = homedir))
+    shinyFileChoose(input, 'gislinkfile',  roots = c(home = homedir))
     shinyDirChoose(input, 'palmspyoutdir',  roots = c(home = homedir)) # Allow for old output to be used as input
     shinyDirChoose(input, 'outputdir',  roots = c(home = homedir))
     shinyFileChoose(input, 'sleepdiaryfile',  roots = c(home = homedir))
@@ -373,6 +383,7 @@ myApp <- function(homedir=getwd(), ...) {
     countaccdir <- reactive(input$countaccdir)
     gpsdir <- reactive(input$gpsdir)
     gisdir <- reactive(input$gisdir)
+    gislinkfile <- reactive(input$gislinkfile)
     palmspyoutdir <- reactive(input$palmspyoutdir) # Allow for old output to be used as input
     outputdir <- reactive(input$outputdir)
     sleepdiaryfile <- reactive(input$sleepdiaryfile) #$datapath
@@ -423,6 +434,21 @@ myApp <- function(homedir=getwd(), ...) {
                    global$gis_in <-
                      file.path(home, paste(unlist(gisdir()$path[-1]), collapse = .Platform$file.sep))
                  })
+    
+    
+    
+    observeEvent(ignoreNULL = TRUE,
+                 eventExpr = {
+                   input$gislinkfile # every time input$gislinkfile updates ...
+                 },
+                 handlerExpr = { # ... we re-assign global$gis_in
+                   # if (!"path" %in% names(gislinkfile())) return()
+                   home <- normalizePath(homedir)
+                   global$gislinkfile_in <-
+                     as.character(parseFilePaths(c(home = homedir), gislinkfile())$datapath)
+                     # file.path(home, paste(unlist(gislinkfile()$path[-1]), collapse = .Platform$file.sep))
+                 })
+    
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
                    input$palmspyoutdir # every time input$palmspyoutdir updates ...
@@ -451,10 +477,11 @@ myApp <- function(homedir=getwd(), ...) {
                    input$sleepdiaryfile # every time input$sleepdiaryfile updates ...
                  },
                  handlerExpr = { # ... we re-assign global$sleepdiaryfile
-                   if (!"path" %in% names(sleepdiaryfile())) return()
+                   # if (!"path" %in% names(sleepdiaryfile())) return()
                    home <- normalizePath(homedir)
                    global$sleepdiaryfile <-
-                     file.path(home, paste(unlist(sleepdiaryfile()$path[-1]), collapse = .Platform$file.sep))
+                     as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
+                     # file.path(home, paste(unlist(sleepdiaryfile()$path[-1]), collapse = .Platform$file.sep))
                  })
     
     
@@ -470,6 +497,9 @@ myApp <- function(homedir=getwd(), ...) {
     })
     output$gisdir <- renderText({
       global$gis_in
+    })
+    output$gislinkfile <- renderText({
+      global$gislinkfile_in
     })
     output$palmspyoutdir <- renderText({
       global$palmspyout_in
