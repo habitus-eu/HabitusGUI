@@ -138,6 +138,11 @@ myApp <- function(homedir=getwd(), ...) {
                                 modConfigUI("edit_palmspy_config"),
                                 hr()
                ),
+               conditionalPanel(condition = "input.tools.includes('PALMSplus')",
+                                h2("PALMSplus"),
+                                p("No parameters are needed for the PALMSplus"),
+                                hr()
+               ),
                actionButton("page_32", "prev"),
                actionButton("page_34", "next")
       ),
@@ -178,6 +183,16 @@ myApp <- function(homedir=getwd(), ...) {
                                 textOutput("palmspy_end_message"),
                                 p(""),
                                 DT::dataTableOutput("PALMSpy_file1"),
+                                hr()
+               ),
+               conditionalPanel(condition = "input.tools.includes('PALMSplus')",
+                                h3("PALMSplus:"),
+                                shinyjs::useShinyjs(),
+                                actionButton("start_palmsplus", "Start analysis", width = '300px'),
+                                p("\n"),
+                                textOutput("palmsplus_end_message"),
+                                p(""),
+                                DT::dataTableOutput("PALMSplus_file1"),
                                 hr()
                ),
                actionButton("page_43", "prev")
@@ -508,7 +523,7 @@ myApp <- function(homedir=getwd(), ...) {
     
     # Apply GGIR after button is pressed ---------------------------------
     runGGIR <- eventReactive(input$start_ggir, {
-      GGIRBrondCounts_message = ""
+      GIRBrondCounts_message = ""
     
       if ("GGIR" %in% input$tools | "BrondCounts" %in% input$tools) {
         GGIRBrondCounts_message = "Error: Contact maintainer"
@@ -649,6 +664,89 @@ myApp <- function(homedir=getwd(), ...) {
       return(PALMSpy_message)
     })
     
+    # Apply PALMSplus after button is pressed ---------------------------------
+    runPALMSplus <- eventReactive(input$start_palmsplus, {
+      PALMSplus_message = ""
+
+      if ("PALMSplus" %in% input$tools) {
+        PALMSplus_message = "Error: Contact maintainer"
+        # Basic check before running function:
+        ready_to_run_palmsplus = FALSE
+      #   if (dir.exists(global$raw_acc_in)) {
+      #     acc_files_available = length(dir(path = global$raw_acc_in, pattern = "csv|bin|gt3x|bin|cwa|wav", recursive = FALSE, full.names = FALSE)) > 0
+      #     if (acc_files_available == TRUE) {
+      #       ready_to_run_palmsplus = TRUE
+      #     } else {
+      #       PALMSplus_message = paste0("No count files found in ", global$raw_acc_in)
+      #     }
+      #   } else {
+      #     PALMSplus_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", global$raw_acc_in)
+      #   }
+      #   # Only run function when checks are met:
+      #   if (ready_to_run_palmsplus == TRUE) {
+      #     shinyjs::hide(id = "start_ggir")
+      #     if ("BrondCounts" %in% input$tools) {
+      #       id_ggir = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+      #       do.BrondCounts = TRUE
+      #     } else {
+      #       id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+      #       do.BrondCounts = FALSE
+      #     }
+      #     on.exit(removeNotification(id_ggir), add = TRUE)
+      #     
+      #     if (file.exists(paste0(global$data_out, "/sleepdiary.csv"))) { # because this is not a global variable
+      #       sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
+      #     } else {
+      #       sleepdiaryfile_local = c()
+      #     }
+      #     # sent all GGIR console output to a GGIR.log file
+      #     logfile_tmp <- tempfile(fileext = ".log")
+      #     logfile = paste0(isolate(global$data_out), "/GGIR.log")
+      #     con <- file(logfile_tmp)
+      #     sink(con, append = TRUE)
+      #     sink(con, append = TRUE, type = "message")
+      #     # Start GGIR
+      #     GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
+      #               sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
+      #               do.BrondCounts = do.BrondCounts)
+      #     sink()
+      #     sink(type = "message")
+      #     # move file to user when connection is closed
+      #     file.copy(from = logfile_tmp, to = logfile)
+      #     file.remove(logfile_tmp)
+      #     # Now check whether results are correctly generated:
+      #     expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
+      #     expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
+      #     if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
+      #       if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
+      #         expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
+      #         if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
+      #           if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
+      #             PALMSplus_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " Output is stored in ", 
+      #                                              expected_outputdir_brondcounts, " and ",
+      #                                              expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
+      #             GGIRpart2 = read.csv(expected_ggiroutput_file)
+      #             output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
+      #           } else {
+      #             PALMSplus_message = paste0("BrondCounts unsuccessful. No file found inside ", expected_outputdir_brondcounts)
+      #           }
+      #         } else {
+      #           PALMSplus_message = paste0("BrondCounts unsuccessful. Dir ",expected_outputdir_brondcounts, " not found")
+      #         }
+      #       } else {
+      #         PALMSplus_message = paste0("GGIR successfully completed at ", Sys.time(), ". Output is stored in ", 
+      #                                          expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
+      #         GGIRpart2 = read.csv(expected_ggiroutput_file, nrow = 100)
+      #         output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
+      #       }
+      #     } 
+      #   }
+      }
+      return(PALMSplus_message)
+    })
+    
+    
+    
     output$recommendorder <- renderText({
       pipeline = proposed_pipeline()
       if ("GGIR" %in% pipeline & "BrondCounts" %in% pipeline) {
@@ -668,6 +766,9 @@ myApp <- function(homedir=getwd(), ...) {
     })
     output$palmspy_end_message <- renderText({
       message = runPALMSpy()
+    })
+    output$palmsplus_end_message <- renderText({
+      message = runPALMSplus()
     })
   }
   # Run the application 
