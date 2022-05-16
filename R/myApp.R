@@ -521,7 +521,9 @@ myApp <- function(homedir=getwd(), ...) {
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir)
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir)
     
-    # Apply GGIR after button is pressed ---------------------------------
+    #========================================================================
+    # Apply GGIR / BrondCounts after button is pressed
+    #========================================================================
     runGGIR <- eventReactive(input$start_ggir, {
       GIRBrondCounts_message = ""
     
@@ -602,7 +604,9 @@ myApp <- function(homedir=getwd(), ...) {
       return(GGIRBrondCounts_message)
     })
     
-    # Apply PALMSpy after button is pressed ---------------------------------
+    #========================================================================
+    # Apply PALMSpy after button is pressed
+    #========================================================================
     runPALMSpy <- eventReactive(input$start_palmspy, {
       PALMSpy_message = ""
       if ("PALMSpy" %in% input$tools) {
@@ -663,8 +667,9 @@ myApp <- function(homedir=getwd(), ...) {
       PALMSpy_message = paste0(PALMSpy_message)
       return(PALMSpy_message)
     })
-    
-    # Apply PALMSplus after button is pressed ---------------------------------
+    #========================================================================
+    # Apply PALMSplus after button is pressed
+    #========================================================================
     runPALMSplus <- eventReactive(input$start_palmsplus, {
       PALMSplus_message = ""
 
@@ -672,18 +677,48 @@ myApp <- function(homedir=getwd(), ...) {
         PALMSplus_message = "Error: Contact maintainer"
         # Basic check before running function:
         ready_to_run_palmsplus = FALSE
-      #   if (dir.exists(global$raw_acc_in)) {
-      #     acc_files_available = length(dir(path = global$raw_acc_in, pattern = "csv|bin|gt3x|bin|cwa|wav", recursive = FALSE, full.names = FALSE)) > 0
-      #     if (acc_files_available == TRUE) {
-      #       ready_to_run_palmsplus = TRUE
-      #     } else {
-      #       PALMSplus_message = paste0("No count files found in ", global$raw_acc_in)
-      #     }
-      #   } else {
-      #     PALMSplus_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", global$raw_acc_in)
-      #   }
-      #   # Only run function when checks are met:
-      #   if (ready_to_run_palmsplus == TRUE) {
+        # Check for PALMSpy output (two possible sources either from this run or from a previous run)
+        if (dir.exists(paste0(global$data_out,"/PALMSpy_output"))) {
+          expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
+        } else {
+          expected_palmspy_results_dir = global$palmspyout_in
+        }
+        if (dir.exists(expected_palmspy_results_dir)) {
+          Nfiles_in_dir = length(dir(path = expected_palmspy_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
+          if (Nfiles_in_dir > 0) {
+            # also check for GIS files
+            if (dir.exists(global$gis_in)) {
+              Nfiles_in_gisdir = length(dir(path = global$gis_in, recursive = FALSE, full.names = FALSE))
+              if (Nfiles_in_gisdir > 0) {
+                if (file.exists(global$gislinkfile_in)) {
+                  ready_to_run_palmsplus = TRUE
+                } else {
+                  PALMSplus_message = paste0("GIS link file not found: ", global$gislinkfile_in)
+                }
+              } else {
+                PALMSplus_message = paste0("No files found in GIS folder: ", global$gis_in)
+              }
+            } else {
+              PALMSplus_message = paste0("Folder that is supposed to hold  GIS files does not exist: ", global$gis_in)
+            }
+          } else {
+            PALMSplus_message = paste0("No files found in PALMSpy output folder: ", expected_palmspy_results_dir)
+          }
+        } else {
+          PALMSplus_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", expected_palmspy_results_dir)
+        }
+        # Only run function when checks are met:
+        if (ready_to_run_palmsplus == TRUE) {
+          
+          # global$gis_in
+          
+          
+          # runpalmsplus(country_name = "BA" # <= Discuss, extract from GIS foldername? 
+          #              participant_exclude_list, # <= Discuss, leave out from linkfile?
+          #              gisdir = global$gis_in,
+          #              palmsdir = expected_palmspy_results_dir,
+          #              gislinkfile = global$gislinkfile_in)
+          
       #     shinyjs::hide(id = "start_ggir")
       #     if ("BrondCounts" %in% input$tools) {
       #       id_ggir = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
@@ -740,7 +775,7 @@ myApp <- function(homedir=getwd(), ...) {
       #         output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
       #       }
       #     } 
-      #   }
+        }
       }
       return(PALMSplus_message)
     })
