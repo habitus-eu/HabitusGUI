@@ -90,10 +90,11 @@ myApp <- function(homedir=getwd(), ...) {
                                 shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
                                                            title = "Select GIS data directory"),
                                 verbatimTextOutput("gisdir", placeholder = TRUE),
+                                # strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
                                 shinyFiles::shinyFilesButton("gislinkfile", label = "GIS linkage file...",
-                                                           title = "Select GIS linkage file", multiple = FALSE),
+                                                             title = "Select GIS linkage file", multiple = FALSE),
                                 verbatimTextOutput("gislinkfile", placeholder = TRUE)
-                                ),
+               ),
                # Select input folder PALMSpy output data -----------------------------------
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`PALMSpy_out`) > -1 && ",
                                                    "input.tools.includes(`PALMSplus`) && !input.tools.includes(`PALMSpy`)"),
@@ -115,6 +116,11 @@ myApp <- function(homedir=getwd(), ...) {
                         verbatimTextOutput("outputdir", placeholder = TRUE)
                  )
                ),
+               # Provide dataset name (only needed when working with GIS data ---------------------------------
+               conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`PALMSplus`)",
+                                strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
+               ),
+               
                hr(),
                actionButton("page_21", "prev"),
                actionButton("page_23", "next")
@@ -237,7 +243,7 @@ myApp <- function(homedir=getwd(), ...) {
                   showNotification("PALMSplus not possible without access to GIS data", type = "error")
                 } else {
                   if ("PALMSplus" %in% input$tools == TRUE & ("PALMSpy_out" %in% input$availabledata == FALSE &
-                      "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
+                                                              "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
                     showNotification("PALMSplus requires either previously generated PALMS(py) output or GPS and Accelerometer data", type = "error")
                   } else {
                     if ("BrondCounts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
@@ -273,11 +279,13 @@ myApp <- function(homedir=getwd(), ...) {
                 showNotification("Select sleepdiary file", type = "error")
               } else {
                 current_gislinkfile = as.character(parseFilePaths(c(home = homedir), input$gislinkfile)$datapath)
+                print(current_gislinkfile)
+                print(length(current_gislinkfile))
                 if ("GIS" %in% input$availabledata &
                     "PALMSplus" %in% input$tools &
-                    as.character(input$gisdir)[1] == "0" &
-                    length(current_gislinkfile) == 0) {
-                  showNotification("Select GIS data directory and GIS linkage file", type = "error")
+                    (as.character(input$gisdir)[1] == "0" |
+                     length(current_gislinkfile) == 0)) {
+                    showNotification("Select GIS data directory and GIS linkage file", type = "error")
                 } else {
                   if ("PALMSpy_out" %in% input$availabledata & "PALMSplus" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0") {
                     showNotification("Select previously generated PALMS(py) output directory", type = "error")
@@ -449,8 +457,24 @@ myApp <- function(homedir=getwd(), ...) {
                    home <- normalizePath(homedir)
                    global$gis_in <-
                      file.path(home, paste(unlist(gisdir()$path[-1]), collapse = .Platform$file.sep))
+                   
+                   # send gisdir to textInput field
+                   # Can also set the label, this time for input$inText2
+                   parent_folder = global$gis_in
+                   parent_folder = gsub(pattern = "\\", replacement =  "/", x = parent_folder, fixed = TRUE)
+                   parent_folder = unlist(strsplit(parent_folder, "/"))
+                   if (length(parent_folder) > 1) {
+                     parent_folder = rev(parent_folder)[2]
+                     parent_folder = gsub(pattern = " ", replacement =  "_", x = parent_folder, fixed = TRUE)
+                   } else {
+                     parent_folder = ""
+                   }
+                   updateTextInput(session, "dataset_name",
+                                   # label = paste("New label", parent_folder),
+                                   value = paste(parent_folder))
+                   
                  })
-      observeEvent(ignoreNULL = TRUE,
+    observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
                    input$gislinkfile # every time input$gislinkfile updates ...
                  },
@@ -518,6 +542,9 @@ myApp <- function(homedir=getwd(), ...) {
       global$sleepdiaryfile
     })
     
+    
+    
+    
     # Check and Edit config files ---------------------------------------
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir)
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir)
@@ -527,7 +554,7 @@ myApp <- function(homedir=getwd(), ...) {
     #========================================================================
     runGGIR <- eventReactive(input$start_ggir, {
       GIRBrondCounts_message = ""
-    
+      
       if ("GGIR" %in% input$tools | "BrondCounts" %in% input$tools) {
         GGIRBrondCounts_message = "Error: Contact maintainer"
         # Basic check before running function:
@@ -673,7 +700,7 @@ myApp <- function(homedir=getwd(), ...) {
     #========================================================================
     runPALMSplus <- eventReactive(input$start_palmsplus, {
       PALMSplus_message = ""
-
+      
       if ("PALMSplus" %in% input$tools) {
         PALMSplus_message = "Error: Contact maintainer"
         # Basic check before running function:
@@ -723,10 +750,10 @@ myApp <- function(homedir=getwd(), ...) {
           
           # Start PALMSplusR
           runpalmsplus(#country_name = "BA", # <= Discuss, extract from GIS foldername?
-                       # participant_exclude_list, # <= Discuss, leave out from linkfile?
-                       gisdir = global$gis_in,
-                       palmsdir = expected_palmspy_results_dir,
-                       gislinkfile = global$gislinkfile_in)
+            # participant_exclude_list, # <= Discuss, leave out from linkfile?
+            gisdir = global$gis_in,
+            palmsdir = expected_palmspy_results_dir,
+            gislinkfile = global$gislinkfile_in)
           
           
           sink()
@@ -734,32 +761,32 @@ myApp <- function(homedir=getwd(), ...) {
           # move file to user when connection is closed
           file.copy(from = logfile_tmp, to = logfile)
           file.remove(logfile_tmp)
-      #     # Now check whether results are correctly generated:
-      #     expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
-      #     expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
-      #     if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
-      #       if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
-      #         expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
-      #         if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
-      #           if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
-      #             PALMSplus_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " Output is stored in ", 
-      #                                              expected_outputdir_brondcounts, " and ",
-      #                                              expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
-      #             GGIRpart2 = read.csv(expected_ggiroutput_file)
-      #             output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
-      #           } else {
-      #             PALMSplus_message = paste0("BrondCounts unsuccessful. No file found inside ", expected_outputdir_brondcounts)
-      #           }
-      #         } else {
-      #           PALMSplus_message = paste0("BrondCounts unsuccessful. Dir ",expected_outputdir_brondcounts, " not found")
-      #         }
-      #       } else {
-      #         PALMSplus_message = paste0("GGIR successfully completed at ", Sys.time(), ". Output is stored in ", 
-      #                                          expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
-      #         GGIRpart2 = read.csv(expected_ggiroutput_file, nrow = 100)
-      #         output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
-      #       }
-      #     } 
+          #     # Now check whether results are correctly generated:
+          #     expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
+          #     expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
+          #     if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
+          #       if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
+          #         expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
+          #         if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
+          #           if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
+          #             PALMSplus_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " Output is stored in ", 
+          #                                              expected_outputdir_brondcounts, " and ",
+          #                                              expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
+          #             GGIRpart2 = read.csv(expected_ggiroutput_file)
+          #             output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
+          #           } else {
+          #             PALMSplus_message = paste0("BrondCounts unsuccessful. No file found inside ", expected_outputdir_brondcounts)
+          #           }
+          #         } else {
+          #           PALMSplus_message = paste0("BrondCounts unsuccessful. Dir ",expected_outputdir_brondcounts, " not found")
+          #         }
+          #       } else {
+          #         PALMSplus_message = paste0("GGIR successfully completed at ", Sys.time(), ". Output is stored in ", 
+          #                                          expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
+          #         GGIRpart2 = read.csv(expected_ggiroutput_file, nrow = 100)
+          #         output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
+          #       }
+          #     } 
         }
       }
       return(PALMSplus_message)
