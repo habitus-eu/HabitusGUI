@@ -31,7 +31,7 @@ myApp <- function(homedir=getwd(), ...) {
                                                      "Counts (in ActiGraph .csv format)",
                                                      "GPS (in .csv format)", 
                                                      "GIS (shape files + linkage file)", 
-                                                     "PALMSpy_output (output from previous run)",
+                                                     "PALMS(py) output previously generated",
                                                      "Sleep Diary (in GGIR compatible .csv format)"),
                                   choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out", "SleepDiary"), width = '100%'),
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ", # GGIR
@@ -95,9 +95,10 @@ myApp <- function(homedir=getwd(), ...) {
                                 verbatimTextOutput("gislinkfile", placeholder = TRUE)
                                 ),
                # Select input folder PALMSpy output data -----------------------------------
-               conditionalPanel(condition = "input.availabledata.indexOf(`PALMSpy_out`) > -1 && input.tools.includes(`PALMSplus`)",
-                                shinyFiles::shinyDirButton("palmspyoutdir", label = "PALMSpy output data directory...",
-                                                           title = "Select PALMSpy output data directory"),
+               conditionalPanel(condition = paste0("input.availabledata.indexOf(`PALMSpy_out`) > -1 && ",
+                                                   "input.tools.includes(`PALMSplus`) && !input.tools.includes(`PALMSpy`)"),
+                                shinyFiles::shinyDirButton("palmspyoutdir", label = "Previously generated PALMS(py) output directory...",
+                                                           title = "Select PALMS(py) output directory"),
                                 verbatimTextOutput("palmspyoutdir", placeholder = TRUE)
                ),
                # Upload sleep diary ----------------------------------------------------
@@ -237,7 +238,7 @@ myApp <- function(homedir=getwd(), ...) {
                 } else {
                   if ("PALMSplus" %in% input$tools == TRUE & ("PALMSpy_out" %in% input$availabledata == FALSE &
                       "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
-                    showNotification("PALMSplus requires either old PALMSpy output or GPS and Accelerometer data to run PALMSpy", type = "error")
+                    showNotification("PALMSplus requires either previously generated PALMS(py) output or GPS and Accelerometer data", type = "error")
                   } else {
                     if ("BrondCounts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
                       showNotification("BrondCounts not possible without access to raw accelerometer data", type = "error")
@@ -279,7 +280,7 @@ myApp <- function(homedir=getwd(), ...) {
                   showNotification("Select GIS data directory and GIS linkage file", type = "error")
                 } else {
                   if ("PALMSpy_out" %in% input$availabledata & "PALMSplus" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0") {
-                    showNotification("Select PALMSpy_output directory", type = "error")
+                    showNotification("Select previously generated PALMS(py) output directory", type = "error")
                   } else {
                     switch_page(3)
                   }
@@ -709,46 +710,30 @@ myApp <- function(homedir=getwd(), ...) {
         }
         # Only run function when checks are met:
         if (ready_to_run_palmsplus == TRUE) {
+          shinyjs::hide(id = "start_palmsplusr")
+          id_palmsplusr = showNotification("PALMSplusR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+          on.exit(removeNotification(id_palmsplusr), add = TRUE)
           
-          # global$gis_in
+          # sent all PALMSplusR console output to a PALMSplusR.log file
+          logfile_tmp <- tempfile(fileext = ".log")
+          logfile = paste0(isolate(global$data_out), "/PALMSplusR.log")
+          con <- file(logfile_tmp)
+          sink(con, append = TRUE)
+          sink(con, append = TRUE, type = "message")
+          
+          # Start PALMSplusR
+          runpalmsplus(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+                       # participant_exclude_list, # <= Discuss, leave out from linkfile?
+                       gisdir = global$gis_in,
+                       palmsdir = expected_palmspy_results_dir,
+                       gislinkfile = global$gislinkfile_in)
           
           
-          # runpalmsplus(country_name = "BA" # <= Discuss, extract from GIS foldername? 
-          #              participant_exclude_list, # <= Discuss, leave out from linkfile?
-          #              gisdir = global$gis_in,
-          #              palmsdir = expected_palmspy_results_dir,
-          #              gislinkfile = global$gislinkfile_in)
-          
-      #     shinyjs::hide(id = "start_ggir")
-      #     if ("BrondCounts" %in% input$tools) {
-      #       id_ggir = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-      #       do.BrondCounts = TRUE
-      #     } else {
-      #       id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-      #       do.BrondCounts = FALSE
-      #     }
-      #     on.exit(removeNotification(id_ggir), add = TRUE)
-      #     
-      #     if (file.exists(paste0(global$data_out, "/sleepdiary.csv"))) { # because this is not a global variable
-      #       sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
-      #     } else {
-      #       sleepdiaryfile_local = c()
-      #     }
-      #     # sent all GGIR console output to a GGIR.log file
-      #     logfile_tmp <- tempfile(fileext = ".log")
-      #     logfile = paste0(isolate(global$data_out), "/GGIR.log")
-      #     con <- file(logfile_tmp)
-      #     sink(con, append = TRUE)
-      #     sink(con, append = TRUE, type = "message")
-      #     # Start GGIR
-      #     GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
-      #               sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
-      #               do.BrondCounts = do.BrondCounts)
-      #     sink()
-      #     sink(type = "message")
-      #     # move file to user when connection is closed
-      #     file.copy(from = logfile_tmp, to = logfile)
-      #     file.remove(logfile_tmp)
+          sink()
+          sink(type = "message")
+          # move file to user when connection is closed
+          file.copy(from = logfile_tmp, to = logfile)
+          file.remove(logfile_tmp)
       #     # Now check whether results are correctly generated:
       #     expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
       #     expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
@@ -779,9 +764,6 @@ myApp <- function(homedir=getwd(), ...) {
       }
       return(PALMSplus_message)
     })
-    
-    
-    
     output$recommendorder <- renderText({
       pipeline = proposed_pipeline()
       if ("GGIR" %in% pipeline & "BrondCounts" %in% pipeline) {
