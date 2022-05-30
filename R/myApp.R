@@ -196,8 +196,8 @@ myApp <- function(homedir=getwd(), ...) {
                                 h3("PALMSplus:"),
                                 shinyjs::useShinyjs(),
                                 actionButton("start_palmsplus", "Start analysis", width = '300px'),
-                                p("\n"),
-                                textOutput("logfile_palmsplusr"),
+                                # p("\n"),
+                                # textOutput("logfile_palmsplusr"),
                                 p("\n"),
                                 textOutput("palmsplus_end_message"),
                                 p(""),
@@ -744,25 +744,22 @@ myApp <- function(homedir=getwd(), ...) {
           on.exit(removeNotification(id_palmsplusr), add = TRUE)
           
           # sent all PALMSplusR console output to a PALMSplusR.log file
-          # logfile_tmp <- tempfile(fileext = ".log")
+          logfile_tmp <- tempfile(fileext = ".log")
           logfile = paste0(isolate(global$data_out), "/PALMSplusR.log")
-          output$logfile_palmsplusr <- renderText({
-            # message = paste0("PALMSplusR log is stored in: ", logfile)
-            message = paste0("PALMSplusR file paths: gis ->> ", global$gis_in,
-                             length(which(file.access(dir(global$gis_in, full.names = TRUE), mode = 4) != 0)),
-                             " |--| palmspydir -> ", expected_palmspy_results_dir,
-                             length(which(file.access(dir(expected_palmspy_results_dir, full.names = TRUE), mode = 4) != 0)),
-                             " |--| global$gislinkfile_in ->> ", global$gislinkfile_in,
-                             " ", file.access(global$gislinkfile_in, mode = 4))
-          })
-          # con <- file(logfile_tmp)
-          # sink(con, append = TRUE)
-          # sink(con, append = TRUE, type = "message")
+          # output$logfile_palmsplusr <- renderText({
+          #   message = paste0("PALMSplusR log is stored in: ", logfile)
+          #   # message = paste0("PALMSplusR file paths: gis ->> ", global$gis_in,
+          #   #                  length(which(file.access(dir(global$gis_in, full.names = TRUE), mode = 4) != 0)),
+          #   #                  " |--| palmspydir -> ", expected_palmspy_results_dir,
+          #   #                  length(which(file.access(dir(expected_palmspy_results_dir, full.names = TRUE), mode = 4) != 0)),
+          #   #                  " |--| global$gislinkfile_in ->> ", global$gislinkfile_in,
+          #   #                  " ", file.access(global$gislinkfile_in, mode = 4))
+          # })
+          con <- file(logfile_tmp)
+          sink(con, append = TRUE)
+          sink(con, append = TRUE, type = "message")
           
-          # check read permissions:
-          # pfile.access(dir(global$gis_in, full.names = TRUE), mode = 4) == -1)) #datadir,"/",
-          
-          try(expr = {
+          # try(expr = {
             # Start PALMSplusR
             PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
               # participant_exclude_list, # <= Discuss, leave out from linkfile?
@@ -770,15 +767,18 @@ myApp <- function(homedir=getwd(), ...) {
               palmsdir = expected_palmspy_results_dir,
               gislinkfile = global$gislinkfile_in,
               outputdir = isolate(global$data_out))
-          }, outFile = logfile)
-          if (!file.exists(logfile)) {
-            write.table(x = "No errors detected", file = logfile)
-          }
-          # sink()
-          # sink(type = "message")
+          # }, outFile = logfile)
+
+          sink()
+          sink(type = "message")
           # move file to user when connection is closed
-          # file.copy(from = logfile_tmp, to = logfile)
-          # file.remove(logfile_tmp)
+          file.copy(from = logfile_tmp, to = logfile)
+          file.remove(logfile_tmp)
+            
+            if (!file.exists(logfile)) {
+              write.table(x = "No errors detected", file = logfile)
+            }
+            
           # Now check whether results are correctly generated:
           expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
           if (dir.exists(expected_palmsplus_folder) == TRUE) {
