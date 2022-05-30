@@ -34,11 +34,15 @@ ln -s /work/TestDataHabitus2022/*  /srv/shiny-server/data/
 # R / HabitusGUI dependencies
 sudo apt-get update && sudo apt-get install -y \
     libcurl4-gnutls-dev \
-    libssl-dev
+    libssl-dev \
+    libgdal-dev
 
-R -e 'install.packages(c("shinyFiles", "shiny", "GGIR", "jsonlite", "DT", "waiter", "activityCounts", "remotes", "shinyjs"), repos = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", dependencies = TRUE)'
+
+R -e 'install.packages(c("shinyFiles", "shiny", "GGIR", "jsonlite", "DT", "waiter", "activityCounts", "remotes", "shinyjs", "dplyr", "magrittr", "sf", "readr", "tidyr", "stringr"), repos = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", dependencies = TRUE)'
 R -e 'remotes::install_github("rstudio/bslib")' # development version because CRAN version has bug that affects us
-R -e 'remotes::install_github("habitus-eu/HabitusGUI")'
+R - e 'remotes::install_github("vincentvanhees/palmsplusr", ref = "config_file")'
+R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "issue11_palmsplusr")'
+
 
 # Assuming that app.R is in the same folder as this script
 APP_PATH=$(find /work/ -name app.R)

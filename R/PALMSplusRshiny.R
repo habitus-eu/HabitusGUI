@@ -1,4 +1,4 @@
-#' runpalmsplus
+#' PALMSplusRshiny
 #'
 #' @param gisdir Path to directory with GIS files
 #' @param palmsdir Path to PALMSpy or PALMS output directory
@@ -13,12 +13,16 @@
 #' 
 #' @export
 
-runpalmsplus <- function(gisdir = "",
+PALMSplusRshiny <- function(gisdir = "",
                          palmsdir = "",
                          gislinkfile = "") {
   home = school = home_nbh = school_nbh = NULL
   lon = identifier = palms = NULL
 
+  palmsplus_folder = "./PALMSplus_output"
+  if (!dir.exists(palmsplus_folder)) {
+    dir.create(palmsplus_folder)
+  }
   country_name = tail(unlist(strsplit(gisdir, "_")), n = 1)
   sf::sf_use_s2(FALSE)
   palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
@@ -63,12 +67,20 @@ runpalmsplus <- function(gisdir = "",
   # VvH - Test for missing values in participant basis
   test_missing_value = rowSums(is.na(participant_basis[,c("identifier", "school_id")]))
   missing = which(test_missing_value > 1)
+  participant_exclude_list = list(identifier = NULL, school_id = NULL)
   if (length(missing) > 0) {
     warning("\nMissing ID values in participant_basis\n", call. = FALSE)
     warning(paste0("\nIgnoring identifier ", paste(participant_basis$identifier[missing], sep = " ")))
     warning(paste0("\nIgnoring schoolid ", paste(participant_basis$school_id[missing], sep = " ")))
+    participant_exclude_list$identifier = participant_basis$identifier[missing]
+    participant_exclude_list$school_id = participant_basis$school_id[missing]
     participant_basis = participant_basis[test_missing_value == 0, ]  
   }
+  # write list to file
+  sink(paste0(palmsplus_folder, "/", country_name, "_excluded_ids.txt"))
+  print(participant_exclude_list)
+  sink()
+  
   rm(missing)
   
   # VvH turned this off because now only process IDs with complete data
@@ -191,7 +203,7 @@ runpalmsplus <- function(gisdir = "",
   print(paste0("school_nbh ", length(unique(school_nbh$school_id))))
   # print(participant_basis)
   
-  write.csv(participant_basis, paste(stringr::str_interp("participant_basis_${country_name}.csv"))) # store file for logging purposes only
+  write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${country_name}.csv"))) # store file for logging purposes only
   
   # Create field tables -----------------------------------------------------
   print("create field tables")
@@ -214,10 +226,10 @@ runpalmsplus <- function(gisdir = "",
   
   # Run palmsplusr ----------------------------------------------------------
   overwrite = TRUE
-  fns = c(paste(country_name, "palmsplus.csv", sep = "_"),
-          paste(country_name, "days.csv", sep = "_"),
-          paste(country_name, "trajectories.csv", sep = "_"),
-          paste(country_name, "multimodal.csv", sep = "_"))
+  fns = c(paste0(palmsplus_folder, "/", country_name, "_palmsplus.csv"),
+          paste0(palmsplus_folder, "/", country_name, "_days.csv"),
+          paste0(palmsplus_folder, "/", country_name, "_trajectories.csv"),
+          paste0(palmsplus_folder, "/", country_name, "_multimodal.csv"))
   if (overwrite == TRUE) {
     for (fn in fns) {
       if (file.exists(fn)) file.remove(fn)
@@ -231,12 +243,12 @@ runpalmsplus <- function(gisdir = "",
   print("run palmplusr - days")
   days <- palms_build_days(palmsplus)
   write_csv(days,  file = fns[2])
-  sf::st_write(palmsplus, dsn = paste(country_name, "palmsplus.shp", sep = "_"), append = FALSE)
+  sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", country_name, "_palmsplus.shp"), append = FALSE)
   
   print("run palmplusr - trajectories")
   trajectories <- palms_build_trajectories(palmsplus)
   write_csv(trajectories,  file = fns[3])
-  sf::st_write(trajectories, paste(country_name, "trajecories.shp", sep = "_"))
+  sf::st_write(trajectories, paste0(palmsplus_folder, "/", country_name, "_trajecories.shp"))
   
   print("run palmplusr - multimodal")
   multimodal <- palms_build_multimodal(data = trajectories,
@@ -244,7 +256,9 @@ runpalmsplus <- function(gisdir = "",
                                        temporal_threshold = 10,
                                        palmsplus_copy = palmsplus) # p
   write_csv(multimodal, file = fns[4])
-  sf::st_write(multimodal, paste(country_name, "multimodal.shp", sep = "_"))
+  sf::st_write(multimodal, paste0(palmsplus_folder, "/", country_name, "_multimodal.shp"))
+  
+ 
   print("end reached")
   return()
 }
