@@ -739,7 +739,7 @@ myApp <- function(homedir=getwd(), ...) {
         }
         # Only run function when checks are met:
         if (ready_to_run_palmsplus == TRUE) {
-          shinyjs::hide(id = "start_palmsplusr")
+          shinyjs::hide(id = "start_palmsplus")
           id_palmsplusr = showNotification("PALMSplusR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           on.exit(removeNotification(id_palmsplusr), add = TRUE)
           
@@ -780,19 +780,22 @@ myApp <- function(homedir=getwd(), ...) {
           # file.copy(from = logfile_tmp, to = logfile)
           # file.remove(logfile_tmp)
           # Now check whether results are correctly generated:
-          expected_palmsplus_folder = "./PALMSplus_output"
+          expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
           if (dir.exists(expected_palmsplus_folder) == TRUE) {
             csv_files_palmsplus = dir(expected_palmsplus_folder,pattern = "csv", recursive = TRUE)
             if (length(csv_files_palmsplus) > 0) {
               PALMSplus_message = paste0("PALMSplusR successfully completed at ", Sys.time(), " Output is stored in ", 
-                                         expected_palmsplus_folder, ". The table below shows the content of ", basename(csv_files_palmsplus))
+                                         expected_palmsplus_folder, ". The table below shows the content of ", basename(csv_files_palmsplus),
+                                         " Log file: ", logfile)
               first_csv_file_palmsplus = read.csv(csv_files_palmsplus)
               output$PALMSpluscsv <- DT::renderDataTable(first_csv_file_palmsplus, options = list(scrollX = TRUE))
             } else {
-              PALMSplus_message = paste0("PALMSplusR unsuccessful. No file found inside ", expected_palmsplus_folder)
+              PALMSplus_message = paste0("PALMSplusR unsuccessful. No file found inside ", expected_palmsplus_folder,
+                                         ". Log file: ", logfile)
             }
           } else {
-            PALMSplus_message = paste0("PALMSplusR unsuccessful. Dir ", expected_palmsplus_folder, " not found")
+            PALMSplus_message = paste0("PALMSplusR unsuccessful. Dir ", expected_palmsplus_folder, " not found.",
+                                       " Log file: ", logfile)
           }
         }
       }

@@ -52,8 +52,9 @@ PALMSplusRshiny <- function(gisdir = "",
   print("cleaning completed")
   
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
-  write.csv(palms_reduced_cleaned, paste(stringr::str_interp("PALMS_${country_name}_reduced.csv")))
-  palms <<- palmsplusr::read_palms(stringr::str_interp("PALMS_${country_name}_reduced.csv"))
+  PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${country_name}_reduced.csv"))
+  write.csv(palms_reduced_cleaned, PALMS_reduced_file)
+  palms <<- palmsplusr::read_palms(PALMS_reduced_file)
   
   # VvH I have added this:
   find_file = function(path, namelowercase) {
