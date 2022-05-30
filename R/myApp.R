@@ -767,7 +767,8 @@ myApp <- function(homedir=getwd(), ...) {
               gisdir = global$gis_in,
               palmsdir = expected_palmspy_results_dir,
               gislinkfile = global$gislinkfile_in,
-              outputdir = isolate(global$data_out))
+              outputdir = isolate(global$data_out),
+              dataset_name = input$dataset_name)
           # }, outFile = logfile)
 
           sink()

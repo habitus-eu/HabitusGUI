@@ -14,6 +14,8 @@ PALMSplusRshiny(gisdir = "", palmsdir = "", gislinkfile = "", outputdir = "")
 \item{gislinkfile}{Path to participant basis file, which is the file that links all participant identifies with the GIS data}
 
 \item{outputdir}{Path to outputdir location}
+
+\item{dataset_name}{Name of dataset}
 }
 \value{
 palms_to_clean_lower object

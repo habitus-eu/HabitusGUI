@@ -4,6 +4,7 @@
 #' @param palmsdir Path to PALMSpy or PALMS output directory
 #' @param gislinkfile Path to participant basis file, which is the file that links all participant identifies with the GIS data
 #' @param outputdir Path to outputdir location
+#' @param dataset_name Name of dataset
 #' @return palms_to_clean_lower object
 #' @importFrom stats end start
 #' @importFrom tidyr pivot_wider
@@ -26,7 +27,8 @@ PALMSplusRshiny <- function(gisdir = "",
     cat("\nCreating PALMSplusR output directory")
     dir.create(palmsplus_folder)
   }
-  country_name = tail(unlist(strsplit(gisdir, "_")), n = 1)
+  country_name = dataset_name #tail(unlist(strsplit(gisdir, "_")), n = 1)
+  cat(paste0("\n Country name: ",country_name))
   sf::sf_use_s2(FALSE)
   palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
   
