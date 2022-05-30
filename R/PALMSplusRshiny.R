@@ -3,6 +3,7 @@
 #' @param gisdir Path to directory with GIS files
 #' @param palmsdir Path to PALMSpy or PALMS output directory
 #' @param gislinkfile Path to participant basis file, which is the file that links all participant identifies with the GIS data
+#' @param outputdir Path to outputdir location
 #' @return palms_to_clean_lower object
 #' @importFrom stats end start
 #' @importFrom tidyr pivot_wider
@@ -15,12 +16,14 @@
 
 PALMSplusRshiny <- function(gisdir = "",
                          palmsdir = "",
-                         gislinkfile = "") {
+                         gislinkfile = "",
+                         outputdir = "") {
   home = school = home_nbh = school_nbh = NULL
   lon = identifier = palms = NULL
 
-  palmsplus_folder = "./PALMSplus_output"
+  palmsplus_folder = paste0(outputdir, "/PALMSplus_output")
   if (!dir.exists(palmsplus_folder)) {
+    cat("\nCreating PALMSplusR output directory")
     dir.create(palmsplus_folder)
   }
   country_name = tail(unlist(strsplit(gisdir, "_")), n = 1)

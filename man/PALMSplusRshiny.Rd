@@ -4,7 +4,7 @@
 \alias{PALMSplusRshiny}
 \title{PALMSplusRshiny}
 \usage{
-PALMSplusRshiny(gisdir = "", palmsdir = "", gislinkfile = "")
+PALMSplusRshiny(gisdir = "", palmsdir = "", gislinkfile = "", outputdir = "")
 }
 \arguments{
 \item{gisdir}{Path to directory with GIS files}
@@ -12,6 +12,8 @@ PALMSplusRshiny(gisdir = "", palmsdir = "", gislinkfile = "")
 \item{palmsdir}{Path to PALMSpy or PALMS output directory}
 
 \item{gislinkfile}{Path to participant basis file, which is the file that links all participant identifies with the GIS data}
+
+\item{outputdir}{Path to outputdir location}
 }
 \value{
 palms_to_clean_lower object
