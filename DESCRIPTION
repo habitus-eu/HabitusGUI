@@ -10,7 +10,7 @@ Authors@R:
            email = "v.vanhees@accelting.com")
 License: Apache License version 2.0 | file LICENSE
 Suggests: testthat, covr, rmarkdown
-Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, activityCounts, dplyr, magrittr, shinyjs, sf, readr, tidyr, palmsplusr, stringr
+Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, activityCounts, dplyr, magrittr, shinyjs, sf, readr, tidyr, stringr
 Depends: stats, utils, R (>= 3.5.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
