@@ -749,44 +749,32 @@ myApp <- function(homedir=getwd(), ...) {
           sink(con, append = TRUE, type = "message")
           
           # Start PALMSplusR
-          runpalmsplus(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
             # participant_exclude_list, # <= Discuss, leave out from linkfile?
             gisdir = global$gis_in,
             palmsdir = expected_palmspy_results_dir,
             gislinkfile = global$gislinkfile_in)
-          
           
           sink()
           sink(type = "message")
           # move file to user when connection is closed
           file.copy(from = logfile_tmp, to = logfile)
           file.remove(logfile_tmp)
-          #     # Now check whether results are correctly generated:
-          #     expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
-          #     expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
-          #     if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
-          #       if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
-          #         expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
-          #         if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
-          #           if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
-          #             PALMSplus_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " Output is stored in ", 
-          #                                              expected_outputdir_brondcounts, " and ",
-          #                                              expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
-          #             GGIRpart2 = read.csv(expected_ggiroutput_file)
-          #             output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
-          #           } else {
-          #             PALMSplus_message = paste0("BrondCounts unsuccessful. No file found inside ", expected_outputdir_brondcounts)
-          #           }
-          #         } else {
-          #           PALMSplus_message = paste0("BrondCounts unsuccessful. Dir ",expected_outputdir_brondcounts, " not found")
-          #         }
-          #       } else {
-          #         PALMSplus_message = paste0("GGIR successfully completed at ", Sys.time(), ". Output is stored in ", 
-          #                                          expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
-          #         GGIRpart2 = read.csv(expected_ggiroutput_file, nrow = 100)
-          #         output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
-          #       }
-          #     } 
+          # Now check whether results are correctly generated:
+          expected_palmsplus_folder = "./PALMSplus_output"
+          if (dir.exists(expected_palmsplus_folder) == TRUE) {
+            csv_files_palmsplus = dir(expected_palmsplus_folder,pattern = "csv", recursive = TRUE)
+            if (length(csv_files_palmsplus) > 0) {
+              PALMSplus_message = paste0("PALMSplusR successfully completed at ", Sys.time(), " Output is stored in ", 
+                                         expected_palmsplus_folder, ". The table below shows the content of ", basename(csv_files_palmsplus))
+              first_csv_file_palmsplus = read.csv(csv_files_palmsplus)
+              output$PALMSpluscsv <- DT::renderDataTable(first_csv_file_palmsplus, options = list(scrollX = TRUE))
+            } else {
+              PALMSplus_message = paste0("PALMSplusR unsuccessful. No file found inside ", expected_palmsplus_folder)
+            }
+          } else {
+            PALMSplus_message = paste0("PALMSplusR unsuccessful. Dir ", expected_palmsplus_folder, " not found")
+          }
         }
       }
       return(PALMSplus_message)
