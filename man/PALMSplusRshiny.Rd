@@ -4,7 +4,13 @@
 \alias{PALMSplusRshiny}
 \title{PALMSplusRshiny}
 \usage{
-PALMSplusRshiny(gisdir = "", palmsdir = "", gislinkfile = "", outputdir = "")
+PALMSplusRshiny(
+  gisdir = "",
+  palmsdir = "",
+  gislinkfile = "",
+  outputdir = "",
+  dataset_name = ""
+)
 }
 \arguments{
 \item{gisdir}{Path to directory with GIS files}

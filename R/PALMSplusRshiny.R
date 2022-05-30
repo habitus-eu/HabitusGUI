@@ -18,7 +18,8 @@
 PALMSplusRshiny <- function(gisdir = "",
                          palmsdir = "",
                          gislinkfile = "",
-                         outputdir = "") {
+                         outputdir = "",
+                         dataset_name = "") {
   home = school = home_nbh = school_nbh = NULL
   lon = identifier = palms = NULL
 
