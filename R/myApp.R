@@ -744,7 +744,7 @@ myApp <- function(homedir=getwd(), ...) {
           on.exit(removeNotification(id_palmsplusr), add = TRUE)
           
           # sent all PALMSplusR console output to a PALMSplusR.log file
-          logfile_tmp <- tempfile(fileext = ".log")
+          # logfile_tmp <- tempfile(fileext = ".log")
           logfile = paste0(isolate(global$data_out), "/PALMSplusR.log")
           # output$logfile_palmsplusr <- renderText({
           #   message = paste0("PALMSplusR log is stored in: ", logfile)
@@ -755,7 +755,8 @@ myApp <- function(homedir=getwd(), ...) {
           #   #                  " |--| global$gislinkfile_in ->> ", global$gislinkfile_in,
           #   #                  " ", file.access(global$gislinkfile_in, mode = 4))
           # })
-          con <- file(logfile_tmp)
+          # con <- file(logfile_tmp)
+          con <- file(logfile)
           sink(con, append = TRUE)
           sink(con, append = TRUE, type = "message")
           
