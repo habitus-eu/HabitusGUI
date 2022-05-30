@@ -197,6 +197,8 @@ myApp <- function(homedir=getwd(), ...) {
                                 shinyjs::useShinyjs(),
                                 actionButton("start_palmsplus", "Start analysis", width = '300px'),
                                 p("\n"),
+                                textOutput("logfile_palmsplusr"),
+                                p("\n"),
                                 textOutput("palmsplus_end_message"),
                                 p(""),
                                 DT::dataTableOutput("PALMSplus_file1"),
@@ -744,6 +746,9 @@ myApp <- function(homedir=getwd(), ...) {
           # sent all PALMSplusR console output to a PALMSplusR.log file
           logfile_tmp <- tempfile(fileext = ".log")
           logfile = paste0(isolate(global$data_out), "/PALMSplusR.log")
+          output$logfile_palmsplusr <- renderText({
+            message = paste0("PALMSplusR log is stored in: ", logfile)
+          })
           con <- file(logfile_tmp)
           sink(con, append = TRUE)
           sink(con, append = TRUE, type = "message")
