@@ -744,27 +744,27 @@ myApp <- function(homedir=getwd(), ...) {
           on.exit(removeNotification(id_palmsplusr), add = TRUE)
           
           # sent all PALMSplusR console output to a PALMSplusR.log file
-          logfile_tmp <- tempfile(fileext = ".log")
+          # logfile_tmp <- tempfile(fileext = ".log")
           logfile = paste0(isolate(global$data_out), "/PALMSplusR.log")
           output$logfile_palmsplusr <- renderText({
             message = paste0("PALMSplusR log is stored in: ", logfile)
           })
-          con <- file(logfile_tmp)
-          sink(con, append = TRUE)
-          sink(con, append = TRUE, type = "message")
-          
-          # Start PALMSplusR
-          PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
-            # participant_exclude_list, # <= Discuss, leave out from linkfile?
-            gisdir = global$gis_in,
-            palmsdir = expected_palmspy_results_dir,
-            gislinkfile = global$gislinkfile_in)
-          
-          sink()
-          sink(type = "message")
+          # con <- file(logfile_tmp)
+          # sink(con, append = TRUE)
+          # sink(con, append = TRUE, type = "message")
+          try(expr = {
+            # Start PALMSplusR
+            PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+              # participant_exclude_list, # <= Discuss, leave out from linkfile?
+              gisdir = global$gis_in,
+              palmsdir = expected_palmspy_results_dir,
+              gislinkfile = global$gislinkfile_in)
+          }, outFile = logfile)
+          # sink()
+          # sink(type = "message")
           # move file to user when connection is closed
-          file.copy(from = logfile_tmp, to = logfile)
-          file.remove(logfile_tmp)
+          # file.copy(from = logfile_tmp, to = logfile)
+          # file.remove(logfile_tmp)
           # Now check whether results are correctly generated:
           expected_palmsplus_folder = "./PALMSplus_output"
           if (dir.exists(expected_palmsplus_folder) == TRUE) {
