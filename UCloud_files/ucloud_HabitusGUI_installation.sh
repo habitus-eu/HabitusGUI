@@ -35,8 +35,8 @@ ln -s /work/TestDataHabitus2022/*  /srv/shiny-server/data/
 sudo apt-get update && sudo apt-get install -y \
     libcurl4-gnutls-dev \
     libssl-dev \
-    libgdal-dev
-
+    libgdal-dev \
+    libudunits2-dev
 
 R -e 'install.packages(c("shinyFiles", "shiny", "GGIR", "jsonlite", "DT", "waiter", "activityCounts", "remotes", "shinyjs", "dplyr", "magrittr", "sf", "readr", "tidyr", "stringr"), repos = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", dependencies = TRUE)'
 R -e 'remotes::install_github("rstudio/bslib")' # development version because CRAN version has bug that affects us
