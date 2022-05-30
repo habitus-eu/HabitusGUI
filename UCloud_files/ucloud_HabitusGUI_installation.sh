@@ -29,7 +29,7 @@ echo "conda activate palmspy" >> ~/.bashrc
 # Create symoblic link to be able to access all data in work 
 sudo mkdir /srv/shiny-server/data
 sudo chown -R ucloud:ucloud /srv/shiny-server/data
-ln -s /work/TestDataHabitus2022/*  /srv/shiny-server/data/
+ln -s "/work/Member Files: LineMatthiesen#8897/*"  /srv/shiny-server/data/
 
 # R / HabitusGUI dependencies
 sudo apt-get update && sudo apt-get install -y \
