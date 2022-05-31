@@ -103,11 +103,16 @@ PALMSplusRshiny <- function(gisdir = "",
   schooltablefile = find_file(path = gisdir, namelowercase = "school_table.shp")
   lochomebuffersfile = find_file(path = gisdir, namelowercase = "loc_homebuffers.shp")
   locschoolbuffersfile = find_file(path = gisdir, namelowercase = "loc_schoolbuffers.shp")
-  
   home = sf::read_sf(hometablefile) #
   school = sf::read_sf(schooltablefile)
   home_nbh = sf::read_sf(lochomebuffersfile)
   school_nbh = sf::read_sf(locschoolbuffersfile)
+  
+  palms <<- palms
+  home <<- school
+  school <<- school
+  home_nbh <<- home_nbh
+  school_nbh <<- school_nbh
   
   check_N = function(home, home_nbh, school, school_nbh, participant_basis, palms) {
     if (length(unique(school$school_id)) == 0) {
@@ -213,20 +218,20 @@ PALMSplusRshiny <- function(gisdir = "",
   print("create field tables")
   palmsplusr::palms_remove_tables()
   palmsplusr::palms_load_defaults(palms_epoch(palms))
-  palms_add_field("at_home", "palms_in_polygon(., filter(home, identifier == i), identifier)")
-  palms_add_field("at_school", "palms_in_polygon(., filter(school, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
-  palms_add_field("at_home_nbh","palms_in_polygon(., filter(home_nbh, identifier == i), identifier)")
-  palms_add_field("at_school_nbh", "palms_in_polygon(., filter(school_nbh, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
-  palms_add_domain("home", "at_home")
-  palms_add_domain("school", "(!at_home & at_school)")
-  palms_add_domain("transport", "!at_home & !(at_school) & (pedestrian | bicycle | vehicle)")
-  palms_add_domain("home_nbh","!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh")
-  palms_add_domain("school_nbh","!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & at_school_nbh")
-  palms_add_domain("other", "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & !(at_school_nbh)")
-  palms_add_trajectory_location("home_school", "at_home", "at_school")
-  palms_add_trajectory_location("school_home", "at_school", "at_home")
-  palms_add_trajectory_location("home_home", "at_home", "at_home")
-  palms_add_trajectory_location("school_school", "at_school", "at_school")
+  palmsplusr::palms_add_field("at_home", "palms_in_polygon(., filter(home, identifier == i), identifier)")
+  palmsplusr::palms_add_field("at_school", "palms_in_polygon(., filter(school, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
+  palmsplusr::palms_add_field("at_home_nbh","palms_in_polygon(., filter(home_nbh, identifier == i), identifier)")
+  palmsplusr::palms_add_field("at_school_nbh", "palms_in_polygon(., filter(school_nbh, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
+  palmsplusr::palms_add_domain("home", "at_home")
+  palmsplusr::palms_add_domain("school", "(!at_home & at_school)")
+  palmsplusr::palms_add_domain("transport", "!at_home & !(at_school) & (pedestrian | bicycle | vehicle)")
+  palmsplusr::palms_add_domain("home_nbh","!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh")
+  palmsplusr::palms_add_domain("school_nbh","!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & at_school_nbh")
+  palmsplusr::palms_add_domain("other", "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & !(at_school_nbh)")
+  palmsplusr::palms_add_trajectory_location("home_school", "at_home", "at_school")
+  palmsplusr::palms_add_trajectory_location("school_home", "at_school", "at_home")
+  palmsplusr::palms_add_trajectory_location("home_home", "at_home", "at_home")
+  palmsplusr::palms_add_trajectory_location("school_school", "at_school", "at_school")
   
   # Run palmsplusr ----------------------------------------------------------
   overwrite = TRUE
@@ -240,21 +245,21 @@ PALMSplusRshiny <- function(gisdir = "",
     }
   }
   print("run palmplusr - plus")
-  palmsplus <- palms_build_palmsplus(palms)
+  palmsplus <- palmsplusr::palms_build_palmsplus(palms)
   write_csv(palmsplus, file = fns[1])
   
   print("run palmplusr - days")
-  days <- palms_build_days(palmsplus)
+  days <- palmsplusr::palms_build_days(palmsplus)
   write_csv(days,  file = fns[2])
   sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", country_name, "_palmsplus.shp"), append = FALSE)
   
   print("run palmplusr - trajectories")
-  trajectories <- palms_build_trajectories(palmsplus)
+  trajectories <- palmsplusr::palms_build_trajectories(palmsplus)
   write_csv(trajectories,  file = fns[3])
   sf::st_write(trajectories, paste0(palmsplus_folder, "/", country_name, "_trajecories.shp"))
   
   print("run palmplusr - multimodal")
-  multimodal <- palms_build_multimodal(data = trajectories,
+  multimodal <- palmsplusr::palms_build_multimodal(data = trajectories,
                                        spatial_threshold = 200,
                                        temporal_threshold = 10,
                                        palmsplus_copy = palmsplus) # p
