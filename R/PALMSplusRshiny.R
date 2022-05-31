@@ -29,7 +29,7 @@ PALMSplusRshiny <- function(gisdir = "",
     dir.create(palmsplus_folder)
   }
   country_name = dataset_name #tail(unlist(strsplit(gisdir, "_")), n = 1)
-  cat(paste0("\n Country name: ",country_name))
+  print(paste0("\n Country name: ",country_name))
   sf::sf_use_s2(FALSE)
   palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
   
@@ -53,13 +53,23 @@ PALMSplusRshiny <- function(gisdir = "",
   print("start cleaning")
   palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, country_name)
   print("cleaning completed")
-  
+  print("check 01 a")
+  print(head(palms_reduced_cleaned))
+  print("check 01 b")
+  print(str(palms_reduced_cleaned))
+
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
   PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${country_name}_reduced.csv"))
   print(paste0("Check PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
   palms <<- palmsplusr::read_palms(PALMS_reduced_file)
+  print("check 0 a")
   print(head(palms))
+  print("check 0 b")
+  print(str(palms))
+  print("check 0 c")
+  print(spec(palms))
+  
   # VvH I have added this:
   find_file = function(path, namelowercase) {
     allcsvfiles = dir(path, recursive = TRUE, full.names = TRUE)
