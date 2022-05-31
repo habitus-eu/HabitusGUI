@@ -20,6 +20,27 @@ PALMSplusRshiny <- function(gisdir = "",
                          gislinkfile = "",
                          outputdir = "",
                          dataset_name = "") {
+  
+  print(gisdir == "/work/LineMatthiesen#8897/test-data-BE/GIS")
+  print(gisdir)
+  print(palmsdir == "/work/LineMatthiesen#8897/test-data-BE/PALMS_output")
+  print(palmsdir)
+  print(gislinkfile == "/work/LineMatthiesen#8897/test-data-BE/Tables/participant_basis.csv")
+  print(gislinkfile)
+  print(outputdir == "/work/LineMatthiesen#8897/test-data-BE")
+  print(outputdir)
+  
+  print(dataset_name)
+  
+  library(tidyverse)
+  library(lwgeom)
+  library(palmsplusr)
+  library(readr)
+  library(raster)
+  library(stringr)
+  library(sp)
+  
+  
   home = school = home_nbh = school_nbh = NULL
   lon = identifier = palms = NULL
 
@@ -64,7 +85,8 @@ PALMSplusRshiny <- function(gisdir = "",
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
   print("reading PALMS_reduced_file")
   print(file.exists(PALMS_reduced_file))
-  palms <<- palmsplusr::read_palms(PALMS_reduced_file)
+  # palms <<- palmsplusr::read_palms(PALMS_reduced_file)
+  palms = palmsplusr::read_palms(PALMS_reduced_file)
   print("check 0 a")
   print(dim(palms))
   print("check 0 b")
@@ -81,7 +103,7 @@ PALMSplusRshiny <- function(gisdir = "",
     return(basisfile)
   }
   basisfile = gislinkfile  #find_file(path = ".", namelowercase = "participant_basis.csv")
-  
+  print("reading basis file")
   participant_basis <<- read_csv(basisfile)
   unique_ids_in_palms <- unique(palms$identifier)
   unique_ids_in_participant_basis <- unique(participant_basis$identifier)
