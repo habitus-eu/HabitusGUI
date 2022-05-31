@@ -6,7 +6,7 @@
 #' @param outputdir Path to outputdir location
 #' @param dataset_name Name of dataset
 #' @return palms_to_clean_lower object
-#' @importFrom stats end start
+#' @importFrom stats end start formula
 #' @importFrom tidyr pivot_wider
 #' @importFrom readr write_csv read_csv
 #' @import palmsplusr
@@ -57,7 +57,6 @@ PALMSplusRshiny <- function(gisdir = "",
   PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${country_name}_reduced.csv"))
   print(paste0("Check PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
-  # palms <<- palmsplusr::read_palms(PALMS_reduced_file)
   palms = palmsplusr::read_palms(PALMS_reduced_file)
   
   # VvH I have added this:
@@ -107,12 +106,6 @@ PALMSplusRshiny <- function(gisdir = "",
   school = sf::read_sf(schooltablefile)
   home_nbh = sf::read_sf(lochomebuffersfile)
   school_nbh = sf::read_sf(locschoolbuffersfile)
-  
-  palms <<- palms
-  home <<- school
-  school <<- school
-  home_nbh <<- home_nbh
-  school_nbh <<- school_nbh
   
   check_N = function(home, home_nbh, school, school_nbh, participant_basis, palms) {
     if (length(unique(school$school_id)) == 0) {
@@ -215,23 +208,152 @@ PALMSplusRshiny <- function(gisdir = "",
   write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${country_name}.csv"))) # store file for logging purposes only
   
   # Create field tables -----------------------------------------------------
+  
+  # Note that I have removed the dependency on palmsplusr for this as it
+  # involved super assignment operators which seems to be causing issues
+  # when run from within another packages. 
+  
   print("create field tables")
-  palmsplusr::palms_remove_tables()
-  palmsplusr::palms_load_defaults(palms_epoch(palms))
-  palmsplusr::palms_add_field("at_home", "palms_in_polygon(., filter(home, identifier == i), identifier)")
-  palmsplusr::palms_add_field("at_school", "palms_in_polygon(., filter(school, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
-  palmsplusr::palms_add_field("at_home_nbh","palms_in_polygon(., filter(home_nbh, identifier == i), identifier)")
-  palmsplusr::palms_add_field("at_school_nbh", "palms_in_polygon(., filter(school_nbh, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
-  palmsplusr::palms_add_domain("home", "at_home")
-  palmsplusr::palms_add_domain("school", "(!at_home & at_school)")
-  palmsplusr::palms_add_domain("transport", "!at_home & !(at_school) & (pedestrian | bicycle | vehicle)")
-  palmsplusr::palms_add_domain("home_nbh","!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh")
-  palmsplusr::palms_add_domain("school_nbh","!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & at_school_nbh")
-  palmsplusr::palms_add_domain("other", "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & !(at_school_nbh)")
-  palmsplusr::palms_add_trajectory_location("home_school", "at_home", "at_school")
-  palmsplusr::palms_add_trajectory_location("school_home", "at_school", "at_home")
-  palmsplusr::palms_add_trajectory_location("home_home", "at_home", "at_home")
-  palmsplusr::palms_add_trajectory_location("school_school", "at_school", "at_school")
+  # Replacing: palmsplusr::palms_remove_tables()
+  if (exists("palmsplus_domains")) rm(palmsplus_domains)
+  if (exists("palmsplus_fields")) rm(palmsplus_fields)
+  if (exists("trajectory_fields")) rm(trajectory_fields)
+  # if (exists("trajectory_locations")) rm(trajectory_locations)
+  if (exists("multimodal_fields")) rm(multimodal_fields)
+  #===============
+  # Set Defaults:
+  # Replacing: palmsplusr::palms_load_defaults(palms_epoch(palms))
+  epoch_length <- as.character(palms_epoch(palms))
+  # palmsplus_fields
+  names = c("weekday", "weekend", "indoors", "outdoors",
+            "in_vehicle", "inserted", "pedestrian", "bicycle",
+            "vehicle", "nonwear", "wear", "sedentary", "light",
+            "moderate", "vigorous", "mvpa")
+  formulas = c("dow < 6", "dow > 5", "iov == 3", "iov == 1",
+               "iov == 2", "fixtypecode == 6", "tripmot == 1",
+               "tripmot == 2", "tripmot == 3", "activityintensity < 0",
+               "activityintensity >= 0", "activityintensity == 0",
+               "activityintensity == 1", "activityintensity == 2",
+               "activityintensity == 3", "moderate + vigorous")
+  domain_fields = c(rep(FALSE, 9), rep(TRUE, 7))
+  for (mi in 1:length(names)) {
+    if (!exists("palmsplus_fields")) {
+      palmsplus_fields = tibble(name = names[mi], formula = formulas[mi], domain_field = domain_fields[mi])
+    } else if (names[mi] %in% palmsplus_fields$name) {
+      stop(names[mi], " already exists in palmsplus_fields")
+    } else{
+      palmsplus_fields = rbind(palmsplus_fields, c(names[mi], formulas[mi], domain_fields[mi]))
+    }
+  }
+  
+  # trajectory_fields
+  names = c("mot", "date", "start", "end",
+            "duration", "nonwear","wear", "sedentary",
+            "light", "moderate", "vigorous", "mvpa",
+            "length", "speed")
+  formulas = c("first(tripmot)", "first(as.Date(datetime))",
+               "datetime[triptype==1]", "datetime[triptype==4]",
+               paste0("as.numeric(difftime(end, start, units = \"secs\") + ", epoch_length, ")"),
+               paste0("sum(activityintensity < 0) * ", epoch_length),
+               paste0("sum(activityintensity >= 0) * ", epoch_length),
+               paste0("sum(activityintensity == 0) * ", epoch_length),
+               paste0("sum(activityintensity == 1) * ", epoch_length),
+               paste0("sum(activityintensity == 2) * ", epoch_length),
+               paste0("sum(activityintensity == 3) * ", epoch_length),
+               "moderate + vigorous", "as.numeric(st_length(.))",
+               "(length / duration) * 3.6")
+  after_conversions = c(rep(FALSE, 12), rep(TRUE, 2))
+  for (mi in 1:length(names)) {
+    if (!exists("trajectory_fields")) {
+      trajectory_fields = tibble(name = names[mi], formula = formulas[mi], after_conversion = after_conversions[mi])
+    } else if (names[mi] %in% trajectory_fields$name) {
+      stop(names[mi], " already exists in trajectory_fields")
+    } else {
+      trajectory_fields = rbind(trajectory_fields, c(names[mi], formulas[mi], after_conversions[mi]))
+    }
+  }
+  # multimodal_fields
+  names = c("duration", "nonwear", "wear", "sedentary", "light",
+            "moderate", "vigorous", "mvpa", "length", "speed")
+  funcs = c(rep("sum", 9), "mean")
+  for (mi in 1:length(names)) {
+    if (!exists("multimodal_fields")) {
+      multimodal_fields = tibble(name = names[mi], func = funcs[mi])
+    } else if (names[mi] %in% multimodal_fields$name) {
+      stop(names[mi], " already exists in multimodal_fields")
+    } else {
+      multimodal_fields = rbind(multimodal_fields, c(names[mi], func = funcs[mi]))
+    }
+  }
+  #================
+  
+  
+  
+  # Replacing:
+  # palmsplusr::palms_add_field("at_home", "palms_in_polygon(., filter(home, identifier == i), identifier)")
+  # palmsplusr::palms_add_field("at_school", "palms_in_polygon(., filter(school, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
+  # palmsplusr::palms_add_field("at_home_nbh","palms_in_polygon(., filter(home_nbh, identifier == i), identifier)")
+  # palmsplusr::palms_add_field("at_school_nbh", "palms_in_polygon(., filter(school_nbh, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
+  # palmsplusr::palms_add_domain("home", "at_home")
+  # palmsplusr::palms_add_domain("school", "(!at_home & at_school)")
+  # palmsplusr::palms_add_domain("transport", "!at_home & !(at_school) & (pedestrian | bicycle | vehicle)")
+  # palmsplusr::palms_add_domain("home_nbh","!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh")
+  # palmsplusr::palms_add_domain("school_nbh","!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & at_school_nbh")
+  # palmsplusr::palms_add_domain("other", "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & !(at_school_nbh)")
+  # palmsplusr::palms_add_trajectory_location("home_school", "at_home", "at_school")
+  # palmsplusr::palms_add_trajectory_location("school_home", "at_school", "at_home")
+  # palmsplusr::palms_add_trajectory_location("home_home", "at_home", "at_home")
+  # palmsplusr::palms_add_trajectory_location("school_school", "at_school", "at_school")
+  
+  
+  #=============================
+  names = c("at_home", "at_school", "at_home_nbh", "at_school_nbh")
+  formulas = c("palms_in_polygon(., filter(home, identifier == i), identifier)",
+               "palms_in_polygon(., filter(school, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))",
+               "palms_in_polygon(., filter(home_nbh, identifier == i), identifier)",
+               "palms_in_polygon(., filter(school_nbh, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
+  for (mi in 1:length(names)) {
+    domain_field = FALSE
+    if (!exists("palmsplus_fields")) {
+      palmsplus_fields = tibble(name = names[mi], formula = formula[mi], domain_field = domain_field)
+    } else if (names[mi] %in% palmsplus_fields$name) {
+      stop(names[mi], " already exists in palmsplus_fields")
+    } else {
+      palmsplus_fields = rbind(palmsplus_fields, c(names[mi], formulas[mi], domain_field))
+    }
+  }
+  #=============================
+  names = c("home","school", "transport", "home_nbh", "school_nbh", "other")
+  formulas =  c( "at_home",
+                 "(!at_home & at_school)",
+                 "!at_home & !(at_school) & (pedestrian | bicycle | vehicle)",
+                 "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh",
+                 "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & at_school_nbh",
+                 "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & !(at_school_nbh)")
+  
+  for (mi in 1:length(names)) {
+    if (!exists("palmsplus_domains")) {
+      palmsplus_domains = tibble(name = names[mi], formula = formulas[mi])
+    } else if (names[mi] %in% palmsplus_domains$name) {
+      stop(names[mi], " already exists in palmsplus_domains")
+    } else {
+      palmsplus_domains = rbind(palmsplus_domains, c(names[mi], formulas[mi]))
+    }
+  }
+  #=============================
+  names = c("home_school", "school_home", "home_home", "school_school")
+  formulas = c("at_home", "at_school", "at_home", "at_school")
+  for (mi in 1:length(names)) {
+    if (!exists("trajectory_fields")) {
+      trajectory_fields = tibble(name = names[mi], formula = formulas[mi], after_conversion = formulas[mi])
+    } else if (names[mi] %in% trajectory_fields$name) {
+      stop(names[mi], " already exists in trajectory_fields")
+      
+    } else {
+      trajectory_fields = rbind(trajectory_fields, c(names[mi], formulas[mi],  after_conversion = formulas[mi]))
+    }
+  }
+  #=============================
   
   # Run palmsplusr ----------------------------------------------------------
   overwrite = TRUE
@@ -260,9 +382,9 @@ PALMSplusRshiny <- function(gisdir = "",
   
   print("run palmplusr - multimodal")
   multimodal <- palmsplusr::palms_build_multimodal(data = trajectories,
-                                       spatial_threshold = 200,
-                                       temporal_threshold = 10,
-                                       palmsplus_copy = palmsplus) # p
+                                                   spatial_threshold = 200,
+                                                   temporal_threshold = 10,
+                                                   palmsplus_copy = palmsplus) # p
   write_csv(multimodal, file = fns[4])
   sf::st_write(multimodal, paste0(palmsplus_folder, "/", country_name, "_multimodal.shp"))
   
