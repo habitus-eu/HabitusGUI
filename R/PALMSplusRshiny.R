@@ -62,13 +62,17 @@ PALMSplusRshiny <- function(gisdir = "",
   PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${country_name}_reduced.csv"))
   print(paste0("Check PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
+  print("reading PALMS_reduced_file")
+  print(file.exists(PALMS_reduced_file))
   palms <<- palmsplusr::read_palms(PALMS_reduced_file)
   print("check 0 a")
-  print(head(palms))
+  print(dim(palms))
   print("check 0 b")
+  print(head(palms))
+  print("check 0 v")
   print(str(palms))
-  print("check 0 c")
-  print(spec(palms))
+  print("check 0 d")
+  print(class(palms))
   
   # VvH I have added this:
   find_file = function(path, namelowercase) {
