@@ -56,7 +56,7 @@ PALMSplusRshiny <- function(gisdir = "",
   
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
   PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${country_name}_reduced.csv"))
-  print(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
+  print(paste0("Check PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
   palms <<- palmsplusr::read_palms(PALMS_reduced_file)
   
@@ -71,18 +71,24 @@ PALMSplusRshiny <- function(gisdir = "",
   participant_basis <<- read_csv(basisfile)
   unique_ids_in_palms <- unique(palms$identifier)
   unique_ids_in_participant_basis <- unique(participant_basis$identifier)
+  print("check 1")
+  print(dim(participant_basis))
+  print(length(unique_ids_in_palms))
+  print(length(unique_ids_in_participant_basis))
   
   # VvH - Test for missing values in participant basis
   test_missing_value = rowSums(is.na(participant_basis[,c("identifier", "school_id")]))
   missing = which(test_missing_value > 1)
+  print("check 2")
+  print(paste0("length missing: ", length(length(missing))))
   participant_exclude_list = list(identifier = NULL, school_id = NULL)
   if (length(missing) > 0) {
-    warning("\nMissing ID values in participant_basis\n", call. = FALSE)
-    warning(paste0("\nIgnoring identifier ", paste(participant_basis$identifier[missing], sep = " ")))
-    warning(paste0("\nIgnoring schoolid ", paste(participant_basis$school_id[missing], sep = " ")))
+    print("\nMissing ID values in participant_basis\n")
+    print(paste0("\nIgnoring identifier ", paste(participant_basis$identifier[missing], sep = " ")))
+    print(paste0("\nIgnoring schoolid ", paste(participant_basis$school_id[missing], sep = " ")))
     participant_exclude_list$identifier = participant_basis$identifier[missing]
     participant_exclude_list$school_id = participant_basis$school_id[missing]
-    participant_basis = participant_basis[test_missing_value == 0, ]  
+    participant_basis = participant_basis[test_missing_value == 0, ]
   }
   # write list to file
   sink(paste0(palmsplus_folder, "/", country_name, "_excluded_ids.txt"))
@@ -90,6 +96,9 @@ PALMSplusRshiny <- function(gisdir = "",
   sink()
   
   rm(missing)
+  print("check 3")
+  print("dim participant_basis:")
+  print(dim(participant_basis))
   
   # VvH turned this off because now only process IDs with complete data
   # missing_ids_in_participant_basis <- setdiff(unique_ids_in_palms, unique_ids_in_participant_basis)
@@ -100,12 +109,15 @@ PALMSplusRshiny <- function(gisdir = "",
   # }
   
   # Load all shape files ----------------------------------------------------
-  print("load shape files")
+  print(paste0("load shape files from ", gisdir))
   hometablefile = find_file(path = gisdir, namelowercase = "home_table.shp")
+  print("check 4")
+  print(hometablefile)
   schooltablefile = find_file(path = gisdir, namelowercase = "school_table.shp")
   lochomebuffersfile = find_file(path = gisdir, namelowercase = "loc_homebuffers.shp")
   locschoolbuffersfile = find_file(path = gisdir, namelowercase = "loc_schoolbuffers.shp")
   home <<- sf::read_sf(hometablefile) 
+  print(head(home))
   school <<- sf::read_sf(schooltablefile)
   home_nbh <<- sf::read_sf(lochomebuffersfile)
   school_nbh <<- sf::read_sf(locschoolbuffersfile)
@@ -134,7 +146,7 @@ PALMSplusRshiny <- function(gisdir = "",
     }
   }
   check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
-  
+  print("check 5")
   # at this point we should have a cleaned dataset with only consistent data in all objects
   print("Number of unique IDs in all objects")
   print(paste0("participant_basis ", length(unique(participant_basis$identifier))))
@@ -200,7 +212,7 @@ PALMSplusRshiny <- function(gisdir = "",
   # print(school_nbh$nrowgeom)
   # print(home$nrowgeom)
   # print(home_nbh$nrowgeom)
-  
+  print("check 6")
   # at this point we should have a cleaned dataset with only consistent data in all objects
   print("Number of unique IDs in all objects")
   print(paste0("participant_basis ", length(unique(participant_basis$identifier))))
@@ -243,7 +255,7 @@ PALMSplusRshiny <- function(gisdir = "",
       if (file.exists(fn)) file.remove(fn)
     }
   }
-  
+  print("check 7")
   print("run palmplusr - plus")
   palmsplus <- palms_build_palmsplus(palms)
   write_csv(palmsplus, file = fns[1])
