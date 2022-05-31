@@ -16,32 +16,19 @@
 #' @export
 
 PALMSplusRshiny <- function(gisdir = "",
-                         palmsdir = "",
-                         gislinkfile = "",
-                         outputdir = "",
-                         dataset_name = "") {
-  library(tidyverse)
-  library(lwgeom)
-  library(palmsplusr)
-  library(readr)
-  library(raster)
-  library(stringr)
-  library(sp)
-  
-  # ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-  # ✖ dplyr::filter() masks stats::filter()
-  # ✖ dplyr::lag()    masks stats::lag()
-  
+                            palmsdir = "",
+                            gislinkfile = "",
+                            outputdir = "",
+                            dataset_name = "") {
   home = school = home_nbh = school_nbh = NULL
   lon = identifier = palms = NULL
-
+  
   palmsplus_folder = paste0(outputdir, "/PALMSplus_output")
   if (!dir.exists(palmsplus_folder)) {
     cat("\nCreating PALMSplusR output directory")
     dir.create(palmsplus_folder)
   }
   country_name = dataset_name #tail(unlist(strsplit(gisdir, "_")), n = 1)
-  print(paste0("\n Country name: ",country_name))
   sf::sf_use_s2(FALSE)
   palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
   
@@ -65,27 +52,13 @@ PALMSplusRshiny <- function(gisdir = "",
   print("start cleaning")
   palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, country_name)
   print("cleaning completed")
-  print("check 01 a")
-  print(head(palms_reduced_cleaned))
-  print("check 01 b")
-  print(str(palms_reduced_cleaned))
-
+  
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
   PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${country_name}_reduced.csv"))
   print(paste0("Check PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
-  print("reading PALMS_reduced_file")
-  print(file.exists(PALMS_reduced_file))
   # palms <<- palmsplusr::read_palms(PALMS_reduced_file)
   palms = palmsplusr::read_palms(PALMS_reduced_file)
-  print("check 0 a")
-  print(dim(palms))
-  print("check 0 b")
-  print(head(palms))
-  print("check 0 v")
-  print(str(palms))
-  print("check 0 d")
-  print(class(palms))
   
   # VvH I have added this:
   find_file = function(path, namelowercase) {
@@ -95,18 +68,12 @@ PALMSplusRshiny <- function(gisdir = "",
   }
   basisfile = gislinkfile  #find_file(path = ".", namelowercase = "participant_basis.csv")
   print("reading basis file")
-  participant_basis <<- read_csv(basisfile)
+  participant_basis = read_csv(basisfile)
   unique_ids_in_palms <- unique(palms$identifier)
   unique_ids_in_participant_basis <- unique(participant_basis$identifier)
-  print("check 1")
-  print(dim(participant_basis))
-  print(length(unique_ids_in_palms))
-  print(length(unique_ids_in_participant_basis))
-  
   # VvH - Test for missing values in participant basis
   test_missing_value = rowSums(is.na(participant_basis[,c("identifier", "school_id")]))
   missing = which(test_missing_value > 1)
-  print("check 2")
   print(paste0("length missing: ", length(length(missing))))
   participant_exclude_list = list(identifier = NULL, school_id = NULL)
   if (length(missing) > 0) {
@@ -123,10 +90,6 @@ PALMSplusRshiny <- function(gisdir = "",
   sink()
   
   rm(missing)
-  print("check 3")
-  print("dim participant_basis:")
-  print(dim(participant_basis))
-  
   # VvH turned this off because now only process IDs with complete data
   # missing_ids_in_participant_basis <- setdiff(unique_ids_in_palms, unique_ids_in_participant_basis)
   
@@ -136,21 +99,15 @@ PALMSplusRshiny <- function(gisdir = "",
   # }
   
   # Load all shape files ----------------------------------------------------
-  print(paste0("load shape files from ", gisdir))
   hometablefile = find_file(path = gisdir, namelowercase = "home_table.shp")
-  print("check 4")
-  print(hometablefile)
-  print(file.exists(hometablefile))
   schooltablefile = find_file(path = gisdir, namelowercase = "school_table.shp")
   lochomebuffersfile = find_file(path = gisdir, namelowercase = "loc_homebuffers.shp")
   locschoolbuffersfile = find_file(path = gisdir, namelowercase = "loc_schoolbuffers.shp")
-  print("read hometablefile")
-  home <<- sf::read_sf(hometablefile) 
-  print("str home")
-  print(str(home))
-  school <<- sf::read_sf(schooltablefile)
-  home_nbh <<- sf::read_sf(lochomebuffersfile)
-  school_nbh <<- sf::read_sf(locschoolbuffersfile)
+  
+  home = sf::read_sf(hometablefile) #
+  school = sf::read_sf(schooltablefile)
+  home_nbh = sf::read_sf(lochomebuffersfile)
+  school_nbh = sf::read_sf(locschoolbuffersfile)
   
   check_N = function(home, home_nbh, school, school_nbh, participant_basis, palms) {
     if (length(unique(school$school_id)) == 0) {
@@ -176,10 +133,9 @@ PALMSplusRshiny <- function(gisdir = "",
     }
   }
   check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
-  print("check 5")
   # at this point we should have a cleaned dataset with only consistent data in all objects
   print("Number of unique IDs in all objects")
-  print(paste0("participant_basis ", length(unique(participant_basis$identifier))))
+  print(paste0("Number of unique IDs in participant_basis: ", length(unique(participant_basis$identifier))))
   print(paste0("palms ", length(unique(palms$identifier))))
   print(paste0("home ", length(unique(home$identifier))))
   print(paste0("home_nbh ", length(unique(home_nbh$identifier))))
@@ -242,7 +198,6 @@ PALMSplusRshiny <- function(gisdir = "",
   # print(school_nbh$nrowgeom)
   # print(home$nrowgeom)
   # print(home_nbh$nrowgeom)
-  print("check 6")
   # at this point we should have a cleaned dataset with only consistent data in all objects
   print("Number of unique IDs in all objects")
   print(paste0("participant_basis ", length(unique(participant_basis$identifier))))
@@ -251,7 +206,6 @@ PALMSplusRshiny <- function(gisdir = "",
   print(paste0("home_nbh ", length(unique(home_nbh$identifier))))
   print(paste0("school ", length(unique(school$school_id))))
   print(paste0("school_nbh ", length(unique(school_nbh$school_id))))
-  # print(participant_basis)
   
   write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${country_name}.csv"))) # store file for logging purposes only
   
@@ -285,7 +239,6 @@ PALMSplusRshiny <- function(gisdir = "",
       if (file.exists(fn)) file.remove(fn)
     }
   }
-  print("check 7")
   print("run palmplusr - plus")
   palmsplus <- palms_build_palmsplus(palms)
   write_csv(palmsplus, file = fns[1])
@@ -308,7 +261,7 @@ PALMSplusRshiny <- function(gisdir = "",
   write_csv(multimodal, file = fns[4])
   sf::st_write(multimodal, paste0(palmsplus_folder, "/", country_name, "_multimodal.shp"))
   
- 
+  
   print("end reached")
   return()
 }
