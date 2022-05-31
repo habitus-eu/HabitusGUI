@@ -38,11 +38,12 @@ sudo apt-get update && sudo apt-get install -y \
     libgdal-dev \
     libudunits2-dev
 
-R -e 'install.packages(c("shinyFiles", "shiny", "GGIR", "jsonlite", "DT", "waiter", "activityCounts", 
-"remotes", "shinyjs", "dplyr", "magrittr", "sf", "readr", "tidyr", "stringr", "sp", "raster", "lwgeom", "tidyverse"), repos = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", dependencies = TRUE)'
-R -e 'remotes::install_github("rstudio/bslib")' # development version because CRAN version has bug that affects us
-R -e 'remotes::install_github("vincentvanhees/palmsplusr", ref = "config_file")'
-R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "issue11_palmsplusr")'
+R -e 'install.packages(c("shinyFiles", "shiny", "GGIR", "jsonlite", "DT", "waiter"), repos = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", dependencies = TRUE)'
+R -e 'install.packages(c("activityCounts", "remotes", "shinyjs", "dplyr", "magrittr"), repos = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", dependencies = TRUE)'
+R -e 'install.packages(c("sf", "readr", "tidyr", "stringr", "sp", "raster", "lwgeom", "tidyverse"), repos = "https://packagemanager.rstudio.com/cran/__linux__/focal/latest", dependencies = TRUE)'
+R -e 'remotes::install_github("rstudio/bslib", dependencies = TRUE)' # development version because CRAN version has bug that affects us
+R -e 'remotes::install_github("vincentvanhees/palmsplusr", ref = "config_file", dependencies = TRUE)'
+R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "issue11_palmsplusr", dependencies = TRUE)'
 
 
 # Assuming that app.R is in the same folder as this script

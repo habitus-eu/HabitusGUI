@@ -20,18 +20,6 @@ PALMSplusRshiny <- function(gisdir = "",
                          gislinkfile = "",
                          outputdir = "",
                          dataset_name = "") {
-  
-  print(gisdir == "/work/LineMatthiesen#8897/test-data-BE/GIS")
-  print(gisdir)
-  print(palmsdir == "/work/LineMatthiesen#8897/test-data-BE/PALMS_output")
-  print(palmsdir)
-  print(gislinkfile == "/work/LineMatthiesen#8897/test-data-BE/Tables/participant_basis.csv")
-  print(gislinkfile)
-  print(outputdir == "/work/LineMatthiesen#8897/test-data-BE")
-  print(outputdir)
-  
-  print(dataset_name)
-  
   library(tidyverse)
   library(lwgeom)
   library(palmsplusr)
@@ -40,6 +28,9 @@ PALMSplusRshiny <- function(gisdir = "",
   library(stringr)
   library(sp)
   
+  # ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+  # ✖ dplyr::filter() masks stats::filter()
+  # ✖ dplyr::lag()    masks stats::lag()
   
   home = school = home_nbh = school_nbh = NULL
   lon = identifier = palms = NULL
@@ -149,9 +140,11 @@ PALMSplusRshiny <- function(gisdir = "",
   hometablefile = find_file(path = gisdir, namelowercase = "home_table.shp")
   print("check 4")
   print(hometablefile)
+  print(file.exists(hometablefile))
   schooltablefile = find_file(path = gisdir, namelowercase = "school_table.shp")
   lochomebuffersfile = find_file(path = gisdir, namelowercase = "loc_homebuffers.shp")
   locschoolbuffersfile = find_file(path = gisdir, namelowercase = "loc_schoolbuffers.shp")
+  print("read hometablefile")
   home <<- sf::read_sf(hometablefile) 
   print("str home")
   print(str(home))
