@@ -59,7 +59,7 @@ PALMSplusRshiny <- function(gisdir = "",
   print(paste0("Check PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
   palms <<- palmsplusr::read_palms(PALMS_reduced_file)
-  
+  print(head(palms))
   # VvH I have added this:
   find_file = function(path, namelowercase) {
     allcsvfiles = dir(path, recursive = TRUE, full.names = TRUE)
@@ -117,7 +117,8 @@ PALMSplusRshiny <- function(gisdir = "",
   lochomebuffersfile = find_file(path = gisdir, namelowercase = "loc_homebuffers.shp")
   locschoolbuffersfile = find_file(path = gisdir, namelowercase = "loc_schoolbuffers.shp")
   home <<- sf::read_sf(hometablefile) 
-  print(head(home))
+  print("str home")
+  print(str(home))
   school <<- sf::read_sf(schooltablefile)
   home_nbh <<- sf::read_sf(lochomebuffersfile)
   school_nbh <<- sf::read_sf(locschoolbuffersfile)
