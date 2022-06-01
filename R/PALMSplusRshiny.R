@@ -209,15 +209,9 @@ PALMSplusRshiny <- function(gisdir = "",
   # involved super assignment operators which seems to be causing issues
   # when run from within another packages. 
   
-  print("create field tables")
-  # Replacing: palmsplusr::palms_remove_tables()
-  if (exists("palmsplus_domains")) rm(palmsplus_domains)
-  if (exists("palmsplus_fields")) rm(palmsplus_fields)
-  if (exists("trajectory_fields")) rm(trajectory_fields)
-  # if (exists("trajectory_locations")) rm(trajectory_locations)
-  if (exists("multimodal_fields_def")) rm(multimodal_fields_def)
   #===============
   # Set Defaults:
+  print("create default objects")
   # Replacing: palmsplusr::palms_load_defaults(palms_epoch(palms))
   epoch_length <- as.character(palms_epoch(palms))
   # palmsplus_fields_def
@@ -233,12 +227,11 @@ PALMSplusRshiny <- function(gisdir = "",
                "activityintensity == 3", "moderate + vigorous")
   domain_fields = c(rep(FALSE, 9), rep(TRUE, 7))
   for (mi in 1:length(names)) {
+    pfd = tibble(name = names[mi], formula = formulas[mi], domain_field = domain_fields[mi])
     if (!exists("palmsplus_fields_def")) {
-      palmsplus_fields_def = tibble(name = names[mi], formula = formulas[mi], domain_field = domain_fields[mi])
-    } else if (names[mi] %in% palmsplus_fields_def$name) {
-      stop(names[mi], " already exists in palmsplus_fields_def")
+      palmsplus_fields_def = pfd
     } else{
-      palmsplus_fields_def = rbind(palmsplus_fields_def, c(names[mi], formulas[mi], domain_fields[mi]))
+      palmsplus_fields_def = rbind(palmsplus_fields_def, pfd)
     }
   }
   
@@ -260,12 +253,11 @@ PALMSplusRshiny <- function(gisdir = "",
                "(length / duration) * 3.6")
   after_conversions = c(rep(FALSE, 12), rep(TRUE, 2))
   for (mi in 1:length(names)) {
+    tfd = tibble(name = names[mi], formula = formulas[mi], after_conversion = after_conversions[mi])
     if (!exists("trajectory_fields_def")) {
-      trajectory_fields_def = tibble(name = names[mi], formula = formulas[mi], after_conversion = after_conversions[mi])
-    } else if (names[mi] %in% trajectory_fields_def$name) {
-      stop(names[mi], " already exists in trajectory_fields_def")
+      trajectory_fields_def = tfd
     } else {
-      trajectory_fields_def = rbind(trajectory_fields_def, c(names[mi], formulas[mi], after_conversions[mi]))
+      trajectory_fields_def = rbind(trajectory_fields_def, tfd)
     }
   }
   # multimodal_fields
@@ -273,12 +265,11 @@ PALMSplusRshiny <- function(gisdir = "",
             "moderate", "vigorous", "mvpa", "length", "speed")
   funcs = c(rep("sum", 9), "mean")
   for (mi in 1:length(names)) {
+    mdf = tibble(name = names[mi], func = funcs[mi])
     if (!exists("multimodal_fields_def")) {
-      multimodal_fields_def = tibble(name = names[mi], func = funcs[mi])
-    } else if (names[mi] %in% multimodal_fields_def$name) {
-      stop(names[mi], " already exists in multimodal_fields_def")
+      multimodal_fields_def = mdf
     } else {
-      multimodal_fields_def = rbind(multimodal_fields_def, c(names[mi], func = funcs[mi]))
+      multimodal_fields_def = rbind(multimodal_fields_def, mfd)
     }
   }
   #================
@@ -340,16 +331,14 @@ PALMSplusRshiny <- function(gisdir = "",
     domain_field = FALSE
     if (!exists("palmsplus_fields")) {
       print("create new tibble")
-      palmsplus_fields = tibble(name = names[mi], formula = formula[mi], domain_field = domain_field)
-    } else if (names[mi] %in% palmsplus_fields$name) {
-      stop(names[mi], " already exists in palmsplus_fields")
+      palmsplus_fields = tibble(name = names[mi], formula = formulas[mi], domain_field = domain_field)
     } else {
       print("append to tibble")
       # if (ncol(palmsplus_fields) != 3) {
         print(head(palmsplus_fields))
       # }
       palmsplus_fields = rbind(palmsplus_fields,
-                               tibble(name = names[mi], formula = formula[mi], domain_field = domain_field))
+                               tibble(name = names[mi], formula = formulas[mi], domain_field = domain_field))
     }
     if (length(palmsplus_fields) == 0) {
       palmsplus_fields = palmsplus_fields_def
@@ -375,8 +364,6 @@ PALMSplusRshiny <- function(gisdir = "",
     if (!exists("palmsplus_domains")) {
       print("create new tibble")
       palmsplus_domains = tibble(name = names[mi], formula = formulas[mi])
-    } else if (names[mi] %in% palmsplus_domains$name) {
-      stop(names[mi], " already exists in palmsplus_domains")
     } else {
       print("append to tibble")
       # if (ncol(palmsplus_domains) != 2) {
@@ -396,9 +383,6 @@ PALMSplusRshiny <- function(gisdir = "",
     if (!exists("trajectory_fields")) {
       print("create new tibble")
       trajectory_fields = tibble(name = names[mi], formula = formulas[mi], after_conversion = formulas[mi])
-    } else if (names[mi] %in% trajectory_fields$name) {
-      stop(names[mi], " already exists in trajectory_fields")
-
     } else {
       print("append to tibble")
       # if (ncol(trajectory_fields) != 3) {
