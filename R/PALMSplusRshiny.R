@@ -356,39 +356,53 @@ PALMSplusRshiny <- function(gisdir = "",
   #=============================
   
   # Run palmsplusr ----------------------------------------------------------
-  overwrite = TRUE
-  fns = c(paste0(palmsplus_folder, "/", country_name, "_palmsplus.csv"),
-          paste0(palmsplus_folder, "/", country_name, "_days.csv"),
-          paste0(palmsplus_folder, "/", country_name, "_trajectories.csv"),
-          paste0(palmsplus_folder, "/", country_name, "_multimodal.csv"))
-  if (overwrite == TRUE) {
-    for (fn in fns) {
-      if (file.exists(fn)) file.remove(fn)
-    }
-  }
-  print("run palmplusr - plus")
-  palmsplus <- palmsplusr::palms_build_palmsplus(palms)
-  write_csv(palmsplus, file = fns[1])
+  # overwrite = TRUE
+  # fns = c(paste0(palmsplus_folder, "/", country_name, "_palmsplus.csv"),
+  #         paste0(palmsplus_folder, "/", country_name, "_days.csv"),
+  #         paste0(palmsplus_folder, "/", country_name, "_trajectories.csv"),
+  #         paste0(palmsplus_folder, "/", country_name, "_multimodal.csv"))
+  # if (overwrite == TRUE) {
+  #   for (fn in fns) {
+  #     if (file.exists(fn)) file.remove(fn)
+  #   }
+  # }
   
-  print("run palmplusr - days")
-  days <- palmsplusr::palms_build_days(palmsplus)
-  write_csv(days,  file = fns[2])
-  sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", country_name, "_palmsplus.shp"), append = FALSE)
+  # this is now an internal function inside HabitusGUI to address scoping problems:
+  palmsplus_build(palms = palms,
+                  config_file = NULL,
+                  verbose = TRUE,
+                  spatial_threshold = 200,
+                  temporal_threshold = 10,
+                  palmsplus_folder = palmsplus_folder,
+                  dataset_name = country_name,
+                  palmsplus_fields = palmsplus_fields,
+                  palmsplus_domains = palmsplus_domains,
+                  trajectory_fields = trajectory_fields)
   
-  print("run palmplusr - trajectories")
-  trajectories <- palmsplusr::palms_build_trajectories(palmsplus)
-  write_csv(trajectories,  file = fns[3])
-  sf::st_write(trajectories, paste0(palmsplus_folder, "/", country_name, "_trajecories.shp"))
-  
-  print("run palmplusr - multimodal")
-  multimodal <- palmsplusr::palms_build_multimodal(data = trajectories,
-                                                   spatial_threshold = 200,
-                                                   temporal_threshold = 10,
-                                                   palmsplus_copy = palmsplus) # p
-  write_csv(multimodal, file = fns[4])
-  sf::st_write(multimodal, paste0(palmsplus_folder, "/", country_name, "_multimodal.shp"))
+  # print("run palmplusr - plus")
+  # palmsplus <- palmsplusr::palms_build_palmsplus(palms)
+  # write_csv(palmsplus, file = fns[1])
+  # 
+  # print("run palmplusr - days")
+  # days <- palmsplusr::palms_build_days(palmsplus)
+  # write_csv(days,  file = fns[2])
+  # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", country_name, "_palmsplus.shp"), append = FALSE)
+  # 
+  # print("run palmplusr - trajectories")
+  # trajectories <- palmsplusr::palms_build_trajectories(palmsplus)
+  # write_csv(trajectories,  file = fns[3])
+  # sf::st_write(trajectories, paste0(palmsplus_folder, "/", country_name, "_trajecories.shp"))
+  # 
+  # print("run palmplusr - multimodal")
+  # multimodal <- palmsplusr::palms_build_multimodal(data = trajectories,
+  #                                                  spatial_threshold = 200,
+  #                                                  temporal_threshold = 10,
+  #                                                  palmsplus_copy = palmsplus) # p
+  # write_csv(multimodal, file = fns[4])
+  # sf::st_write(multimodal, paste0(palmsplus_folder, "/", country_name, "_multimodal.shp"))
   
   
   print("end reached")
-  return()
+  return(NULL)
 }
+########################################
