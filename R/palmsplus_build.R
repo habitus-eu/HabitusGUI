@@ -36,7 +36,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   end_point = end_prev = end_trip = func = geometry = identifier = mmt_criteria = NULL
   mmt_number = mot = name = palmsplus_copy = read_config = start_point = start_trip = NULL
   time_diff = tripnumber = triptype = value = variable = NULL
-  
+  print("starting palmsplus_build")
   # palms_build_palmsplus <- function(data, config_file = NULL, verbose = TRUE) {
   print("run palmplusr - plus")
   if (!exists("palmsplus_fields") & is.null(config_file)) stop("No palmsplus fields have been added (and no config file specified)")
