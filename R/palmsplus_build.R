@@ -41,6 +41,8 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
                             school,
                             home_nbh,
                             school_nbh) {
+  print(str(palms))
+  print("---------------")
   # Create empty objects to reassure R that object names are expected
   after_conversion = context = datetime = distance_diff = domain_field = duration = NULL
   end_point = end_prev = end_trip = func = geometry = identifier = mmt_criteria = NULL
@@ -83,6 +85,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
       lapply(parse_expr)
   }
   print("b")
+  print(config_file)
   # If using config file
   if (!is.null(config_file)) {
     print("b1")
