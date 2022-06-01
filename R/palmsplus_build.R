@@ -109,6 +109,8 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     }
   }
   print("d")
+  print(class(palms))
+  print(head(palms))
   palmsplus <- rbindlist(x) %>%
     sf::st_set_geometry(palms$geometry)
   
