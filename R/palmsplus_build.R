@@ -78,10 +78,10 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   print("a")
   # If using field tables
   if (exists("palmsplus_fields") & is.null(config_file)) {
-    print("item 1")
-    print(palmsplus_fields[[1]])
-    print("item 2")
-    print(palmsplus_fields[[2]])
+    # print("item 1")
+    # print(palmsplus_fields[[1]])
+    # print("item 2")
+    # print(palmsplus_fields[[2]])
     field_args <- setNames(palmsplus_fields[[2]], palmsplus_fields[[1]]) %>%
       lapply(parse_expr)
   }

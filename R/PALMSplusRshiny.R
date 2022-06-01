@@ -305,16 +305,16 @@ PALMSplusRshiny <- function(gisdir = "",
                paste0("palmsInPolygon(polygons = dplyr::filter(school_nbh, school_id == participant_basis %>%",
                                  " dplyr::filter(identifier == i) %>% pull(school_id)))"))
   for (mi in 1:length(names)) {
-    print(paste0("mi: ", mi))
+    # print(paste0("mi: ", mi))
     domain_field = FALSE
     pfi = tibble(name = names[mi], formula = formulas[mi], domain_field = domain_field)
     if (!exists("palmsplus_fields")) {
-      print("create new tibble")
+      # print("create new tibble")
       palmsplus_fields = pfi
     } else {
-      print("append to tibble")
+      # print("append to tibble")
       # if (ncol(palmsplus_fields) != 3) {
-        print(head(palmsplus_fields))
+        # print(head(palmsplus_fields))
       # }
       palmsplus_fields = rbind(palmsplus_fields, pfi)
     }
@@ -335,15 +335,15 @@ PALMSplusRshiny <- function(gisdir = "",
                                   " !(at_home_nbh) & !(at_school_nbh)"))
   
   for (mi in 1:length(names)) {
-    print(paste0("mi: ", mi))
+    # print(paste0("mi: ", mi))
     pdo = tibble(name = names[mi], formula = formulas[mi])
     if (!exists("palmsplus_domains")) {
-      print("create new tibble")
+      # print("create new tibble")
       palmsplus_domains = pdo
     } else {
-      print("append to tibble")
+      # print("append to tibble")
       # if (ncol(palmsplus_domains) != 2) {
-      print(head(palmsplus_domains))
+      # print(head(palmsplus_domains))
       # }
       palmsplus_domains = rbind(palmsplus_domains, pdo)
     }
@@ -354,15 +354,15 @@ PALMSplusRshiny <- function(gisdir = "",
   formulas = c("at_home", "at_school",
                "at_home", "at_school")
   for (mi in 1:length(names)) {
-    print(paste0("mi: ", mi))
+    # print(paste0("mi: ", mi))
     tfi = tibble(name = names[mi], formula = formulas[mi], after_conversion = "at_home")
     if (!exists("trajectory_fields")) {
-      print("create new tibble")
+      # print("create new tibble")
       trajectory_fields = tfi
     } else {
-      print("append to tibble")
+      # print("append to tibble")
       # if (ncol(trajectory_fields) != 3) {
-      print(head(trajectory_fields))
+      # print(head(trajectory_fields))
       # }
       trajectory_fields = rbind(trajectory_fields, tfi)
     }
