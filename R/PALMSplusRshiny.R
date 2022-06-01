@@ -321,10 +321,18 @@ PALMSplusRshiny <- function(gisdir = "",
   
   #=============================
   names = c("at_home", "at_school", "at_home_nbh", "at_school_nbh")
-  formulas = c(as.formula("palmsInPolygon(polygons = dyplr::filter(home, identifier == i), collapse_var = identifier)", env = environment()),
-               as.formula("palmsInPolygon(polygons = dyplr::filter(school, school_id == participant_basis %>% dyplr::filter(identifier == i) %>% pull(school_id)))", env = environment()),
-               as.formula("palmsInPolygon(polygons = dyplr::filter(home_nbh, identifier == i), collapse_var = identifier)", env = environment()),
-               as.formula("palmsInPolygon(polygons = dyplr::filter(school_nbh, school_id == participant_basis %>% dyplr::filter(identifier == i) %>% pull(school_id)))", env = environment()))
+  formulas = c(as.formula(paste0("~",
+                                 "palmsInPolygon(polygons = dyplr::filter(home, identifier == i),",
+                                 " collapse_var = identifier)")),
+               as.formula(paste0("~",
+                                 "palmsInPolygon(polygons = dyplr::filter(school, school_id == participant_basis %>%",
+                                 " dyplr::filter(identifier == i) %>% pull(school_id)))")),
+               as.formula(paste0("~", 
+                                 "palmsInPolygon(polygons = dyplr::filter(home_nbh, identifier == i),",
+                                 " collapse_var = identifier)")),
+               as.formula(paste0("~",
+                                 "palmsInPolygon(polygons = dyplr::filter(school_nbh, school_id == participant_basis %>%",
+                                 " dyplr::filter(identifier == i) %>% pull(school_id)))")))
   for (mi in 1:length(names)) {
     domain_field = FALSE
     if (!exists("palmsplus_fields")) {
