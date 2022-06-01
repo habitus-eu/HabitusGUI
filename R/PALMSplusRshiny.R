@@ -348,7 +348,8 @@ PALMSplusRshiny <- function(gisdir = "",
       # if (ncol(palmsplus_fields) != 3) {
         print(head(palmsplus_fields))
       # }
-      palmsplus_fields = rbind(palmsplus_fields, c(names[mi], formulas[mi], domain_field))
+      palmsplus_fields = rbind(palmsplus_fields,
+                               tibble(name = names[mi], formula = formula[mi], domain_field = domain_field))
     }
     if (length(palmsplus_fields) == 0) {
       palmsplus_fields = palmsplus_fields_def
@@ -381,7 +382,8 @@ PALMSplusRshiny <- function(gisdir = "",
       # if (ncol(palmsplus_domains) != 2) {
       print(head(palmsplus_domains))
       # }
-      palmsplus_domains = rbind(palmsplus_domains, c(names[mi], formulas[mi]))
+      palmsplus_domains = rbind(palmsplus_domains,
+                                tibble(name = names[mi], formula = formulas[mi]))
     }
   }
   #=============================
@@ -402,7 +404,8 @@ PALMSplusRshiny <- function(gisdir = "",
       # if (ncol(trajectory_fields) != 3) {
       print(head(trajectory_fields))
       # }
-      trajectory_fields = rbind(trajectory_fields, c(names[mi], formulas[mi],  after_conversion = formulas[mi]))
+      trajectory_fields = rbind(trajectory_fields, 
+                                tibble(name = names[mi], formula = formulas[mi], after_conversion = formulas[mi]))
     }
     if (length(trajectory_fields) == 0) {
       trajectory_fields = trajectory_fields_def
