@@ -296,14 +296,14 @@ PALMSplusRshiny <- function(gisdir = "",
   #=============================
   print("adding fields:")
   names = c("at_home", "at_school", "at_home_nbh", "at_school_nbh")
-  formulas = c(paste0("palmsInPolygon(polygons = dyplr::filter(home, identifier == i),",
+  formulas = c(paste0("palmsInPolygon(polygons = dplyr::filter(home, identifier == i),",
                                  " collapse_var = identifier)"),
-               paste0("palmsInPolygon(polygons = dyplr::filter(school, school_id == participant_basis %>%",
-                                 " dyplr::filter(identifier == i) %>% pull(school_id)))"),
-               paste0("palmsInPolygon(polygons = dyplr::filter(home_nbh, identifier == i),",
+               paste0("palmsInPolygon(polygons = dplyr::filter(school, school_id == participant_basis %>%",
+                                 " dplyr::filter(identifier == i) %>% pull(school_id)))"),
+               paste0("palmsInPolygon(polygons = dplyr::filter(home_nbh, identifier == i),",
                                  " collapse_var = identifier)"),
-               paste0("palmsInPolygon(polygons = dyplr::filter(school_nbh, school_id == participant_basis %>%",
-                                 " dyplr::filter(identifier == i) %>% pull(school_id)))"))
+               paste0("palmsInPolygon(polygons = dplyr::filter(school_nbh, school_id == participant_basis %>%",
+                                 " dplyr::filter(identifier == i) %>% pull(school_id)))"))
   for (mi in 1:length(names)) {
     print(paste0("mi: ", mi))
     domain_field = FALSE
