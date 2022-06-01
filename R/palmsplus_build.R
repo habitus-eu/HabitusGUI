@@ -11,6 +11,7 @@
 #' @param palmsplus_fields ...
 #' @param palmsplus_domains ...
 #' @param trajectory_fields ...
+#' @param multimodal_fields_def ...
 #'
 #' @import dplyr
 #' @import sf
@@ -30,7 +31,8 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
                             dataset_name = "",
                             palmsplus_fields,
                             palmsplus_domains,
-                            trajectory_fields) {
+                            trajectory_fields,
+                            multimodal_fields_def) {
   # Create empty objects to reassure R that object names are expected
   after_conversion = context = datetime = distance_diff = domain_field = duration = NULL
   end_point = end_prev = end_trip = func = geometry = identifier = mmt_criteria = NULL
@@ -427,6 +429,9 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   if(verbose) cat('done\n')
   
   multimodal = df
+  if (length(multimodal) == 0) {
+    multimodal = multimodal_fields_def
+  }
   # store results
   fn = paste0(palmsplus_folder, "/", dataset_name,  "_multimodal.csv")
   write_csv(multimodal, file = fn)

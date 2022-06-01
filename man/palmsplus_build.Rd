@@ -14,7 +14,8 @@ palmsplus_build(
   dataset_name = "",
   palmsplus_fields,
   palmsplus_domains,
-  trajectory_fields
+  trajectory_fields,
+  multimodal_fields_def
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ palmsplus_build(
 \item{palmsplus_domains}{...}
 
 \item{trajectory_fields}{...}
+
+\item{multimodal_fields_def}{...}
 }
 \description{
 Build the \code{palmsplus} objects by adding additional columns..
