@@ -6,7 +6,7 @@
 #' @param outputdir Path to outputdir location
 #' @param dataset_name Name of dataset
 #' @return palms_to_clean_lower object
-#' @importFrom stats end start formula
+#' @importFrom stats end start formula as.formula
 #' @importFrom tidyr pivot_wider
 #' @importFrom readr write_csv read_csv
 #' @import palmsplusr
@@ -28,10 +28,10 @@ PALMSplusRshiny <- function(gisdir = "",
     cat("\nCreating PALMSplusR output directory")
     dir.create(palmsplus_folder)
   }
-  country_name = dataset_name #tail(unlist(strsplit(gisdir, "_")), n = 1)
   sf::sf_use_s2(FALSE)
+  # identify palms csv output files in palmsdir:
   palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
-  
+  # read and combine the palms csv output files
   csv_palms <- lapply(palms_country_files, FUN = read_csv, col_types = list(
     identifier = readr::col_character(),
     dow = readr::col_integer(),
@@ -46,15 +46,14 @@ PALMSplusRshiny <- function(gisdir = "",
   ))
   PALMS_combined <- bind_rows(csv_palms)
   
-  PALMS_reduced <- subset(PALMS_combined, lon > -180)
-  # PALMS_reduced <- subset(PALMS_reduced, !identifier %in% participant_exclude_list) # VvH turned off
-  
+  # Data cleaning:
   print("start cleaning")
-  palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, country_name)
+  PALMS_reduced <- subset(PALMS_combined, lon > -180)
+  palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, dataset_name)
   print("cleaning completed")
   
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
-  PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${country_name}_reduced.csv"))
+  PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv"))
   print(paste0("Check PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
   palms = palmsplusr::read_palms(PALMS_reduced_file)
@@ -62,12 +61,11 @@ PALMSplusRshiny <- function(gisdir = "",
   # VvH I have added this:
   find_file = function(path, namelowercase) {
     allcsvfiles = dir(path, recursive = TRUE, full.names = TRUE)
-    basisfile = allcsvfiles[which(tolower(basename(allcsvfiles)) == namelowercase)]
-    return(basisfile)
+    file_of_interest = allcsvfiles[which(tolower(basename(allcsvfiles)) == namelowercase)]
+    return(file_of_interest)
   }
-  basisfile = gislinkfile  #find_file(path = ".", namelowercase = "participant_basis.csv")
   print("reading basis file")
-  participant_basis = read_csv(basisfile)
+  participant_basis = read_csv(gislinkfile)
   unique_ids_in_palms <- unique(palms$identifier)
   unique_ids_in_participant_basis <- unique(participant_basis$identifier)
   # VvH - Test for missing values in participant basis
@@ -83,18 +81,16 @@ PALMSplusRshiny <- function(gisdir = "",
     participant_exclude_list$school_id = participant_basis$school_id[missing]
     participant_basis = participant_basis[test_missing_value == 0, ]
   }
-  # write list to file
-  sink(paste0(palmsplus_folder, "/", country_name, "_excluded_ids.txt"))
+  # Write list of excluded files to file
+  sink(paste0(palmsplus_folder, "/", dataset_name, "_excluded_ids.txt"))
   print(participant_exclude_list)
   sink()
-  
   rm(missing)
   # VvH turned this off because now only process IDs with complete data
   # missing_ids_in_participant_basis <- setdiff(unique_ids_in_palms, unique_ids_in_participant_basis)
-  
   # if(length(missing_ids_in_participant_basis) > 0){
   #   participant_basis <- rbind(participant_basis, data.frame(identifier = missing_ids_in_participant_basis, school_id = NA, class_id = NA))
-  #   write.csv(participant_basis, paste(str_interp("participant_basis_${country_name}.csv")))
+  #   write.csv(participant_basis, paste(str_interp("participant_basis_${dataset_name}.csv")))
   # }
   
   # Load all shape files ----------------------------------------------------
@@ -181,12 +177,12 @@ PALMSplusRshiny <- function(gisdir = "",
   # }
   # check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
   
-  getnrow = function(x) {
-    x = x[[1]]
-    x = x[rowSums(is.na(x)) == 0, ] 
-    v = nrow(x)
-    return(v)
-  }
+  # getnrow = function(x) {
+  #   x = x[[1]]
+  #   x = x[rowSums(is.na(x)) == 0, ] 
+  #   v = nrow(x)
+  #   return(v)
+  # }
   # school$nrowgeom = unlist(lapply(school$geometry, FUN = getnrow))
   # school_nbh$nrowgeom = unlist(lapply(school_nbh$geometry, FUN = getnrow))
   # home$nrowgeom = unlist(lapply(home$geometry, FUN = getnrow))
@@ -205,7 +201,7 @@ PALMSplusRshiny <- function(gisdir = "",
   print(paste0("school ", length(unique(school$school_id))))
   print(paste0("school_nbh ", length(unique(school_nbh$school_id))))
   
-  write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${country_name}.csv"))) # store file for logging purposes only
+  write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
   
   # Create field tables -----------------------------------------------------
   
@@ -313,27 +309,22 @@ PALMSplusRshiny <- function(gisdir = "",
       message("palms_in_polygon: Polygon data has 0 rows, returning NA")
       return(NA)
     }
-    
     polygons <- st_make_valid(polygons)
-    
     collapse_var <- rlang::quo_text(enquo(collapse_var))
-    
     if (!(collapse_var == "NULL"))
       polygons <- aggregate(polygons, list(polygons[[collapse_var]]), function(x) x[1])
-    
     suppressMessages( # Supresses the 'planar coordinates' warning
       st_contains(x = polygons, y = ., sparse = FALSE) %>% as.vector(.)
     )
   }
   
   
-  
   #=============================
   names = c("at_home", "at_school", "at_home_nbh", "at_school_nbh")
-  formulas = c("palmsInPolygon(polygons = dyplr::filter(home, identifier == i), collapse_var = identifier)",
-               "palmsInPolygon(polygons = dyplr::filter(school, school_id == participant_basis %>% dyplr::filter(identifier == i) %>% pull(school_id)))",
-               "palmsInPolygon(polygons = dyplr::filter(home_nbh, identifier == i), collapse_var = identifier)",
-               "palmsInPolygon(polygons = dyplr::filter(school_nbh, school_id == participant_basis %>% dyplr::filter(identifier == i) %>% pull(school_id)))")
+  formulas = c(as.formula("palmsInPolygon(polygons = dyplr::filter(home, identifier == i), collapse_var = identifier)", env = environment()),
+               as.formula("palmsInPolygon(polygons = dyplr::filter(school, school_id == participant_basis %>% dyplr::filter(identifier == i) %>% pull(school_id)))", env = environment()),
+               as.formula("palmsInPolygon(polygons = dyplr::filter(home_nbh, identifier == i), collapse_var = identifier)", env = environment()),
+               as.formula("palmsInPolygon(polygons = dyplr::filter(school_nbh, school_id == participant_basis %>% dyplr::filter(identifier == i) %>% pull(school_id)))", env = environment()))
   for (mi in 1:length(names)) {
     domain_field = FALSE
     if (!exists("palmsplus_fields")) {
@@ -379,10 +370,10 @@ PALMSplusRshiny <- function(gisdir = "",
   
   # Run palmsplusr ----------------------------------------------------------
   # overwrite = TRUE
-  # fns = c(paste0(palmsplus_folder, "/", country_name, "_palmsplus.csv"),
-  #         paste0(palmsplus_folder, "/", country_name, "_days.csv"),
-  #         paste0(palmsplus_folder, "/", country_name, "_trajectories.csv"),
-  #         paste0(palmsplus_folder, "/", country_name, "_multimodal.csv"))
+  # fns = c(paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.csv"),
+  #         paste0(palmsplus_folder, "/", dataset_name, "_days.csv"),
+  #         paste0(palmsplus_folder, "/", dataset_name, "_trajectories.csv"),
+  #         paste0(palmsplus_folder, "/", dataset_name, "_multimodal.csv"))
   # if (overwrite == TRUE) {
   #   for (fn in fns) {
   #     if (file.exists(fn)) file.remove(fn)
@@ -396,7 +387,7 @@ PALMSplusRshiny <- function(gisdir = "",
                   spatial_threshold = 200,
                   temporal_threshold = 10,
                   palmsplus_folder = palmsplus_folder,
-                  dataset_name = country_name,
+                  dataset_name = dataset_name,
                   palmsplus_fields = palmsplus_fields,
                   palmsplus_domains = palmsplus_domains,
                   trajectory_fields = trajectory_fields)
@@ -408,12 +399,12 @@ PALMSplusRshiny <- function(gisdir = "",
   # print("run palmplusr - days")
   # days <- palmsplusr::palms_build_days(palmsplus)
   # write_csv(days,  file = fns[2])
-  # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", country_name, "_palmsplus.shp"), append = FALSE)
+  # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
   # 
   # print("run palmplusr - trajectories")
   # trajectories <- palmsplusr::palms_build_trajectories(palmsplus)
   # write_csv(trajectories,  file = fns[3])
-  # sf::st_write(trajectories, paste0(palmsplus_folder, "/", country_name, "_trajecories.shp"))
+  # sf::st_write(trajectories, paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp"))
   # 
   # print("run palmplusr - multimodal")
   # multimodal <- palmsplusr::palms_build_multimodal(data = trajectories,
@@ -421,7 +412,7 @@ PALMSplusRshiny <- function(gisdir = "",
   #                                                  temporal_threshold = 10,
   #                                                  palmsplus_copy = palmsplus) # p
   # write_csv(multimodal, file = fns[4])
-  # sf::st_write(multimodal, paste0(palmsplus_folder, "/", country_name, "_multimodal.shp"))
+  # sf::st_write(multimodal, paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp"))
   
   
   print("end reached")
