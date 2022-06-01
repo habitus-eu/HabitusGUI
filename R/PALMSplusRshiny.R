@@ -380,7 +380,7 @@ PALMSplusRshiny <- function(gisdir = "",
                as.formula("~at_home"), as.formula("~at_school"))
   for (mi in 1:length(names)) {
     print(paste0("mi: ", mi))
-    tfi = tibble(name = names[mi], formula = formulas[mi], after_conversion = formulas[mi])
+    tfi = tibble(name = names[mi], formula = formulas[mi], after_conversion = "at_home")
     if (!exists("trajectory_fields")) {
       print("create new tibble")
       trajectory_fields = tfi
