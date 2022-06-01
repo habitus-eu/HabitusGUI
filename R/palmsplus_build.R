@@ -93,9 +93,9 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   }
   
   print("c")
+  print(str(palms))
   print(class(palms))
   print(head(palms))
-  print(str(palms))
   x <- list()
   j <- 1
   print("c1")
