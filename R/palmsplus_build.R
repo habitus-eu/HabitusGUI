@@ -41,6 +41,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
                             school,
                             home_nbh,
                             school_nbh) {
+  print("---------------")
   print(str(palms))
   print("---------------")
   # Create empty objects to reassure R that object names are expected
