@@ -93,24 +93,28 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   }
   
   print("c")
+  print(class(palms))
+  print(head(palms))
+  print(str(palms))
   x <- list()
   j <- 1
+  print("c1")
   len <- length(unique(palms$identifier))
-  
+  print("c2")
   for (i in unique(palms$identifier)) {
+    print("c3")
     x[[i]] <- palms %>%
-      filter(identifier == i) %>%
-      mutate(!!! field_args) %>%
-      mutate_if(is.logical, as.integer)
-    
+      dplyr::filter(identifier == i) %>%
+      dplyr::mutate(!!! field_args) %>%
+      dplyr::mutate_if(is.logical, as.integer)
+    print("c4")
     if (verbose) {
       cat("[", j, "/", len, "] Computed palmsplus for: ", i, "\n", sep = "")
       j <- j + 1
     }
   }
   print("d")
-  print(class(palms))
-  print(head(palms))
+  
   palmsplus <- rbindlist(x) %>%
     sf::st_set_geometry(palms$geometry)
   
