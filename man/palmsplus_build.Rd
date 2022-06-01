@@ -15,7 +15,11 @@ palmsplus_build(
   palmsplus_fields,
   palmsplus_domains,
   trajectory_fields,
-  multimodal_fields_def
+  multimodal_fields_def,
+  home,
+  school,
+  home_nbh,
+  school_nbh
 )
 }
 \arguments{
@@ -40,6 +44,14 @@ palmsplus_build(
 \item{trajectory_fields}{...}
 
 \item{multimodal_fields_def}{...}
+
+\item{home}{...}
+
+\item{school}{...}
+
+\item{home_nbh}{...}
+
+\item{school_nbh}{...}
 }
 \description{
 Build the \code{palmsplus} objects by adding additional columns..

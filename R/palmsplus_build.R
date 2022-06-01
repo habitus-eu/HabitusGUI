@@ -12,7 +12,11 @@
 #' @param palmsplus_domains ...
 #' @param trajectory_fields ...
 #' @param multimodal_fields_def ...
-#'
+#' @param home ...
+#' @param school ...
+#' @param home_nbh ...
+#' @param school_nbh ...
+#' 
 #' @import dplyr
 #' @import sf
 #' @importFrom rlang parse_expr  UQ
@@ -32,12 +36,38 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
                             palmsplus_fields,
                             palmsplus_domains,
                             trajectory_fields,
-                            multimodal_fields_def) {
+                            multimodal_fields_def,
+                            home,
+                            school,
+                            home_nbh,
+                            school_nbh) {
   # Create empty objects to reassure R that object names are expected
   after_conversion = context = datetime = distance_diff = domain_field = duration = NULL
   end_point = end_prev = end_trip = func = geometry = identifier = mmt_criteria = NULL
   mmt_number = mot = name = palmsplus_copy = read_config = start_point = start_trip = NULL
   time_diff = tripnumber = triptype = value = variable = NULL
+  
+  
+  # rewriting function such that objects are by default present inside the function
+  palmsInPolygon <- function(polygons, collapse_var = NULL, home = home, school = school,
+                             home_nbh = home_nbh, school_nbh = school_nbh){
+    . <- NULL # declaring because otherwise R check complains about undefined '.'
+    if (nrow(polygons) < 1) {
+      message("palms_in_polygon: Polygon data has 0 rows, returning NA")
+      return(NA)
+    }
+    polygons <- st_make_valid(polygons)
+    collapse_var <- rlang::quo_text(enquo(collapse_var))
+    if (!(collapse_var == "NULL")) {
+      polygons <- aggregate(polygons, list(polygons[[collapse_var]]), function(x) x[1])
+    }
+    # Supresses the 'planar coordinates' warning
+    polygons = suppressMessages(st_contains(x = polygons, y = ., sparse = FALSE) %>% as.vector(.))
+    
+    return(polygons)
+  }
+  
+  
   print("starting palmsplus_build")
   # palms_build_palmsplus <- function(data, config_file = NULL, verbose = TRUE) {
   print("run palmplusr - plus")
