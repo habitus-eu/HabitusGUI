@@ -56,13 +56,13 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
       message("palms_in_polygon: Polygon data has 0 rows, returning NA")
       return(NA)
     }
-    polygons <- st_make_valid(polygons)
-    collapse_var <- rlang::quo_text(enquo(collapse_var))
+    polygons <- sf::st_make_valid(polygons)
+    collapse_var <- rlang::quo_text(rlang::enquo(collapse_var))
     if (!(collapse_var == "NULL")) {
       polygons <- aggregate(polygons, list(polygons[[collapse_var]]), function(x) x[1])
     }
     # Supresses the 'planar coordinates' warning
-    polygons = suppressMessages(st_contains(x = polygons, y = ., sparse = FALSE) %>% as.vector(.))
+    polygons = suppressMessages(sf::st_contains(x = polygons, y = ., sparse = FALSE) %>% as.vector(.))
     
     return(polygons)
   }
@@ -110,7 +110,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   }
   print("d")
   palmsplus <- rbindlist(x) %>%
-    st_set_geometry(palms$geometry)
+    sf::st_set_geometry(palms$geometry)
   
   # store results
   fn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.csv")
@@ -153,19 +153,19 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   
   print("g")
   palmsplus_tmp <- palmsplus %>%
-    mutate(!!! domain_args) %>%
-    mutate_if(is.logical, as.integer)
+    dplyr::mutate(!!! domain_args) %>%
+    mutate_if::mutate_if(is.logical, as.integer)
   
   
   if (!is.null(config_file)) {
     config <- read_config(config_file) %>%
       filter(context == 'palmsplus_field')
     
-    fields <- config %>% filter(domain_field == TRUE) %>% pull(name)
+    fields <- config %>% filter(domain_field == TRUE) %>% dplyr::pull(name)
     
   } else {
     
-    fields <- palmsplus_fields %>% filter(domain_field == TRUE) %>% pull(name)
+    fields <- palmsplus_fields %>% filter(domain_field == TRUE) %>% dplyr::pull(name)
     
   }
   print("h")
