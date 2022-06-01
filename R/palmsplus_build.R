@@ -41,9 +41,6 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
                             school,
                             home_nbh,
                             school_nbh) {
-  print("---------------")
-  print(str(palms))
-  print("---------------")
   # Create empty objects to reassure R that object names are expected
   after_conversion = context = datetime = distance_diff = domain_field = duration = NULL
   end_point = end_prev = end_trip = func = geometry = identifier = mmt_criteria = NULL
@@ -75,57 +72,48 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   # palms_build_palmsplus <- function(data, config_file = NULL, verbose = TRUE) {
   print("run palmplusr - plus")
   if (!exists("palmsplus_fields") & is.null(config_file)) stop("No palmsplus fields have been added (and no config file specified)")
-  print("a")
   # If using field tables
   if (exists("palmsplus_fields") & is.null(config_file)) {
-    # print("item 1")
-    # print(palmsplus_fields[[1]])
-    # print("item 2")
-    # print(palmsplus_fields[[2]])
     field_args <- setNames(palmsplus_fields[[2]], palmsplus_fields[[1]]) %>%
       lapply(parse_expr)
   }
-  print("b")
-  print(config_file)
   # If using config file
   if (!is.null(config_file)) {
-    print("b1")
     config <- read_config(config_file) %>%
       filter(context == 'palmsplus_field')
-    print("b2")
     field_args <- setNames(config$formula, config$name) %>%
       lapply(parse_expr)
-    print("b3")
   }
-  
-  print("c")
+  print("field_args")
+  print(str(field_args))
+  print("palms")
   print(str(palms))
-  print("c1")
   print(class(palms))
-  print("c2")
   print(head(palms))
-  print("c3")
   x <- list()
   j <- 1
-  print("c4")
   len <- length(unique(palms$identifier))
-  print("c5")
   for (i in unique(palms$identifier)) {
-    print("c6")
+    print(paste0("i ",i))
+    print("test1")
+    test1 = palms %>% dplyr::filter(identifier == i)
+    print("test2")
+    test2 = palms %>% dplyr::filter(identifier == i) %>% dplyr::mutate(!!! field_args)
+    print("test3")
+    test3 = palms %>% dplyr::filter(identifier == i) %>% dplyr::mutate(!!! field_args) %>% dplyr::mutate_if(is.logical, as.integer)
+    print("testfull")
     x[[i]] <- palms %>%
       dplyr::filter(identifier == i) %>%
       dplyr::mutate(!!! field_args) %>%
       dplyr::mutate_if(is.logical, as.integer)
-    print("c7")
+    print("done")
     if (verbose) {
       cat("[", j, "/", len, "] Computed palmsplus for: ", i, "\n", sep = "")
       j <- j + 1
     }
   }
-  print("d")
   
-  palmsplus <- rbindlist(x) %>%
-    sf::st_set_geometry(palms$geometry)
+  palmsplus <- rbindlist(x) %>% sf::st_set_geometry(palms$geometry)
   
   # store results
   fn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.csv")
@@ -135,7 +123,6 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   print("run palmplusr - days")
   domains <- "total"
   domain_args <- setNames("1", "total") %>% lapply(parse_expr)
-  print("e")
   # If using field tables
   if (!exists("palmsplus_domains")) {
     
@@ -147,7 +134,6 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     domain_args <- c(domain_args, setNames(palmsplus_domains[[2]], palmsplus_domains[[1]]) %>%
                        lapply(parse_expr))
   }
-  print("f")
   # If using config file
   if (!is.null(config_file)) {
     config <- read_config(config_file) %>%
@@ -166,7 +152,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     
   }
   
-  print("g")
+  
   palmsplus_tmp <- palmsplus %>%
     dplyr::mutate(!!! domain_args) %>%
     mutate_if::mutate_if(is.logical, as.integer)
@@ -183,7 +169,6 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     fields <- palmsplus_fields %>% filter(domain_field == TRUE) %>% dplyr::pull(name)
     
   }
-  print("h")
   palmsplus_tmp <- palmsplus_tmp %>%
     st_set_geometry(NULL) %>%
     select(identifier, datetime, domains, fields) %>%
@@ -201,7 +186,6 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
       ungroup() %>%
       rename_at(vars(-identifier, -date), ~ paste0(i, "_", .))
   }
-  print("i")
   days <- x %>%
     reduce(left_join, by = c("identifier" = "identifier", "date" = "date"))
   
@@ -227,7 +211,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     args <- list()
     args_after <- list()
   }
-  print("j")
+  
   # If using config file
   if (!is.null(config_file) & !exists("trajectory_fields")) {
     config <- read_config(config_file) %>%
@@ -245,7 +229,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     }
   }
   
-  print("k")
+  
   # If using field tables
   if (exists("trajectory_locations") & is.null(config_file)) {
     args_locations <- setNames(paste0("first(", trajectory_locations[[2]],
@@ -268,7 +252,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     }
     
   }
-  print("l")
+  
   
   trajectories = palmsplus %>%
     filter(tripnumber > 0) %>%
@@ -279,7 +263,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     ungroup() %>%
     mutate_if(is.logical, as.integer)
   # }
-  print("m")
+  
   # store results
   fn = paste0(palmsplus_folder, "/", dataset_name,  "_trajectories.csv")
   write_csv(trajectories,  file = fn)
@@ -298,7 +282,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     stop("Your trajectories data does not contain the required column names...")
   
   if(verbose) cat('Calculating multimodal eligibility...')
-  print("n")
+  
   # Determine if a trajectory meets spatial and temporal criteria
   trajectories <- trajectories %>%
     arrange(identifier, tripnumber) %>%
@@ -319,7 +303,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
            mmt_number = NA)
   
   if(verbose) cat('done\nAssigning trip numbers...')
-  print("o")
+  
   # Assign correct start times for consecutive mmt segments
   for(i in 1:(nrow(trajectories)-1)) {
     trajectories$mmt_number[i] <- ifelse((!trajectories$mmt_criteria[i]) & trajectories$mmt_criteria[i+1], trajectories$start[i],
@@ -328,7 +312,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   
   trajectories$mmt_number[nrow(trajectories)] <- ifelse(trajectories$mmt_criteria[nrow(trajectories)], trajectories$mmt_number[nrow(trajectories)-1],
                                                         trajectories$start[nrow(trajectories)])
-  print("p")
+  
   # Use run-length encoding to assign mmt numbers
   trajectories <- trajectories %>%
     group_by(identifier) %>%
@@ -338,7 +322,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   
   if(verbose) cat('done\nCalculating fields...')
   
-  print("q")
+  
   
   
   if (!exists("multimodal_fields") & !is.null(config_file)) {
@@ -351,7 +335,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   
   
   if (exists("multimodal_fields")) {
-    print("r")
+    
     # Split varables into each mot
     mot_split <- trajectories %>%
       select(c("mot", "mmt_number", "identifier", "geometry", multimodal_fields$name)) %>%
@@ -374,7 +358,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
           paste(multimodal_fields$name[multimodal_fields$formula == i], collapse = "|"))),
           i, na.rm = TRUE)
     }
-    print("s")
+    
     df_fields <- reduce(df_fields, left_join,
                         by = c("identifier" = "identifier", "mmt_number" = "mmt_number"))
     
@@ -384,7 +368,6 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     mot_split <- trajectories
   }
   
-  print("t")
   
   if (!exists("trajectory_locations") & !is.null(config_file)) {
     
@@ -396,7 +379,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
     }
   }
   
-  print("u")
+  
   # Build trajectory_location formulas if they exist
   if (exists("trajectory_locations")) {
     
@@ -430,7 +413,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
         
         return(n1 & n2)
       }
-      print("v")
+      
       
       args_locations <- setNames(
         
@@ -445,13 +428,11 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
       
       args_locations <- NULL
     }
-    print("w")
     
   } else {
     args_locations <- NULL
   }
   
-  print("x")
   # Calculate other fields (+ trajectory_locations)
   df_other <- mot_split %>%
     group_by(identifier, mmt_number) %>%
@@ -474,14 +455,14 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
   } else {
     df <- df_other
   }
-  print("y")
+  
   if(verbose) cat('done\n')
   
   multimodal = df
   if (length(multimodal) == 0) {
     multimodal = multimodal_fields_def
   }
-  print("z")
+  
   # store results
   fn = paste0(palmsplus_folder, "/", dataset_name,  "_multimodal.csv")
   write_csv(multimodal, file = fn)
