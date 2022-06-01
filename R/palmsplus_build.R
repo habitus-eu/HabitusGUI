@@ -83,6 +83,7 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
       lapply(parse_expr)
   }
   print("b")
+  kkkk
   # If using config file
   if (!is.null(config_file)) {
     config <- read_config(config_file) %>%
