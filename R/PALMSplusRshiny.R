@@ -21,7 +21,7 @@ PALMSplusRshiny <- function(gisdir = "",
                             outputdir = "",
                             dataset_name = "") {
   home = school = home_nbh = school_nbh = NULL
-  lon = identifier = palms = NULL
+  . = lon = identifier = palms = NULL
   
   palmsplus_folder = paste0(outputdir, "/PALMSplus_output")
   if (!dir.exists(palmsplus_folder)) {
@@ -304,14 +304,36 @@ PALMSplusRshiny <- function(gisdir = "",
   # palmsplusr::palms_add_trajectory_location("school_home", "at_school", "at_home")
   # palmsplusr::palms_add_trajectory_location("home_home", "at_home", "at_home")
   # palmsplusr::palms_add_trajectory_location("school_school", "at_school", "at_school")
+
+  # rewriting function such that objects are by default present inside the function
+  palmsInPolygon <- function(polygons, collapse_var = NULL, home = home, school = school,
+                               home_nbh = home_nbh, school_nbh = school_nbh){
+    . <- NULL
+    if (nrow(polygons) < 1) {
+      message("palms_in_polygon: Polygon data has 0 rows, returning NA")
+      return(NA)
+    }
+    
+    polygons <- st_make_valid(polygons)
+    
+    collapse_var <- rlang::quo_text(enquo(collapse_var))
+    
+    if (!(collapse_var == "NULL"))
+      polygons <- aggregate(polygons, list(polygons[[collapse_var]]), function(x) x[1])
+    
+    suppressMessages( # Supresses the 'planar coordinates' warning
+      st_contains(x = polygons, y = ., sparse = FALSE) %>% as.vector(.)
+    )
+  }
+  
   
   
   #=============================
   names = c("at_home", "at_school", "at_home_nbh", "at_school_nbh")
-  formulas = c("palms_in_polygon(., filter(home, identifier == i), identifier)",
-               "palms_in_polygon(., filter(school, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))",
-               "palms_in_polygon(., filter(home_nbh, identifier == i), identifier)",
-               "palms_in_polygon(., filter(school_nbh, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
+  formulas = c("palmsInPolygon(polygons = dyplr::filter(home, identifier == i), collapse_var = identifier)",
+               "palmsInPolygon(polygons = dyplr::filter(school, school_id == participant_basis %>% dyplr::filter(identifier == i) %>% pull(school_id)))",
+               "palmsInPolygon(polygons = dyplr::filter(home_nbh, identifier == i), collapse_var = identifier)",
+               "palmsInPolygon(polygons = dyplr::filter(school_nbh, school_id == participant_basis %>% dyplr::filter(identifier == i) %>% pull(school_id)))")
   for (mi in 1:length(names)) {
     domain_field = FALSE
     if (!exists("palmsplus_fields")) {
