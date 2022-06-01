@@ -83,32 +83,36 @@ palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
       lapply(parse_expr)
   }
   print("b")
-  kkkk
   # If using config file
   if (!is.null(config_file)) {
+    print("b1")
     config <- read_config(config_file) %>%
       filter(context == 'palmsplus_field')
-    
+    print("b2")
     field_args <- setNames(config$formula, config$name) %>%
       lapply(parse_expr)
+    print("b3")
   }
   
   print("c")
   print(str(palms))
+  print("c1")
   print(class(palms))
+  print("c2")
   print(head(palms))
+  print("c3")
   x <- list()
   j <- 1
-  print("c1")
+  print("c4")
   len <- length(unique(palms$identifier))
-  print("c2")
+  print("c5")
   for (i in unique(palms$identifier)) {
-    print("c3")
+    print("c6")
     x[[i]] <- palms %>%
       dplyr::filter(identifier == i) %>%
       dplyr::mutate(!!! field_args) %>%
       dplyr::mutate_if(is.logical, as.integer)
-    print("c4")
+    print("c7")
     if (verbose) {
       cat("[", j, "/", len, "] Computed palmsplus for: ", i, "\n", sep = "")
       j <- j + 1
