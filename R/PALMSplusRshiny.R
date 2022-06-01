@@ -304,22 +304,24 @@ PALMSplusRshiny <- function(gisdir = "",
   # rewriting function such that objects are by default present inside the function
   palmsInPolygon <- function(polygons, collapse_var = NULL, home = home, school = school,
                                home_nbh = home_nbh, school_nbh = school_nbh){
-    . <- NULL
+    . <- NULL # declaring because otherwise R check complains about undefined '.'
     if (nrow(polygons) < 1) {
       message("palms_in_polygon: Polygon data has 0 rows, returning NA")
       return(NA)
     }
     polygons <- st_make_valid(polygons)
     collapse_var <- rlang::quo_text(enquo(collapse_var))
-    if (!(collapse_var == "NULL"))
+    if (!(collapse_var == "NULL")) {
       polygons <- aggregate(polygons, list(polygons[[collapse_var]]), function(x) x[1])
-    suppressMessages( # Supresses the 'planar coordinates' warning
-      st_contains(x = polygons, y = ., sparse = FALSE) %>% as.vector(.)
-    )
+    }
+    # Supresses the 'planar coordinates' warning
+    polygons = suppressMessages(st_contains(x = polygons, y = ., sparse = FALSE) %>% as.vector(.))
+    
+    return(polygons)
   }
   
-  
   #=============================
+  print("adding fields:")
   names = c("at_home", "at_school", "at_home_nbh", "at_school_nbh")
   formulas = c(as.formula(paste0("~",
                                  "palmsInPolygon(polygons = dyplr::filter(home, identifier == i),",
@@ -344,13 +346,19 @@ PALMSplusRshiny <- function(gisdir = "",
     }
   }
   #=============================
+  print("adding domains:")
   names = c("home","school", "transport", "home_nbh", "school_nbh", "other")
-  formulas =  c( "at_home",
-                 "(!at_home & at_school)",
-                 "!at_home & !(at_school) & (pedestrian | bicycle | vehicle)",
-                 "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh",
-                 "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & at_school_nbh",
-                 "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & !(at_school_nbh)")
+  formulas =  c(as.formula(paste0("~", "at_home")),
+                as.formula(paste0("~", "(!at_home & at_school)")),
+                as.formula(paste0("~",  "!at_home & !(at_school) & (pedestrian | bicycle | vehicle)")),
+                as.formula(paste0("~", 
+                                  "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh")),
+                as.formula(paste0("~", 
+                                  "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) &",
+                                  " !(at_home_nbh) & at_school_nbh")),
+                as.formula(paste0("~", 
+                                  "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) &",
+                                  " !(at_home_nbh) & !(at_school_nbh)")))
   
   for (mi in 1:length(names)) {
     if (!exists("palmsplus_domains")) {
@@ -358,12 +366,17 @@ PALMSplusRshiny <- function(gisdir = "",
     } else if (names[mi] %in% palmsplus_domains$name) {
       stop(names[mi], " already exists in palmsplus_domains")
     } else {
+      if (ncol(palmsplus_domains) != 2) {
+        print(head(palmsplus_domains))
+      }
       palmsplus_domains = rbind(palmsplus_domains, c(names[mi], formulas[mi]))
     }
   }
   #=============================
+  print("adding trajectories")
   names = c("home_school", "school_home", "home_home", "school_school")
-  formulas = c("at_home", "at_school", "at_home", "at_school")
+  formulas = c(as.formula("~at_home"), as.formula("~at_school"),
+               as.formula("~at_home"), as.formula("~at_school"))
   for (mi in 1:length(names)) {
     if (!exists("trajectory_fields")) {
       trajectory_fields = tibble(name = names[mi], formula = formulas[mi], after_conversion = formulas[mi])
