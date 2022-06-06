@@ -212,9 +212,9 @@ myApp <- function(homedir=getwd(), ...) {
   server <- function(input, output, session) {
     getlogo = function() {
       renderImage({
-        list(src = system.file("www/fontys_logo.png", package = "HabitusGUI")[1],
+        list(src = system.file("www/logos_merged.png", package = "HabitusGUI")[1],
              contentType = "image/png",
-             width = 100, height = 100)
+             width = 280, height = 70)
       }, deleteFile = FALSE)
     }
     output$logo_page1 = getlogo()
