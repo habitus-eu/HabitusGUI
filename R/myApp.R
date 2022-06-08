@@ -190,8 +190,8 @@ myApp <- function(homedir=getwd(), ...) {
                                 p("\n"),
                                 h4("Log:"),
                                 # textOutput("viewggir"),
-                                textOutput("mylog_GGIR"),
-                                # htmlOutput("mylog_GGIR"),
+                                # textOutput("mylog_GGIR"),
+                                htmlOutput("mylog_GGIR"),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
@@ -634,10 +634,14 @@ myApp <- function(homedir=getwd(), ...) {
           # sink(con, append = TRUE, type = "message")
           # Start GGIR
           
-          x_ggir <- r_bg(func = function(GGIRshiny){GGIRshiny()},
-                    args = list(GGIRshiny,
-                                rawaccdir = isolate(global$raw_acc_in),
-                                outputdir = global$data_out, 
+          x_ggir <- r_bg(func = function(GGIRshiny, rawaccdir, outputdir, 
+                                         sleepdiary, configfile, do.BrondCounts){
+            GGIRshiny(rawaccdir, outputdir, 
+                      sleepdiary, configfile, do.BrondCounts)
+          },
+          args = list(GGIRshiny = GGIRshiny,
+                      rawaccdir = isolate(global$raw_acc_in),
+                      outputdir = global$data_out, 
                                 sleepdiary = sleepdiaryfile_local,
                                 configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
                                 do.BrondCounts = do.BrondCounts),
