@@ -3,6 +3,7 @@
 #' @param palms_to_clean palms_to_clean
 #' @param country_name country_name
 #' @return palms_to_clean_lower object
+#' @import dplyr
 #' @export
 check_and_clean_palms_data <- function(palms_to_clean, country_name){
   dif = datetime = identifier = tripnumber = triptype = tt1 = tt4 = NULL

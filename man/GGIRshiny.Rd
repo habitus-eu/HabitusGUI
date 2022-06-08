@@ -7,8 +7,8 @@
 GGIRshiny(
   rawaccdir,
   outputdir,
-  configfile = c(),
   sleepdiary = c(),
+  configfile = c(),
   do.BrondCounts = FALSE
 )
 }
@@ -17,9 +17,9 @@ GGIRshiny(
 
 \item{outputdir}{Path to output directory}
 
-\item{configfile}{Configfile path}
-
 \item{sleepdiary}{Path to sleep diary}
+
+\item{configfile}{Configfile path}
 
 \item{do.BrondCounts}{Boolean to indicate whether BrondCounts should be derived}
 }

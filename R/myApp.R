@@ -5,13 +5,21 @@
 #' @return no object is returned, just an app
 #' @import shiny
 #' @import shinyFiles
+#' @importFrom callr r_bg
 #' @export
 
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") HabitusGUI::myApp(homedir="~/projects")
 # pkgload::load_all("."); myApp(homedir="~/projects/fontys")
 # roxygen2::roxygenise()
 #/Member Files: LineMatthiesen#8897
+
+
+# create temp log file
+
 myApp <- function(homedir=getwd(), ...) {
+  stdout_GGIR_tmp <- tempfile(fileext = ".log")
+  mylog_GGIR <- shiny::reactiveFileReader(500, NULL, stdout_GGIR_tmp, readLines)
+
   ui <- fluidPage(
     theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
     # preview examples: https://bootswatch.com/
@@ -180,6 +188,10 @@ myApp <- function(homedir=getwd(), ...) {
                                 p(""),
                                 DT::dataTableOutput("GGIRpart2"),
                                 p("\n"),
+                                h4("Log:"),
+                                # textOutput("viewggir"),
+                                textOutput("mylog_GGIR"),
+                                # htmlOutput("mylog_GGIR"),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
@@ -281,8 +293,6 @@ myApp <- function(homedir=getwd(), ...) {
                 showNotification("Select sleepdiary file", type = "error")
               } else {
                 current_gislinkfile = as.character(parseFilePaths(c(home = homedir), input$gislinkfile)$datapath)
-                print(current_gislinkfile)
-                print(length(current_gislinkfile))
                 if ("GIS" %in% input$availabledata &
                     "PALMSplus" %in% input$tools &
                     (as.character(input$gisdir)[1] == "0" |
@@ -589,20 +599,69 @@ myApp <- function(homedir=getwd(), ...) {
             sleepdiaryfile_local = c()
           }
           # sent all GGIR console output to a GGIR.log file
-          logfile_tmp <- tempfile(fileext = ".log")
-          logfile = paste0(isolate(global$data_out), "/GGIR.log")
-          con <- file(logfile_tmp)
-          sink(con, append = TRUE)
-          sink(con, append = TRUE, type = "message")
+          # logfile_tmp <- tempfile(fileext = ".log")
+          
+          # Once every 5 seconds, read the file and send it to UI
+          # view_GGIRlog <- reactive({
+          #   shiny::invalidateLater(5000, session) # equivalent milliseconds for 2 minutes
+          #   if (file.exists(logfile_tmp)) {
+          #     view.data <- tail(read.csv(logfile_tmp), n = 100)
+          #   } else {
+          #     view.data = ""
+          #   }
+          #   return(view.data)
+          # })
+          # 
+          # view_GGIRlog <- reactiveFileReader(1000, NULL, logfile_tmp, read.csv)
+          
+          # output$viewggir <- renderUI({
+          #   re = paste0(view_GGIRlog(), "\n")
+          #   print(re)
+          #   re
+          # })
+          output$mylog_GGIR <- renderUI({
+            HTML(paste(mylog_GGIR(), collapse = '<br/>'))
+          })
+          
+          # output$viewggir <-  renderTable({
+          #   view_GGIRlog()))
+          #   paste(as.character(unlist(view_GGIRlog())), collapse = '\n')
+          # })
+          
+          # Start writing to log file
+          # con <- file(logfile_tmp)
+          # sink(con, append = TRUE)
+          # sink(con, append = TRUE, type = "message")
           # Start GGIR
-          GGIRshiny(rawaccdir = global$raw_acc_in, outputdir = global$data_out, 
-                    sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
-                    do.BrondCounts = do.BrondCounts)
-          sink()
-          sink(type = "message")
+          
+          x_ggir <- r_bg(func = function(GGIRshiny){GGIRshiny()},
+                    args = list(GGIRshiny,
+                                rawaccdir = isolate(global$raw_acc_in),
+                                outputdir = global$data_out, 
+                                sleepdiary = sleepdiaryfile_local,
+                                configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
+                                do.BrondCounts = do.BrondCounts),
+                    stdout = stdout_GGIR_tmp,
+                    stderr = "2>&1")
+          
+          # GGIRshiny(rawaccdir = isolate(global$raw_acc_in), outputdir = global$data_out, 
+          #           sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
+          #           do.BrondCounts = do.BrondCounts)
+          # Close log file
+          # sink()
+          # sink(type = "message")
+          # Copy tmp log file to actual log file for user to see
+          logfile = paste0(isolate(global$data_out), "/GGIR.log")
+          observe({
+            invalidateLater(5000)
+            if(x_ggir$poll_io(0)[["process"]] == "ready") {
+              file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE)     
+            }
+          })
+          
           # move file to user when connection is closed
-          file.copy(from = logfile_tmp, to = logfile)
-          file.remove(logfile_tmp)
+          # file.copy(from = logfile_tmp, to = logfile)
+          # file.remove(logfile_tmp)
           # Now check whether results are correctly generated:
           expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
           expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
@@ -744,7 +803,7 @@ myApp <- function(homedir=getwd(), ...) {
           on.exit(removeNotification(id_palmsplusr), add = TRUE)
           
           # sent all PALMSplusR console output to a PALMSplusR.log file
-          # logfile_tmp <- tempfile(fileext = ".log")
+          logfile_tmp <- tempfile(fileext = ".log")
           logfile = paste0(isolate(global$data_out), "/PALMSplusR.log")
           # output$logfile_palmsplusr <- renderText({
           #   message = paste0("PALMSplusR log is stored in: ", logfile)
@@ -755,8 +814,8 @@ myApp <- function(homedir=getwd(), ...) {
           #   #                  " |--| global$gislinkfile_in ->> ", global$gislinkfile_in,
           #   #                  " ", file.access(global$gislinkfile_in, mode = 4))
           # })
-          # con <- file(logfile_tmp)
-          con <- file(logfile)
+          con <- file(logfile_tmp)
+          # con <- file(logfile)
           sink(con, append = TRUE)
           sink(con, append = TRUE, type = "message")
           

@@ -26,6 +26,7 @@
 #' @importFrom geosphere distGeo
 #' @importFrom data.table rleid
 #' @importFrom tidyr gather spread unite
+#' @importFrom utils str
 #'
 #' @export
 palmsplus_build <- function(palms, config_file = NULL, verbose = TRUE,
