@@ -20,9 +20,9 @@ myApp <- function(homedir=getwd(), ...) {
   stdout_GGIR_tmp <- tempfile(fileext = ".log")
   stdout_palmsplusr_tmp <- tempfile(fileext = ".log")
   stdout_PALMSpy_tmp <- tempfile(fileext = ".log")
-  mylog_GGIR <- shiny::reactiveFileReader(500, NULL, stdout_GGIR_tmp, readLines)
-  mylog_palmsplusr <- shiny::reactiveFileReader(500, NULL, stdout_palmsplusr_tmp, readLines)
-  mylog_PALMSpy <- shiny::reactiveFileReader(500, NULL, stdout_PALMSpy_tmp, readLines)
+  mylog_GGIR <- shiny::reactiveFileReader(500, NULL, stdout_GGIR_tmp, readLines, warn = FALSE)
+  mylog_palmsplusr <- shiny::reactiveFileReader(500, NULL, stdout_palmsplusr_tmp, readLines, warn = FALSE)
+  mylog_PALMSpy <- shiny::reactiveFileReader(500, NULL, stdout_PALMSpy_tmp, readLines, warn = FALSE)
 
   ui <- fluidPage(
     theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
@@ -188,14 +188,15 @@ myApp <- function(homedir=getwd(), ...) {
                                 shinyjs::useShinyjs(),
                                 actionButton("start_ggir", "Start analysis", width = '300px'),
                                 p("\n"),
-                                textOutput("ggir_end_message"),
-                                p(""),
-                                DT::dataTableOutput("GGIRpart2"),
-                                p("\n"),
-                                tags$b("Process log:"),
+                                # tags$b("Process log:"),
                                 verbatimTextOutput("mylog_GGIR"),
                                 tags$head(tags$style("#mylog_GGIR{color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
+                                p("\n"),
+                                # tags$b(textOutput("ggir_end_message")),
+                                htmlOutput("ggir_end_message"),
+                                p("\n"),
+                                DT::dataTableOutput("GGIRpart2"),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
@@ -206,7 +207,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 textOutput("palmspy_end_message"),
                                 p(""),
                                 DT::dataTableOutput("PALMSpy_file1"),
-                                tags$b("Process log:"),
+                                # tags$b("Process log:"),
                                 verbatimTextOutput("mylog_PALMSpy"),
                                 tags$head(tags$style("#mylog_PALMSpy{color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
@@ -222,7 +223,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 textOutput("palmsplus_end_message"),
                                 p(""),
                                 DT::dataTableOutput("PALMSplus_file1"),
-                                tags$b("Process log:"),
+                                # tags$b("Process log:"),
                                 verbatimTextOutput("mylog_palmsplusr"),
                                 tags$head(tags$style("#mylog_palmsplusr{color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
@@ -580,7 +581,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
       GIRBrondCounts_message = ""
       
       if ("GGIR" %in% input$tools | "BrondCounts" %in% input$tools) {
-        GGIRBrondCounts_message = "Error: Contact maintainer"
+        GGIRBrondCounts_message = ""
         # Basic check before running function:
         ready_to_run_ggirbrondcounts = FALSE
         if (dir.exists(global$raw_acc_in)) {
@@ -637,40 +638,46 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           # Copy tmp log file to actual log file for user to see
           logfile = paste0(isolate(global$data_out), "/GGIR.log")
           observe({
-            invalidateLater(5000)
-            if (x_ggir$poll_io(0)[["process"]] == "ready") {
-              file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE)     
+            if (x_ggir$poll_io(0)[["process"]] != "ready") {
+              invalidateLater(5000)
+            } else {
+              file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE)
+              # Now check whether results are correctly generated:
+              expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
+              expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
+              if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
+                if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
+                  expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
+                  if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
+                    if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
+                      GGIRBrondCounts_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " Output is stored in ", 
+                                                       expected_outputdir_brondcounts, " and ",
+                                                       expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
+                      GGIRpart2 = read.csv(expected_ggiroutput_file)
+                      output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
+                    } else {
+                      GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. No file found inside ", expected_outputdir_brondcounts)
+                    }
+                  } else {
+                    GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. Dir ",expected_outputdir_brondcounts, " not found")
+                  }
+                } else {
+                  GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), 
+                                                   "<br/>Output is stored in: ", 
+                                                   expected_outputdir_ggir,
+                                                   "<br/>The table below shows the content of part2_daysummary.csv:")
+                  GGIRpart2 = read.csv(expected_ggiroutput_file, nrow = 100)
+                  output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
+                }
+                output$ggir_end_message <- renderUI({
+                  HTML(paste0(GGIRBrondCounts_message))
+                })
+              }
             }
           })
-          # Now check whether results are correctly generated:
-          expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
-          expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
-          if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
-            if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
-              expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
-              if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
-                if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
-                  GGIRBrondCounts_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " Output is stored in ", 
-                                                   expected_outputdir_brondcounts, " and ",
-                                                   expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
-                  GGIRpart2 = read.csv(expected_ggiroutput_file)
-                  output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
-                } else {
-                  GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. No file found inside ", expected_outputdir_brondcounts)
-                }
-              } else {
-                GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. Dir ",expected_outputdir_brondcounts, " not found")
-              }
-            } else {
-              GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), ". Output is stored in ", 
-                                               expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
-              GGIRpart2 = read.csv(expected_ggiroutput_file, nrow = 100)
-              output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
-            }
-          } 
         }
       }
-      return(GGIRBrondCounts_message)
+      return()
     })
     
     #========================================================================
@@ -735,30 +742,34 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
         # Copy tmp log file to actual log file for user to see
         logfile = paste0(isolate(global$data_out), "/PALMSpy.log")
         observe({
-          invalidateLater(5000)
-          if (x_ggir$poll_io(0)[["process"]] == "ready") {
+          if (x_palmspy$poll_io(0)[["process"]] != "ready") {
+            invalidateLater(5000)
+          } else {
             file.copy(from = stdout_PALMSpy_tmp, to = logfile, overwrite = TRUE)     
+            # Now check whether results are correctly generated:
+            expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
+            
+            if (dir.exists(expected_palmspy_results_dir)) {
+              PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(),
+                                       "<br/>Output is stored in: ", expected_palmspy_results_dir) 
+              # Now send content of 1 output file to UI
+              expected_palmspyoutput_file = dir(expected_palmspy_results_dir, recursive = TRUE, full.names = TRUE, pattern = "csv")[1]
+              if (length(expected_palmspyoutput_file) > 0) {
+                PALMSpy_message = paste0(PALMSpy_message, "<br/>The table below shows the top of ", basename(expected_palmspyoutput_file))
+                PALMSpy_file1 = read.csv(file = expected_palmspyoutput_file, nrow = 100)
+                output$PALMSpy_file1 <- DT::renderDataTable(PALMSpy_file1, options = list(scrollX = TRUE))
+              }
+            } else {
+              PALMSpy_message = "PALMSpy unsuccessful: see PALMSpy.log in your output folder"
+            }
+            output$palmspy_end_message <- renderUI({
+              HTML(paste0(PALMSpy_message))
+            })
           }
+          
         })
-        
-        # Now check whether results are correctly generated:
-        expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
-        
-        if (dir.exists(expected_palmspy_results_dir)) {
-          PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(), ". See ", expected_palmspy_results_dir,".") 
-          # Now send content of 1 output file to UI
-          expected_palmspyoutput_file = dir(expected_palmspy_results_dir, recursive = TRUE, full.names = TRUE, pattern = "csv")[1]
-          if (length(expected_palmspyoutput_file) > 0) {
-            PALMSpy_message = paste0(PALMSpy_message, " The table below shows the top of ", basename(expected_palmspyoutput_file))
-            PALMSpy_file1 = read.csv(file = expected_palmspyoutput_file, nrow = 100)
-            output$PALMSpy_file1 <- DT::renderDataTable(PALMSpy_file1, options = list(scrollX = TRUE))
-          }
-        } else {
-          PALMSpy_message = "PALMSpy unsuccessful: see stdout_palmspy.log and stderr_palmspy.log in your output folder"
-        }
       }
-      PALMSpy_message = paste0(PALMSpy_message)
-      return(PALMSpy_message)
+      return()
     })
     #========================================================================
     # Apply PALMSplus after button is pressed
@@ -841,33 +852,39 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           # Copy tmp log file to actual log file for user to see
           logfile = paste0(isolate(global$data_out), "/palmsplusr.log")
           observe({
-            invalidateLater(5000)
-            if (x_palmsplusr$poll_io(0)[["process"]] == "ready") {
+            if (x_palmsplusr$poll_io(0)[["process"]] != "ready") {
+              invalidateLater(5000)
+            } else {
               file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE)     
+              # Now check whether results are correctly generated:
+              expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
+              if (dir.exists(expected_palmsplus_folder) == TRUE) {
+                csv_files_palmsplus = dir(expected_palmsplus_folder,pattern = "csv", recursive = TRUE)
+                if (length(csv_files_palmsplus) > 0) {
+                  PALMSplus_message = paste0("PALMSplusR successfully completed at ", Sys.time(),
+                                             "<br/>Output is stored in: ", expected_palmsplus_folder,
+                                             "<br/>The table below shows the content of ", basename(csv_files_palmsplus),
+                                             "<br/>Log file: ", logfile)
+                  first_csv_file_palmsplus = read.csv(csv_files_palmsplus)
+                  output$PALMSpluscsv <- DT::renderDataTable(first_csv_file_palmsplus, options = list(scrollX = TRUE))
+                } else {
+                  PALMSplus_message = paste0("PALMSplusR unsuccessful",
+                                             "<br/>No file found inside: ", expected_palmsplus_folder,
+                                             "<br/>Log file: ", logfile)
+                }
+              } else {
+                PALMSplus_message = paste0("PALMSplusR unsuccessful",
+                                           "<br/>No file found inside: ", expected_palmsplus_folder,
+                                           "<br/>Log file: ", logfile)
+              }
+              output$palmsplus_end_message <- renderUI({
+                HTML(paste0(PALMSplus_message))
+              })
             }
           })
-          ####=
-          # Now check whether results are correctly generated:
-          expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
-          if (dir.exists(expected_palmsplus_folder) == TRUE) {
-            csv_files_palmsplus = dir(expected_palmsplus_folder,pattern = "csv", recursive = TRUE)
-            if (length(csv_files_palmsplus) > 0) {
-              PALMSplus_message = paste0("PALMSplusR successfully completed at ", Sys.time(), " Output is stored in ", 
-                                         expected_palmsplus_folder, ". The table below shows the content of ", basename(csv_files_palmsplus),
-                                         " Log file: ", logfile)
-              first_csv_file_palmsplus = read.csv(csv_files_palmsplus)
-              output$PALMSpluscsv <- DT::renderDataTable(first_csv_file_palmsplus, options = list(scrollX = TRUE))
-            } else {
-              PALMSplus_message = paste0("PALMSplusR unsuccessful. No file found inside ", expected_palmsplus_folder,
-                                         ". Log file: ", logfile)
-            }
-          } else {
-            PALMSplus_message = paste0("PALMSplusR unsuccessful. Dir ", expected_palmsplus_folder, " not found.",
-                                       " Log file: ", logfile)
-          }
         }
       }
-      return(PALMSplus_message)
+      return()
     })
     output$recommendorder <- renderText({
       pipeline = proposed_pipeline()
