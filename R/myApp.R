@@ -711,22 +711,40 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
       if (ready_to_run_palsmpy == TRUE) {
         id_palmspy = showNotification("PALMSpy in progress ...", type = "message", duration = NULL, closeButton = FALSE)
         shinyjs::hide(id = "start_palmspy")
-        on.exit(removeNotification(id_palmspy), add = TRUE)
+        # on.exit(removeNotification(id_palmspy), add = TRUE)
         
         output$mylog_PALMSpy <- renderText({
           paste(mylog_PALMSpy(), collapse = '\n')
         })
         
+        
+        
+        basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
+                             " --acc-path ", count_file_location,
+                             " --config-file ", paste0(global$data_out, "/config.json"))
+        
         # Start PALMSpy
-        x_palmspy <- r_bg(func = function(PALMSpyshiny, outputdir, gpsdir, count_file_location){
-          PALMSpyshiny(outputdir, gpsdir, count_file_location)
+        x_palmspy <- r_bg(func = function(system2, command, args, stdout, stderr, wait){
+          system2(command, args, stdout, stderr, wait)
         },
-        args = list(PALMSpyshiny = PALMSpyshiny,
-                   outputdir = global$data_out, 
-                   gpsdir = global$gps_in,
-                   count_file_location = count_file_location),
+        args = list(system2 = system2,
+                    command = "cd",
+                    args = gsub(pattern = "cd ", replacement = "", x = basecommand),
+                    stdout = "", 
+                    stderr = "",
+                    wait = TRUE),
         stdout = stdout_PALMSpy_tmp,
         stderr = "2>&1")
+        # # Start PALMSpy
+        # x_palmspy <- r_bg(func = function(PALMSpyshiny, outputdir, gpsdir, count_file_location){
+        #   PALMSpyshiny(outputdir, gpsdir, count_file_location)
+        # },
+        # args = list(PALMSpyshiny = PALMSpyshiny,
+        #            outputdir = global$data_out, 
+        #            gpsdir = global$gps_in,
+        #            count_file_location = count_file_location),
+        # stdout = stdout_PALMSpy_tmp,
+        # stderr = "2>&1")
         
         # basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
         #                      " --acc-path ", count_file_location,
@@ -741,6 +759,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           if (x_palmspy$poll_io(0)[["process"]] != "ready") {
             invalidateLater(5000)
           } else {
+            on.exit(removeNotification(id_palmspy), add = TRUE)
             file.copy(from = stdout_PALMSpy_tmp, to = logfile, overwrite = TRUE)     
             # Now check whether results are correctly generated:
             expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
