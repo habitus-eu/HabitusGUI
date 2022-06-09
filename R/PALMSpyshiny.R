@@ -11,6 +11,6 @@ PALMSpyshiny = function(outputdir, gpsdir, count_file_location) {
                        " --acc-path ", count_file_location,
                        " --config-file ", paste0(outputdir, "/config.json"))
   system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
-          stdout = TRUE, stderr = TRUE, wait = TRUE)
+          stdout = "", stderr = "", wait = TRUE)
   return()
 }

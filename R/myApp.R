@@ -600,7 +600,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
             id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
             do.BrondCounts = FALSE
           }
-          on.exit(removeNotification(id_ggir), add = TRUE)
+          
           
           if (file.exists(paste0(global$data_out, "/sleepdiary.csv"))) { # because this is not a global variable
             sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
@@ -637,6 +637,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
             if (x_ggir$poll_io(0)[["process"]] != "ready") {
               invalidateLater(5000)
             } else {
+              on.exit(removeNotification(id_ggir), add = TRUE)
               file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE)
               # Now check whether results are correctly generated:
               expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
