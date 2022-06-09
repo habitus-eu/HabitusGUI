@@ -188,12 +188,10 @@ myApp <- function(homedir=getwd(), ...) {
                                 shinyjs::useShinyjs(),
                                 actionButton("start_ggir", "Start analysis", width = '300px'),
                                 p("\n"),
-                                # tags$b("Process log:"),
                                 verbatimTextOutput("mylog_GGIR"),
                                 tags$head(tags$style("#mylog_GGIR{color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 p("\n"),
-                                # tags$b(textOutput("ggir_end_message")),
                                 htmlOutput("ggir_end_message"),
                                 p("\n"),
                                 DT::dataTableOutput("GGIRpart2"),
@@ -204,27 +202,25 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 shinyjs::useShinyjs(),
                                 actionButton("start_palmspy", "Start analysis", width = '300px'),
                                 p("\n"),
-                                textOutput("palmspy_end_message"),
-                                p(""),
-                                DT::dataTableOutput("PALMSpy_file1"),
-                                # tags$b("Process log:"),
                                 verbatimTextOutput("mylog_PALMSpy"),
                                 tags$head(tags$style("#mylog_PALMSpy{color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
+                                p("\n"),
+                                htmlOutput("palmspy_end_message"),
+                                p("\n"),
+                                DT::dataTableOutput("PALMSpy_file1"),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSplus')",
                                 h3("PALMSplus:"),
                                 shinyjs::useShinyjs(),
                                 actionButton("start_palmsplus", "Start analysis", width = '300px'),
-                                # p("\n"),
-                                # textOutput("logfile_palmsplusr"),
                                 p("\n"),
-                                textOutput("palmsplus_end_message"),
-                                p(""),
-                                DT::dataTableOutput("PALMSplus_file1"),
-                                # tags$b("Process log:"),
                                 verbatimTextOutput("mylog_palmsplusr"),
+                                p("\n"),
+                                htmlOutput("palmsplus_end_message"),
+                                p("\n"),
+                                DT::dataTableOutput("PALMSplus_file1"),
                                 tags$head(tags$style("#mylog_palmsplusr{color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 hr()
@@ -899,7 +895,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
       }
       return(message)
     })
-    # If button pressed send message to UI about success ----------------
+    # Only used to initialise the value
     output$ggir_end_message <- renderText({
       message = runGGIR()
     })
