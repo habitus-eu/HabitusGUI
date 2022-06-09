@@ -835,8 +835,6 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
         if (ready_to_run_palmsplus == TRUE) {
           shinyjs::hide(id = "start_palmsplus")
           id_palmsplusr = showNotification("PALMSplusR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-          on.exit(removeNotification(id_palmsplusr), add = TRUE)
-          
           output$mylog_palmsplusr <- renderText({
             paste(mylog_palmsplusr(), collapse = '\n')
           })
@@ -875,6 +873,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
             if (x_palmsplusr$poll_io(0)[["process"]] != "ready") {
               invalidateLater(5000)
             } else {
+              on.exit(removeNotification(id_palmsplusr), add = TRUE)
               file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE)     
               # Now check whether results are correctly generated:
               expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
