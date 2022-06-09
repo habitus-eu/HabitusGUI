@@ -18,7 +18,11 @@
 
 myApp <- function(homedir=getwd(), ...) {
   stdout_GGIR_tmp <- tempfile(fileext = ".log")
+  stdout_palmsplusr_tmp <- tempfile(fileext = ".log")
+  stdout_PALMSpy_tmp <- tempfile(fileext = ".log")
   mylog_GGIR <- shiny::reactiveFileReader(500, NULL, stdout_GGIR_tmp, readLines)
+  mylog_palmsplusr <- shiny::reactiveFileReader(500, NULL, stdout_palmsplusr_tmp, readLines)
+  mylog_PALMSpy <- shiny::reactiveFileReader(500, NULL, stdout_PALMSpy_tmp, readLines)
 
   ui <- fluidPage(
     theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
@@ -202,6 +206,10 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 textOutput("palmspy_end_message"),
                                 p(""),
                                 DT::dataTableOutput("PALMSpy_file1"),
+                                tags$b("Process log:"),
+                                verbatimTextOutput("mylog_PALMSpy"),
+                                tags$head(tags$style("#mylog_PALMSpy{color:darkblue; font-size:12px; font-style:italic; 
+overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSplus')",
@@ -214,6 +222,10 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 textOutput("palmsplus_end_message"),
                                 p(""),
                                 DT::dataTableOutput("PALMSplus_file1"),
+                                tags$b("Process log:"),
+                                verbatimTextOutput("mylog_palmsplusr"),
+                                tags$head(tags$style("#mylog_palmsplusr{color:darkblue; font-size:12px; font-style:italic; 
+overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 hr()
                ),
                actionButton("page_43", "prev")
@@ -626,7 +638,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           logfile = paste0(isolate(global$data_out), "/GGIR.log")
           observe({
             invalidateLater(5000)
-            if(x_ggir$poll_io(0)[["process"]] == "ready") {
+            if (x_ggir$poll_io(0)[["process"]] == "ready") {
               file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE)     
             }
           })
@@ -698,12 +710,36 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
         shinyjs::hide(id = "start_palmspy")
         on.exit(removeNotification(id_palmspy), add = TRUE)
         
-        basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
-                             " --acc-path ", count_file_location,
-                             " --config-file ", paste0(global$data_out, "/config.json"))
-        # stdout = system(command = basecommand, intern = TRUE) # old command
-        system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
-                stdout = "stdout_palmspy.log", stderr = "stderr_palmspy.log", wait = TRUE)
+        output$mylog_PALMSpy <- renderText({
+          paste(mylog_PALMSpy(), collapse = '\n')
+        })
+        
+        # Start PALMSpy
+        x_palmspy <- r_bg(func = function(PALMSpyshiny, outputdir, gpsdir, count_file_location){
+          PALMSpyshiny(outputdir, gpsdir, count_file_location)
+        },
+        args = list(PALMSpyshiny = PALMSpyshiny,
+                   outputdir = global$data_out, 
+                   gpsdir = global$gps_in,
+                   count_file_location = count_file_location),
+        stdout = stdout_PALMSpy_tmp,
+        stderr = "2>&1")
+        
+        # basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
+        #                      " --acc-path ", count_file_location,
+        #                      " --config-file ", paste0(global$data_out, "/config.json"))
+        # # stdout = system(command = basecommand, intern = TRUE) # old command
+        # system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
+        #         stdout = "stdout_palmspy.log", stderr = "stderr_palmspy.log", wait = TRUE)
+        
+        # Copy tmp log file to actual log file for user to see
+        logfile = paste0(isolate(global$data_out), "/PALMSpy.log")
+        observe({
+          invalidateLater(5000)
+          if (x_ggir$poll_io(0)[["process"]] == "ready") {
+            file.copy(from = stdout_PALMSpy_tmp, to = logfile, overwrite = TRUE)     
+          }
+        })
         
         # Now check whether results are correctly generated:
         expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
@@ -770,44 +806,47 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           id_palmsplusr = showNotification("PALMSplusR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           on.exit(removeNotification(id_palmsplusr), add = TRUE)
           
-          # sent all PALMSplusR console output to a PALMSplusR.log file
-          logfile_tmp <- tempfile(fileext = ".log")
-          logfile = paste0(isolate(global$data_out), "/PALMSplusR.log")
-          # output$logfile_palmsplusr <- renderText({
-          #   message = paste0("PALMSplusR log is stored in: ", logfile)
-          #   # message = paste0("PALMSplusR file paths: gis ->> ", global$gis_in,
-          #   #                  length(which(file.access(dir(global$gis_in, full.names = TRUE), mode = 4) != 0)),
-          #   #                  " |--| palmspydir -> ", expected_palmspy_results_dir,
-          #   #                  length(which(file.access(dir(expected_palmspy_results_dir, full.names = TRUE), mode = 4) != 0)),
-          #   #                  " |--| global$gislinkfile_in ->> ", global$gislinkfile_in,
-          #   #                  " ", file.access(global$gislinkfile_in, mode = 4))
-          # })
-          con <- file(logfile_tmp)
-          # con <- file(logfile)
-          sink(con, append = TRUE)
-          sink(con, append = TRUE, type = "message")
+          output$mylog_palmsplusr <- renderText({
+            paste(mylog_palmsplusr(), collapse = '\n')
+          })
           
-          # try(expr = {
-            # Start PALMSplusR
-            PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
-              # participant_exclude_list, # <= Discuss, leave out from linkfile?
-              gisdir = global$gis_in,
-              palmsdir = expected_palmspy_results_dir,
-              gislinkfile = global$gislinkfile_in,
-              outputdir = isolate(global$data_out),
-              dataset_name = input$dataset_name)
-          # }, outFile = logfile)
-
-          sink()
-          sink(type = "message")
-          # move file to user when connection is closed
-          file.copy(from = logfile_tmp, to = logfile)
-          file.remove(logfile_tmp)
-            
-            if (!file.exists(logfile)) {
-              write.table(x = "No errors detected", file = logfile)
+          PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+            # participant_exclude_list, # <= Discuss, leave out from linkfile?
+            gisdir = global$gis_in,
+            palmsdir = expected_palmspy_results_dir,
+            gislinkfile = global$gislinkfile_in,
+            outputdir = isolate(global$data_out),
+            dataset_name = input$dataset_name)
+          
+          # Start palmsplusr
+          x_palmsplusr <- r_bg(func = function(PALMSplusRshiny, gisdir, palmsdir, gislinkfile, outputdir, dataset_name){
+            PALMSplusRshiny(gisdir, palmsdir, gislinkfile, outputdir, dataset_name)
+          },
+          args = list(PALMSplusRshiny = PALMSplusRshiny,
+                      gisdir = global$gis_in,
+                      palmsdir = expected_palmspy_results_dir,
+                      gislinkfile = global$gislinkfile_in,
+                      outputdir = isolate(global$data_out),
+                      dataset_name = input$dataset_name),
+          stdout = stdout_palmsplusr_tmp,
+          stderr = "2>&1")
+          #   # Start PALMSplusR
+          #   PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          #     # participant_exclude_list, # <= Discuss, leave out from linkfile?
+          #     gisdir = global$gis_in,
+          #     palmsdir = expected_palmspy_results_dir,
+          #     gislinkfile = global$gislinkfile_in,
+          #     outputdir = isolate(global$data_out),
+          #     dataset_name = input$dataset_name)
+          # Copy tmp log file to actual log file for user to see
+          logfile = paste0(isolate(global$data_out), "/palmsplusr.log")
+          observe({
+            invalidateLater(5000)
+            if (x_palmsplusr$poll_io(0)[["process"]] == "ready") {
+              file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE)     
             }
-            
+          })
+          ####=
           # Now check whether results are correctly generated:
           expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
           if (dir.exists(expected_palmsplus_folder) == TRUE) {
