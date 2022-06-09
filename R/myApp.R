@@ -188,10 +188,10 @@ myApp <- function(homedir=getwd(), ...) {
                                 p(""),
                                 DT::dataTableOutput("GGIRpart2"),
                                 p("\n"),
-                                h4("Log:"),
-                                # textOutput("viewggir"),
-                                # textOutput("mylog_GGIR"),
-                                htmlOutput("mylog_GGIR"),
+                                tags$b("Process log:"),
+                                verbatimTextOutput("mylog_GGIR"),
+                                tags$head(tags$style("#mylog_GGIR{color:darkblue; font-size:12px; font-style:italic; 
+overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
@@ -598,42 +598,12 @@ myApp <- function(homedir=getwd(), ...) {
           } else {
             sleepdiaryfile_local = c()
           }
-          # sent all GGIR console output to a GGIR.log file
-          # logfile_tmp <- tempfile(fileext = ".log")
-          
-          # Once every 5 seconds, read the file and send it to UI
-          # view_GGIRlog <- reactive({
-          #   shiny::invalidateLater(5000, session) # equivalent milliseconds for 2 minutes
-          #   if (file.exists(logfile_tmp)) {
-          #     view.data <- tail(read.csv(logfile_tmp), n = 100)
-          #   } else {
-          #     view.data = ""
-          #   }
-          #   return(view.data)
-          # })
-          # 
-          # view_GGIRlog <- reactiveFileReader(1000, NULL, logfile_tmp, read.csv)
-          
-          # output$viewggir <- renderUI({
-          #   re = paste0(view_GGIRlog(), "\n")
-          #   print(re)
-          #   re
-          # })
-          output$mylog_GGIR <- renderUI({
-            HTML(paste(mylog_GGIR(), collapse = '<br/>'))
+
+          output$mylog_GGIR <- renderText({
+            paste(mylog_GGIR(), collapse = '\n')
           })
           
-          # output$viewggir <-  renderTable({
-          #   view_GGIRlog()))
-          #   paste(as.character(unlist(view_GGIRlog())), collapse = '\n')
-          # })
-          
-          # Start writing to log file
-          # con <- file(logfile_tmp)
-          # sink(con, append = TRUE)
-          # sink(con, append = TRUE, type = "message")
           # Start GGIR
-          
           x_ggir <- r_bg(func = function(GGIRshiny, rawaccdir, outputdir, 
                                          sleepdiary, configfile, do.BrondCounts){
             GGIRshiny(rawaccdir, outputdir, 
@@ -651,9 +621,7 @@ myApp <- function(homedir=getwd(), ...) {
           # GGIRshiny(rawaccdir = isolate(global$raw_acc_in), outputdir = global$data_out, 
           #           sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
           #           do.BrondCounts = do.BrondCounts)
-          # Close log file
-          # sink()
-          # sink(type = "message")
+          
           # Copy tmp log file to actual log file for user to see
           logfile = paste0(isolate(global$data_out), "/GGIR.log")
           observe({
@@ -662,10 +630,6 @@ myApp <- function(homedir=getwd(), ...) {
               file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE)     
             }
           })
-          
-          # move file to user when connection is closed
-          # file.copy(from = logfile_tmp, to = logfile)
-          # file.remove(logfile_tmp)
           # Now check whether results are correctly generated:
           expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
           expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
