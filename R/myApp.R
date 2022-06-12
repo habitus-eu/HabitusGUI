@@ -612,6 +612,11 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
             paste(mylog_GGIR(), collapse = '\n')
           })
           
+          # If process somehow unexpectedly terminates, always copy tmp log 
+          # file to actual log file for user to see
+          logfile = paste0(isolate(global$data_out), "/GGIR.log")
+          on.exit(file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE))
+          
           # Start GGIR
           x_ggir <- r_bg(func = function(GGIRshiny, rawaccdir, outputdir, 
                                          sleepdiary, configfile, do.BrondCounts){
@@ -631,13 +636,14 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           #           sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
           #           do.BrondCounts = do.BrondCounts)
           
-          # Copy tmp log file to actual log file for user to see
-          logfile = paste0(isolate(global$data_out), "/GGIR.log")
+          
+          
           observe({
             if (x_ggir$poll_io(0)[["process"]] != "ready") {
               invalidateLater(5000)
             } else {
               on.exit(removeNotification(id_ggir), add = TRUE)
+              # When process is finished copy tmp log file to actual log file for user to see
               file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE)
               # Now check whether results are correctly generated:
               expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
@@ -647,9 +653,10 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                   expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
                   if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
                     if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
-                      GGIRBrondCounts_message = paste0("BrondCounts and GGIR successfully completed at ", Sys.time(), " Output is stored in ", 
-                                                       expected_outputdir_brondcounts, " and ",
-                                                       expected_outputdir_ggir, ". The table below shows the content of part2_daysummary.csv")
+                      GGIRBrondCounts_message = paste0(#"BrondCounts and GGIR successfully completed at ", Sys.time(), 
+                                                      "Output is stored in ", expected_outputdir_brondcounts, " and ",
+                                                       expected_outputdir_ggir, 
+                                                      "<br/>The table below shows the content of part2_daysummary.csv")
                       GGIRpart2 = read.csv(expected_ggiroutput_file)
                       output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
                     } else {
@@ -659,8 +666,8 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                     GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. Dir ",expected_outputdir_brondcounts, " not found")
                   }
                 } else {
-                  GGIRBrondCounts_message = paste0("GGIR successfully completed at ", Sys.time(), 
-                                                   "<br/>Output is stored in: ", 
+                  GGIRBrondCounts_message = paste0(#"GGIR successfully completed at ", Sys.time(), 
+                                                   "Output is stored in: ",  #<br/>
                                                    expected_outputdir_ggir,
                                                    "<br/>The table below shows the content of part2_daysummary.csv:")
                   GGIRpart2 = read.csv(expected_ggiroutput_file, nrow = 100)
@@ -740,6 +747,11 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
         # stderr = "2>&1")
         # 
         
+        # If process somehow unexpectedly terminates, always copy tmp log 
+        # file to actual log file for user to see
+        logfile = paste0(isolate(global$data_out), "/PALMSpy.log")
+        on.exit(file.copy(from = stdout_PALMSpy_tmp, to = logfile, overwrite = TRUE))
+        
         # # Start PALMSpy
         x_palmspy <- r_bg(func = function(PALMSpyshiny, outputdir, gpsdir, count_file_location){
           PALMSpyshiny(outputdir, gpsdir, count_file_location)
@@ -758,20 +770,19 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
         # system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
         #         stdout = "stdout_palmspy.log", stderr = "stderr_palmspy.log", wait = TRUE)
         
-        # Copy tmp log file to actual log file for user to see
-        logfile = paste0(isolate(global$data_out), "/PALMSpy.log")
+        
         observe({
           if (x_palmspy$poll_io(0)[["process"]] != "ready") {
             invalidateLater(5000)
           } else {
             on.exit(removeNotification(id_palmspy), add = TRUE)
+            # When process is finished copy tmp log file to actual log file for user to see
             file.copy(from = stdout_PALMSpy_tmp, to = logfile, overwrite = TRUE)     
             # Now check whether results are correctly generated:
             expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
-            
             if (dir.exists(expected_palmspy_results_dir)) {
-              PALMSpy_message = paste0("PALMSpy completed at ", Sys.time(),
-                                       "<br/>Output is stored in: ", expected_palmspy_results_dir) 
+              PALMSpy_message = paste0(#"PALMSpy completed at ", Sys.time(),
+                                       "Output is stored in: ", expected_palmspy_results_dir) #<br/>
               # Now send content of 1 output file to UI
               expected_palmspyoutput_file = dir(expected_palmspy_results_dir, recursive = TRUE, full.names = TRUE, pattern = "csv")[1]
               if (length(expected_palmspyoutput_file) > 0) {
@@ -839,13 +850,18 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
             paste(mylog_palmsplusr(), collapse = '\n')
           })
           
-          PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
-            # participant_exclude_list, # <= Discuss, leave out from linkfile?
-            gisdir = global$gis_in,
-            palmsdir = expected_palmspy_results_dir,
-            gislinkfile = global$gislinkfile_in,
-            outputdir = isolate(global$data_out),
-            dataset_name = input$dataset_name)
+          # If process somehow unexpectedly terminates, always copy tmp log 
+          # file to actual log file for user to see
+          logfile = paste0(isolate(global$data_out), "/palmsplusr.log")
+          on.exit(file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE), add = TRUE)
+          
+          # PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          #   # participant_exclude_list, # <= Discuss, leave out from linkfile?
+          #   gisdir = global$gis_in,
+          #   palmsdir = expected_palmspy_results_dir,
+          #   gislinkfile = global$gislinkfile_in,
+          #   outputdir = isolate(global$data_out),
+          #   dataset_name = input$dataset_name)
           
           # Start palmsplusr
           x_palmsplusr <- r_bg(func = function(PALMSplusRshiny, gisdir, palmsdir, gislinkfile, outputdir, dataset_name){
@@ -867,28 +883,28 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           #     gislinkfile = global$gislinkfile_in,
           #     outputdir = isolate(global$data_out),
           #     dataset_name = input$dataset_name)
-          # Copy tmp log file to actual log file for user to see
-          logfile = paste0(isolate(global$data_out), "/palmsplusr.log")
+          
           observe({
             if (x_palmsplusr$poll_io(0)[["process"]] != "ready") {
               invalidateLater(5000)
             } else {
               on.exit(removeNotification(id_palmsplusr), add = TRUE)
+              # When process is finished copy tmp log file to actual log file for user to see
               file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE)     
               # Now check whether results are correctly generated:
               expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
               if (dir.exists(expected_palmsplus_folder) == TRUE) {
                 csv_files_palmsplus = dir(expected_palmsplus_folder,pattern = "csv", recursive = TRUE)
                 if (length(csv_files_palmsplus) > 0) {
-                  PALMSplus_message = paste0("PALMSplusR successfully completed at ", Sys.time(),
-                                             "<br/>Output is stored in: ", expected_palmsplus_folder,
+                  PALMSplus_message = paste0(#"PALMSplusR successfully completed at ", Sys.time(),
+                                             "Output is stored in: ", expected_palmsplus_folder, #<br/>
                                              "<br/>The table below shows the content of ", basename(csv_files_palmsplus),
                                              "<br/>Log file: ", logfile)
                   first_csv_file_palmsplus = read.csv(csv_files_palmsplus)
                   output$PALMSpluscsv <- DT::renderDataTable(first_csv_file_palmsplus, options = list(scrollX = TRUE))
                 } else {
-                  PALMSplus_message = paste0("PALMSplusR unsuccessful",
-                                             "<br/>No file found inside: ", expected_palmsplus_folder,
+                  PALMSplus_message = paste0(#"PALMSplusR unsuccessful",
+                                             "No file found inside: ", expected_palmsplus_folder, #<br/>
                                              "<br/>Log file: ", logfile)
                 }
               } else {
