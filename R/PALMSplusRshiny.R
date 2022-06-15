@@ -400,23 +400,24 @@ PALMSplusRshiny <- function(gisdir = "",
   #                 school = school,
   #                 home_nbh = home_nbh,
   #                 school_nbh = school_nbh)
-  
+  config <- system.file("extdata", "config.csv", package = "palmsplusr")
   print("run palmplusr - plus")
   palmsplus <- palmsplusr::palms_build_palmsplus(palms, config_file = config)
   write_csv(palmsplus, file = fns[1])
 
   print("run palmplusr - days")
-  days <- palmsplusr::palms_build_days(palmsplus)
+  days <- palmsplusr::palms_build_days(palmsplus, config_file = config)
   write_csv(days,  file = fns[2])
-  sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
+  # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
 
   print("run palmplusr - trajectories")
-  trajectories <- palmsplusr::palms_build_trajectories(palmsplus)
+  trajectories <- palmsplusr::palms_build_trajectories(palmsplus, config_file = config)
   write_csv(trajectories,  file = fns[3])
   sf::st_write(trajectories, paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp"))
 
   print("run palmplusr - multimodal")
   multimodal <- palmsplusr::palms_build_multimodal(data = trajectories,
+                                                   config_file = config,
                                                    spatial_threshold = 200,
                                                    temporal_threshold = 10,
                                                    palmsplus_copy = palmsplus) # p
