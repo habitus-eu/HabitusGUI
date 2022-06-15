@@ -402,7 +402,7 @@ PALMSplusRshiny <- function(gisdir = "",
   #                 school_nbh = school_nbh)
   
   print("run palmplusr - plus")
-  palmsplus <- palmsplusr::palms_build_palmsplus(palms)
+  palmsplus <- palmsplusr::palms_build_palmsplus(palms, config_file = config)
   write_csv(palmsplus, file = fns[1])
 
   print("run palmplusr - days")

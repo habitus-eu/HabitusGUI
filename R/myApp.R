@@ -891,7 +891,9 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
             } else {
               on.exit(removeNotification(id_palmsplusr), add = TRUE)
               # When process is finished copy tmp log file to actual log file for user to see
-              file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE)     
+              if (file.exists(stdout_palmsplusr_tmp)) {
+                file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE)     
+              }
               PALMSplus_message = "TEST message: process done"
               # # Now check whether results are correctly generated:
               # expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
