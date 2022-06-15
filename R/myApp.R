@@ -218,12 +218,12 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 actionButton("start_palmsplus", "Start analysis", width = '300px'),
                                 p("\n"),
                                 verbatimTextOutput("mylog_palmsplusr"),
+                                tags$head(tags$style("#mylog_palmsplusr{color:darkblue; font-size:12px; font-style:italic; 
+overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 p("\n"),
                                 htmlOutput("palmsplus_end_message"),
                                 p("\n"),
                                 DT::dataTableOutput("PALMSplus_file1"),
-                                tags$head(tags$style("#mylog_palmsplusr{color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 hr()
                ),
                actionButton("page_43", "prev")
@@ -903,8 +903,10 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                              "Output is stored in: ", expected_palmsplus_folder, #<br/>
                                              "<br/>The table below shows the content of ", basename(csv_files_palmsplus),
                                              "<br/>Log file: ", logfile)
-                  first_csv_file_palmsplus = read.csv(csv_files_palmsplus)
-                  output$PALMSplus_file1 <- DT::renderDataTable(first_csv_file_palmsplus, options = list(scrollX = TRUE))
+                  PALMSplus_file1 = read.csv(file = csv_files_palmsplus[1])
+                  if (length(PALMSplus_file1) > 0) {
+                    output$PALMSplus_file1 <- DT::renderDataTable(PALMSplus_file1, options = list(scrollX = TRUE))
+                  }
                 } else {
                   PALMSplus_message = paste0("PALMSplusR unsuccessful",
                                              "<br/>No file found inside: ", expected_palmsplus_folder, #<br/>
