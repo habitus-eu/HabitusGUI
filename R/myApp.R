@@ -903,10 +903,10 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                              "Output is stored in: ", expected_palmsplus_folder, #<br/>
                                              "<br/>The table below shows the content of ", basename(csv_files_palmsplus),
                                              "<br/>Log file: ", logfile)
-                  PALMSplus_file1 = read.csv(file = csv_files_palmsplus[1])
-                  if (length(PALMSplus_file1) > 0) {
-                    # output$PALMSplus_file1 <- DT::renderDataTable(PALMSplus_file1, options = list(scrollX = TRUE))
-                  }
+                  # PALMSplus_file1 = read.csv(file = csv_files_palmsplus[1])
+                  # if (length(PALMSplus_file1) > 0) {
+                  #   # output$PALMSplus_file1 <- DT::renderDataTable(PALMSplus_file1, options = list(scrollX = TRUE))
+                  # }
                 } else {
                   PALMSplus_message = paste0("PALMSplusR unsuccessful",
                                              "<br/>No file found inside: ", expected_palmsplus_folder, #<br/>
