@@ -203,6 +203,8 @@ PALMSplusRshiny <- function(gisdir = "",
   
   write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
   
+  
+  #===========================================================================================  
   # Create field tables -----------------------------------------------------
   
   # Note that I have removed the dependency on palmsplusr for this as it
@@ -273,27 +275,6 @@ PALMSplusRshiny <- function(gisdir = "",
     }
   }
   #================
-  
-  
-  
-  # Replacing:
-  # palmsplusr::palms_add_field("at_home", "palms_in_polygon(., filter(home, identifier == i), identifier)")
-  # palmsplusr::palms_add_field("at_school", "palms_in_polygon(., filter(school, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
-  # palmsplusr::palms_add_field("at_home_nbh","palms_in_polygon(., filter(home_nbh, identifier == i), identifier)")
-  # palmsplusr::palms_add_field("at_school_nbh", "palms_in_polygon(., filter(school_nbh, school_id == participant_basis %>% filter(identifier == i) %>% pull(school_id)))")
-  # palmsplusr::palms_add_domain("home", "at_home")
-  # palmsplusr::palms_add_domain("school", "(!at_home & at_school)")
-  # palmsplusr::palms_add_domain("transport", "!at_home & !(at_school) & (pedestrian | bicycle | vehicle)")
-  # palmsplusr::palms_add_domain("home_nbh","!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh")
-  # palmsplusr::palms_add_domain("school_nbh","!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & at_school_nbh")
-  # palmsplusr::palms_add_domain("other", "!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & !(at_school_nbh)")
-  # palmsplusr::palms_add_trajectory_location("home_school", "at_home", "at_school")
-  # palmsplusr::palms_add_trajectory_location("school_home", "at_school", "at_home")
-  # palmsplusr::palms_add_trajectory_location("home_home", "at_home", "at_home")
-  # palmsplusr::palms_add_trajectory_location("school_school", "at_school", "at_school")
-
-
-  #=============================
   print("adding fields:")
   names = c("at_home", "at_school", "at_home_nbh", "at_school_nbh")
   formulas = c(paste0("palmsInPolygon(polygons = dplyr::filter(home, identifier == i),",
@@ -305,17 +286,11 @@ PALMSplusRshiny <- function(gisdir = "",
                paste0("palmsInPolygon(polygons = dplyr::filter(school_nbh, school_id == participant_basis %>%",
                                  " dplyr::filter(identifier == i) %>% pull(school_id)))"))
   for (mi in 1:length(names)) {
-    # print(paste0("mi: ", mi))
     domain_field = FALSE
     pfi = tibble(name = names[mi], formula = formulas[mi], domain_field = domain_field)
     if (!exists("palmsplus_fields")) {
-      # print("create new tibble")
       palmsplus_fields = pfi
     } else {
-      # print("append to tibble")
-      # if (ncol(palmsplus_fields) != 3) {
-        # print(head(palmsplus_fields))
-      # }
       palmsplus_fields = rbind(palmsplus_fields, pfi)
     }
     if (length(palmsplus_fields) == 0) {
@@ -338,13 +313,8 @@ PALMSplusRshiny <- function(gisdir = "",
     # print(paste0("mi: ", mi))
     pdo = tibble(name = names[mi], formula = formulas[mi])
     if (!exists("palmsplus_domains")) {
-      # print("create new tibble")
       palmsplus_domains = pdo
     } else {
-      # print("append to tibble")
-      # if (ncol(palmsplus_domains) != 2) {
-      # print(head(palmsplus_domains))
-      # }
       palmsplus_domains = rbind(palmsplus_domains, pdo)
     }
   }
@@ -354,16 +324,10 @@ PALMSplusRshiny <- function(gisdir = "",
   formulas = c("at_home", "at_school",
                "at_home", "at_school")
   for (mi in 1:length(names)) {
-    # print(paste0("mi: ", mi))
     tfi = tibble(name = names[mi], formula = formulas[mi], after_conversion = "at_home")
     if (!exists("trajectory_fields")) {
-      # print("create new tibble")
       trajectory_fields = tfi
     } else {
-      # print("append to tibble")
-      # if (ncol(trajectory_fields) != 3) {
-      # print(head(trajectory_fields))
-      # }
       trajectory_fields = rbind(trajectory_fields, tfi)
     }
     if (length(trajectory_fields) == 0) {
@@ -383,23 +347,7 @@ PALMSplusRshiny <- function(gisdir = "",
       if (file.exists(fn)) file.remove(fn)
     }
   }
-  
-  # this is now an internal function inside HabitusGUI to address scoping problems:
-  # palmsplus_build(palms = palms,
-  #                 config_file = NULL,
-  #                 verbose = TRUE,
-  #                 spatial_threshold = 200,
-  #                 temporal_threshold = 10,
-  #                 palmsplus_folder = palmsplus_folder,
-  #                 dataset_name = dataset_name,
-  #                 palmsplus_fields = palmsplus_fields,
-  #                 palmsplus_domains = palmsplus_domains,
-  #                 trajectory_fields = trajectory_fields,
-  #                 multimodal_fields_def = multimodal_fields_def,
-  #                 home = home,
-  #                 school = school,
-  #                 home_nbh = home_nbh,
-  #                 school_nbh = school_nbh)
+
   config <- system.file("extdata", "config.csv", package = "palmsplusr")
   print("run palmplusr - plus")
   palmsplus <- palmsplusr::palms_build_palmsplus(palms, config_file = config)

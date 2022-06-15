@@ -895,9 +895,10 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                 file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE)     
               }
               PALMSplus_message = "TEST message: process done"
-              # # Now check whether results are correctly generated:
-              # expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
-              # if (dir.exists(expected_palmsplus_folder) == TRUE) {
+              # Now check whether results are correctly generated:
+              expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
+              if (dir.exists(expected_palmsplus_folder) == TRUE) {
+                PALMSplus_message = "TEST message: process done A"
               #   csv_files_palmsplus = dir(expected_palmsplus_folder,pattern = "csv", recursive = TRUE)
               #   if (length(csv_files_palmsplus) > 0) {
               #     PALMSplus_message = paste0(#"PALMSplusR successfully completed at ", Sys.time(),
@@ -911,11 +912,12 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
               #                                "No file found inside: ", expected_palmsplus_folder, #<br/>
               #                                "<br/>Log file: ", logfile)
               #   }
-              # } else {
+              } else {
+                PALMSplus_message = "TEST message: process done B"
               #   PALMSplus_message = paste0("PALMSplusR unsuccessful",
               #                              "<br/>No file found inside: ", expected_palmsplus_folder,
               #                              "<br/>Log file: ", logfile)
-              # }
+              }
               output$palmsplus_end_message <- renderUI({
                 HTML(paste0(PALMSplus_message))
               })
