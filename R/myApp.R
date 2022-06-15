@@ -8,7 +8,8 @@
 #' @importFrom callr r_bg
 #' @export
 
-# pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") HabitusGUI::myApp(homedir="~/projects")
+# pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") 
+# HabitusGUI::myApp(homedir="~/projects")
 # pkgload::load_all("."); myApp(homedir="~/projects/fontys")
 # roxygen2::roxygenise()
 #/Member Files: LineMatthiesen#8897

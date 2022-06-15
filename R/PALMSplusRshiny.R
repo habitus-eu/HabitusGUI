@@ -291,19 +291,19 @@ PALMSplusRshiny <- function(gisdir = "",
   # palmsplusr::palms_add_trajectory_location("school_home", "at_school", "at_home")
   # palmsplusr::palms_add_trajectory_location("home_home", "at_home", "at_home")
   # palmsplusr::palms_add_trajectory_location("school_school", "at_school", "at_school")
-
-
+  
+  
   #=============================
   print("adding fields:")
   names = c("at_home", "at_school", "at_home_nbh", "at_school_nbh")
   formulas = c(paste0("palmsInPolygon(polygons = dplyr::filter(home, identifier == i),",
-                                 " collapse_var = identifier)"),
+                      " collapse_var = identifier)"),
                paste0("palmsInPolygon(polygons = dplyr::filter(school, school_id == participant_basis %>%",
-                                 " dplyr::filter(identifier == i) %>% pull(school_id)))"),
+                      " dplyr::filter(identifier == i) %>% pull(school_id)))"),
                paste0("palmsInPolygon(polygons = dplyr::filter(home_nbh, identifier == i),",
-                                 " collapse_var = identifier)"),
+                      " collapse_var = identifier)"),
                paste0("palmsInPolygon(polygons = dplyr::filter(school_nbh, school_id == participant_basis %>%",
-                                 " dplyr::filter(identifier == i) %>% pull(school_id)))"))
+                      " dplyr::filter(identifier == i) %>% pull(school_id)))"))
   for (mi in 1:length(names)) {
     # print(paste0("mi: ", mi))
     domain_field = FALSE
@@ -314,7 +314,7 @@ PALMSplusRshiny <- function(gisdir = "",
     } else {
       # print("append to tibble")
       # if (ncol(palmsplus_fields) != 3) {
-        # print(head(palmsplus_fields))
+      # print(head(palmsplus_fields))
       # }
       palmsplus_fields = rbind(palmsplus_fields, pfi)
     }
@@ -330,9 +330,9 @@ PALMSplusRshiny <- function(gisdir = "",
                 paste0("!at_home & !(at_school) & (pedestrian | bicycle | vehicle)"),
                 paste0("!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh"),
                 paste0("!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) &",
-                                  " !(at_home_nbh) & at_school_nbh"),
+                       " !(at_home_nbh) & at_school_nbh"),
                 paste0("!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) &",
-                                  " !(at_home_nbh) & !(at_school_nbh)"))
+                       " !(at_home_nbh) & !(at_school_nbh)"))
   
   for (mi in 1:length(names)) {
     # print(paste0("mi: ", mi))
@@ -401,28 +401,31 @@ PALMSplusRshiny <- function(gisdir = "",
   #                 home_nbh = home_nbh,
   #                 school_nbh = school_nbh)
   
+  config <- system.file("extdata", "config.csv", package = "palmsplusr")
   print("run palmplusr - plus")
-  palmsplus <- palmsplusr::palms_build_palmsplus(palms)
+  palmsplus <- palmsplusr::palms_build_palmsplus(palms, config_file = config)
   write_csv(palmsplus, file = fns[1])
-
+  # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/",
+  #                                      dataset_name, "_palmsplus.shp"), append = FALSE)
+  
   print("run palmplusr - days")
-  days <- palmsplusr::palms_build_days(palmsplus)
+  days <- palmsplusr::palms_build_days(palmsplus, config_file = config)
   write_csv(days,  file = fns[2])
-  sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
-
+  
   print("run palmplusr - trajectories")
-  trajectories <- palmsplusr::palms_build_trajectories(palmsplus)
+  trajectories <- palmsplusr::palms_build_trajectories(palmsplus, config_file = config)
   write_csv(trajectories,  file = fns[3])
   sf::st_write(trajectories, paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp"))
-
+  
   print("run palmplusr - multimodal")
   multimodal <- palmsplusr::palms_build_multimodal(data = trajectories,
+                                                   config_file = config,
                                                    spatial_threshold = 200,
                                                    temporal_threshold = 10,
                                                    palmsplus_copy = palmsplus) # p
   write_csv(multimodal, file = fns[4])
   sf::st_write(multimodal, paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp"))
-
+  
   
   print("end reached")
   return(NULL)
