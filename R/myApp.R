@@ -892,27 +892,28 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
               on.exit(removeNotification(id_palmsplusr), add = TRUE)
               # When process is finished copy tmp log file to actual log file for user to see
               file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE)     
-              # Now check whether results are correctly generated:
-              expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
-              if (dir.exists(expected_palmsplus_folder) == TRUE) {
-                csv_files_palmsplus = dir(expected_palmsplus_folder,pattern = "csv", recursive = TRUE)
-                if (length(csv_files_palmsplus) > 0) {
-                  PALMSplus_message = paste0(#"PALMSplusR successfully completed at ", Sys.time(),
-                                             "Output is stored in: ", expected_palmsplus_folder, #<br/>
-                                             "<br/>The table below shows the content of ", basename(csv_files_palmsplus),
-                                             "<br/>Log file: ", logfile)
-                  first_csv_file_palmsplus = read.csv(csv_files_palmsplus)
-                  output$PALMSpluscsv <- DT::renderDataTable(first_csv_file_palmsplus, options = list(scrollX = TRUE))
-                } else {
-                  PALMSplus_message = paste0(#"PALMSplusR unsuccessful",
-                                             "No file found inside: ", expected_palmsplus_folder, #<br/>
-                                             "<br/>Log file: ", logfile)
-                }
-              } else {
-                PALMSplus_message = paste0("PALMSplusR unsuccessful",
-                                           "<br/>No file found inside: ", expected_palmsplus_folder,
-                                           "<br/>Log file: ", logfile)
-              }
+              PALMSplus_message = "TEST message: process done"
+              # # Now check whether results are correctly generated:
+              # expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
+              # if (dir.exists(expected_palmsplus_folder) == TRUE) {
+              #   csv_files_palmsplus = dir(expected_palmsplus_folder,pattern = "csv", recursive = TRUE)
+              #   if (length(csv_files_palmsplus) > 0) {
+              #     PALMSplus_message = paste0(#"PALMSplusR successfully completed at ", Sys.time(),
+              #                                "Output is stored in: ", expected_palmsplus_folder, #<br/>
+              #                                "<br/>The table below shows the content of ", basename(csv_files_palmsplus),
+              #                                "<br/>Log file: ", logfile)
+              #     first_csv_file_palmsplus = read.csv(csv_files_palmsplus)
+              #     output$PALMSpluscsv <- DT::renderDataTable(first_csv_file_palmsplus, options = list(scrollX = TRUE))
+              #   } else {
+              #     PALMSplus_message = paste0(#"PALMSplusR unsuccessful",
+              #                                "No file found inside: ", expected_palmsplus_folder, #<br/>
+              #                                "<br/>Log file: ", logfile)
+              #   }
+              # } else {
+              #   PALMSplus_message = paste0("PALMSplusR unsuccessful",
+              #                              "<br/>No file found inside: ", expected_palmsplus_folder,
+              #                              "<br/>Log file: ", logfile)
+              # }
               output$palmsplus_end_message <- renderUI({
                 HTML(paste0(PALMSplus_message))
               })
