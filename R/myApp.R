@@ -905,7 +905,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                              "<br/>Log file: ", logfile)
                   PALMSplus_file1 = read.csv(file = csv_files_palmsplus[1])
                   if (length(PALMSplus_file1) > 0) {
-                    output$PALMSplus_file1 <- DT::renderDataTable(PALMSplus_file1, options = list(scrollX = TRUE))
+                    # output$PALMSplus_file1 <- DT::renderDataTable(PALMSplus_file1, options = list(scrollX = TRUE))
                   }
                 } else {
                   PALMSplus_message = paste0("PALMSplusR unsuccessful",
