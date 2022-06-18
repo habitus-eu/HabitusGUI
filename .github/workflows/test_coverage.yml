@@ -9,38 +9,23 @@ on:
       - main
       - master
 jobs:
-  run:
-    runs-on: ubuntu-20.04
-    strategy:
-      fail-fast: false
+  test-coverage:
+    runs-on: ubuntu-latest
     env:
-      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
-      - uses: actions/checkout@master
-      - uses: r-lib/actions/setup-r@master
-      - uses: r-lib/actions/setup-tinytex@master
-      - uses: r-lib/actions/setup-pandoc@v1
-      - name: Query dependencies
-        run: |
-          install.packages('devtools')
-          saveRDS(devtools::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
-        shell: Rscript {0}
-      - name: Restore R package cache
-        uses: actions/cache@v2
+      - uses: actions/checkout@v2
+
+      - uses: ./setup-r
         with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
-      - name: Install dependencies
-        run: |
-          options(download.file.method = "libcurl")
-          install.packages(c("devtools"))
-          devtools::install_deps(dependencies = TRUE)
-          devtools::install_cran("covr")
-        shell: Rscript {0}
+          use-public-rspm: true
+
+      - uses: ./setup-r-dependencies
+        with:
+          extra-packages: any::covr
+          needs: coverage
+
       - name: Test coverage
-        run: covr::codecov()
+        run: covr::codecov(quiet = FALSE)
         shell: Rscript {0}
