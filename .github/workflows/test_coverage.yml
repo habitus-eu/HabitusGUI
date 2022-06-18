@@ -29,6 +29,7 @@ jobs:
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
       - name: Install dependencies
         run: |
+          options(download.file.method = "libcurl")
           install.packages(c("remotes"))
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("covr")
