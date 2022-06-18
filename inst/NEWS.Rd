@@ -1,6 +1,13 @@
 \name{NEWS}
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
+\section{Changes in version 0.1.5 (GitHub-only-release date: 17-06-2022)}{
+\itemize{
+  \item Improving declaration of palmsplusr dependency
+  }
+}
+
+
 \section{Changes in version 0.1.3 (GitHub-only-release date: 16-06-2022)}{
 \itemize{
   \item palmsplusr integrated based on default config file.
