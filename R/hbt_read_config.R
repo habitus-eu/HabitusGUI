@@ -6,6 +6,7 @@
 #'
 #' @importFrom readr read_csv
 #'
+#' @export
 hbt_read_config <- function(path) {
 
   if (file.exists(path)) {

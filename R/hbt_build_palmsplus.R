@@ -29,8 +29,9 @@ hbt_build_palmsplus <- function(data = NULL, config_file = NULL, verbose = TRUE,
                                 school_nbh = NULL,
                                 participant_basis = NULL) {
 
-  if (is.null(data)) stop("No data provided")
+  
   if (is.null(palmsplus_fields) & is.null(config_file)) stop("No palmsplus fields have been added (and no config file specified)")
+  if (is.null(data)) stop("No data provided")
   if (is.null(home)) stop("home object is missing")
   if (is.null(school)) stop("school object is missing")
   if (is.null(home_nbh)) stop("home_nbh object is missing")
