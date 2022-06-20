@@ -350,7 +350,17 @@ PALMSplusRshiny <- function(gisdir = "",
 
   config <- system.file("extdata", "config.csv", package = "palmsplusr")
   print("run palmplusr - plus")
-  palmsplus <- palmsplusr::palms_build_palmsplus(palms, config_file = config)
+  # palmsplusr::palms
+  environment(hbt_build_palmsplus) <- environment()
+  
+  palmsplus <- hbt_build_palmsplus(data = palms, 
+                                   config_file = config, 
+                                   palmsplus_fields = palmsplus_fields,
+                                   home = home,
+                                   school = school,
+                                   home_nbh = home_nbh,
+                                   school_nbh = school_nbh,
+                                   participant_basis = participant_basis)
   write_csv(palmsplus, file = fns[1])
 
   print("run palmplusr - days")
