@@ -4,7 +4,7 @@
 \alias{hbt_build_trajectories}
 \title{Build trajectories from the palmsplus dataset}
 \usage{
-hbt_build_trajectories(data, config_file = NULL)
+hbt_build_trajectories(data = NULL, config_file = NULL)
 }
 \arguments{
 \item{data}{The palmsplus data obtained from \code{\link{palms_build_palmsplus}}.}

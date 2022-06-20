@@ -18,8 +18,10 @@
 #' @importFrom stats setNames
 #'
 #' @export
-hbt_build_trajectories <- function(data, config_file = NULL) {
+hbt_build_trajectories <- function(data = NULL, config_file = NULL) {
   name = after_conversion = tripnumber = NULL
+  
+  if (is.null(data)) stop("No data provided")
   
   # Config file is required
   if (is.null(config_file)) {

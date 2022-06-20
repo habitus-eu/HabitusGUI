@@ -402,12 +402,15 @@ PALMSplusRshiny <- function(gisdir = "",
   sf::st_write(trajectories, paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp"))
   
   print("run palmplusr - multimodal")
-  # 
-  multimodal <- palmsplusr::palms_build_multimodal(data = trajectories,
-                                     config_file = config,
+  # palmsplusr::
+  multimodal <- hbt_build_multimodal(data = trajectories,
                                      spatial_threshold = 200,
                                      temporal_threshold = 10,
+                                     config_file = config,
+                                     palmsplus = palmsplus,
                                      palmsplus_copy = palmsplus) # p
+  
+  
   write_csv(multimodal, file = fns[4])
   sf::st_write(multimodal, paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp"))
   

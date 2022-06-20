@@ -9,7 +9,9 @@ Authors@R:
            role = c("aut", "cre"),
            email = "v.vanhees@accelting.com")
 License: Apache License version 2.0 | file LICENSE
-Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, activityCounts, dplyr, magrittr, shinyjs, sf, readr, tidyr, stringr, callr, palmsplusr, data.table, rlang, purrr
+Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, activityCounts,
+    dplyr, magrittr, shinyjs, sf, readr, tidyr, stringr, callr, palmsplusr,
+    data.table, rlang, purrr, geosphere
 Remotes: vincentvanhees/palmsplusr
 LazyData: true
 Suggests: testthat, covr, rmarkdown
