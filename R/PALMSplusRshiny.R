@@ -237,31 +237,31 @@ PALMSplusRshiny <- function(gisdir = "",
     }
   }
   
-  # trajectory_fields
-  names = c("mot", "date", "start", "end",
-            "duration", "nonwear","wear", "sedentary",
-            "light", "moderate", "vigorous", "mvpa",
-            "length", "speed")
-  formulas = c("first(tripmot)", "first(as.Date(datetime))",
-               "datetime[triptype==1]", "datetime[triptype==4]",
-               paste0("as.numeric(difftime(end, start, units = \"secs\") + ", epoch_length, ")"),
-               paste0("sum(activityintensity < 0) * ", epoch_length),
-               paste0("sum(activityintensity >= 0) * ", epoch_length),
-               paste0("sum(activityintensity == 0) * ", epoch_length),
-               paste0("sum(activityintensity == 1) * ", epoch_length),
-               paste0("sum(activityintensity == 2) * ", epoch_length),
-               paste0("sum(activityintensity == 3) * ", epoch_length),
-               "moderate + vigorous", "as.numeric(st_length(.))",
-               "(length / duration) * 3.6")
-  after_conversions = c(rep(FALSE, 12), rep(TRUE, 2))
-  for (mi in 1:length(names)) {
-    tfd = tibble(name = names[mi], formula = formulas[mi], after_conversion = after_conversions[mi])
-    if (!exists("trajectory_fields_def")) {
-      trajectory_fields_def = tfd
-    } else {
-      trajectory_fields_def = rbind(trajectory_fields_def, tfd)
-    }
-  }
+  # # trajectory_fields
+  # names = c("mot", "date", "start", "end",
+  #           "duration", "nonwear","wear", "sedentary",
+  #           "light", "moderate", "vigorous", "mvpa",
+  #           "length", "speed")
+  # formulas = c("first(tripmot)", "first(as.Date(datetime))",
+  #              "datetime[triptype==1]", "datetime[triptype==4]",
+  #              paste0("as.numeric(difftime(end, start, units = \"secs\") + ", epoch_length, ")"),
+  #              paste0("sum(activityintensity < 0) * ", epoch_length),
+  #              paste0("sum(activityintensity >= 0) * ", epoch_length),
+  #              paste0("sum(activityintensity == 0) * ", epoch_length),
+  #              paste0("sum(activityintensity == 1) * ", epoch_length),
+  #              paste0("sum(activityintensity == 2) * ", epoch_length),
+  #              paste0("sum(activityintensity == 3) * ", epoch_length),
+  #              "moderate + vigorous", "as.numeric(st_length(.))",
+  #              "(length / duration) * 3.6")
+  # after_conversions = c(rep(FALSE, 12), rep(TRUE, 2))
+  # for (mi in 1:length(names)) {
+  #   tfd = tibble(name = names[mi], formula = formulas[mi], after_conversion = after_conversions[mi])
+  #   if (!exists("trajectory_fields_def")) {
+  #     trajectory_fields_def = tfd
+  #   } else {
+  #     trajectory_fields_def = rbind(trajectory_fields_def, tfd)
+  #   }
+  # }
   # multimodal_fields
   names = c("duration", "nonwear", "wear", "sedentary", "light",
             "moderate", "vigorous", "mvpa", "length", "speed")
@@ -278,13 +278,13 @@ PALMSplusRshiny <- function(gisdir = "",
   print("adding fields:")
   names = c("at_home", "at_school", "at_home_nbh", "at_school_nbh")
   formulas = c(paste0("palmsInPolygon(polygons = dplyr::filter(home, identifier == i),",
-                                 " collapse_var = identifier)"),
+                      " collapse_var = identifier)"),
                paste0("palmsInPolygon(polygons = dplyr::filter(school, school_id == participant_basis %>%",
-                                 " dplyr::filter(identifier == i) %>% pull(school_id)))"),
+                      " dplyr::filter(identifier == i) %>% pull(school_id)))"),
                paste0("palmsInPolygon(polygons = dplyr::filter(home_nbh, identifier == i),",
-                                 " collapse_var = identifier)"),
+                      " collapse_var = identifier)"),
                paste0("palmsInPolygon(polygons = dplyr::filter(school_nbh, school_id == participant_basis %>%",
-                                 " dplyr::filter(identifier == i) %>% pull(school_id)))"))
+                      " dplyr::filter(identifier == i) %>% pull(school_id)))"))
   for (mi in 1:length(names)) {
     domain_field = FALSE
     pfi = tibble(name = names[mi], formula = formulas[mi], domain_field = domain_field)
@@ -305,9 +305,9 @@ PALMSplusRshiny <- function(gisdir = "",
                 paste0("!at_home & !(at_school) & (pedestrian | bicycle | vehicle)"),
                 paste0("!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh"),
                 paste0("!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) &",
-                                  " !(at_home_nbh) & at_school_nbh"),
+                       " !(at_home_nbh) & at_school_nbh"),
                 paste0("!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) &",
-                                  " !(at_home_nbh) & !(at_school_nbh)"))
+                       " !(at_home_nbh) & !(at_school_nbh)"))
   
   for (mi in 1:length(names)) {
     # print(paste0("mi: ", mi))
@@ -318,22 +318,41 @@ PALMSplusRshiny <- function(gisdir = "",
       palmsplus_domains = rbind(palmsplus_domains, pdo)
     }
   }
-  #=============================
-  print("adding trajectories")
-  names = c("home_school", "school_home", "home_home", "school_school")
-  formulas = c("at_home", "at_school",
-               "at_home", "at_school")
-  for (mi in 1:length(names)) {
-    tfi = tibble(name = names[mi], formula = formulas[mi], after_conversion = "at_home")
-    if (!exists("trajectory_fields")) {
-      trajectory_fields = tfi
-    } else {
-      trajectory_fields = rbind(trajectory_fields, tfi)
-    }
-    if (length(trajectory_fields) == 0) {
-      trajectory_fields = trajectory_fields_def
-    }
-  }
+  # #=============================
+  # print("adding trajectories")
+  # names = c("home_school", "school_home", "home_home", "school_school")
+  # formulas = c("at_home", "at_school",
+  #              "at_home", "at_school")
+  # for (mi in 1:length(names)) {
+  #   tfi = tibble(name = names[mi], formula = formulas[mi], after_conversion = "at_home")
+  #   if (!exists("trajectory_fields")) {
+  #     trajectory_fields = tfi
+  #   } else {
+  #     trajectory_fields = rbind(trajectory_fields, tfi)
+  #   }
+  #   if (length(trajectory_fields) == 0) {
+  #     trajectory_fields = trajectory_fields_def
+  #   }
+  # }
+  
+  # #=============================
+  # print("adding trajectory locations")
+  # names = c("home_school", "school_home", "school_school", "home_home")
+  # start_criteria = c("at_home", "at_school", "at_school", "at_home")
+  # end_criteria = c("at_school", "at_home", "at_school", "at_home")
+  # for (mi in 1:length(names)) {
+  #   tli = tibble(name = name[mi], start_criteria = start_criteria[mi], end_criteria = end_criteria[mi])
+  #   if (!exists("trajectory_fields")) {
+  #     trajectory_locations = tli
+  #   } else {
+  #     trajectory_locations = rbind(trajectory_locations, tli)
+  #   }
+  #   # if (length(trajectory_locations) == 0) {
+  #   #   trajectory_locations = trajectory_locations_def
+  #   # }
+  # }
+  # #==
+  
   #=============================
   
   # Run palmsplusr ----------------------------------------------------------
@@ -347,7 +366,7 @@ PALMSplusRshiny <- function(gisdir = "",
       if (file.exists(fn)) file.remove(fn)
     }
   }
-
+  
   config <- system.file("extdata", "config.csv", package = "palmsplusr")
   print("run palmplusr - plus")
   # palmsplusr::palms
@@ -360,7 +379,7 @@ PALMSplusRshiny <- function(gisdir = "",
                                    school_nbh = school_nbh,
                                    participant_basis = participant_basis)
   write_csv(palmsplus, file = fns[1])
-
+  
   print("run palmplusr - days")
   # palmsplusr::palms
   days <- hbt_build_days(data = palmsplus,
@@ -375,21 +394,23 @@ PALMSplusRshiny <- function(gisdir = "",
                          participant_basis = participant_basis)
   write_csv(days,  file = fns[2])
   # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
-
+  
   print("run palmplusr - trajectories")
-  trajectories <- palmsplusr::palms_build_trajectories(palmsplus, config_file = config)
+  # palmsplusr::palms
+  trajectories <- hbt_build_trajectories(palmsplus, config_file = config)
   write_csv(trajectories,  file = fns[3])
   sf::st_write(trajectories, paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp"))
-
+  
   print("run palmplusr - multimodal")
+  # 
   multimodal <- palmsplusr::palms_build_multimodal(data = trajectories,
-                                                   config_file = config,
-                                                   spatial_threshold = 200,
-                                                   temporal_threshold = 10,
-                                                   palmsplus_copy = palmsplus) # p
+                                     config_file = config,
+                                     spatial_threshold = 200,
+                                     temporal_threshold = 10,
+                                     palmsplus_copy = palmsplus) # p
   write_csv(multimodal, file = fns[4])
   sf::st_write(multimodal, paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp"))
-
+  
   
   print("end reached")
   return()

@@ -5,7 +5,7 @@
 \title{Calculate day-level summaries from the palmsplus dataset}
 \usage{
 hbt_build_days(
-  data,
+  data = NULL,
   verbose = TRUE,
   config_file = NULL,
   palmsplus_domains = NULL,
