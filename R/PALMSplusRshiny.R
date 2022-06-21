@@ -58,7 +58,7 @@ PALMSplusRshiny <- function(gisdir = "",
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
   palms = palmsplusr::read_palms(PALMS_reduced_file)
   
-  # VvH I have added this:
+  # Helper function to find shape files
   find_file = function(path, namelowercase) {
     allcsvfiles = dir(path, recursive = TRUE, full.names = TRUE)
     file_of_interest = allcsvfiles[which(tolower(basename(allcsvfiles)) == namelowercase)]
@@ -68,30 +68,6 @@ PALMSplusRshiny <- function(gisdir = "",
   participant_basis = read_csv(gislinkfile)
   unique_ids_in_palms <- unique(palms$identifier)
   unique_ids_in_participant_basis <- unique(participant_basis$identifier)
-  # VvH - Test for missing values in participant basis
-  test_missing_value = rowSums(is.na(participant_basis[,c("identifier", "school_id")]))
-  missing = which(test_missing_value > 1)
-  print(paste0("length missing: ", length(length(missing))))
-  participant_exclude_list = list(identifier = NULL, school_id = NULL)
-  if (length(missing) > 0) {
-    print("\nMissing ID values in participant_basis\n")
-    print(paste0("\nIgnoring identifier ", paste(participant_basis$identifier[missing], sep = " ")))
-    print(paste0("\nIgnoring schoolid ", paste(participant_basis$school_id[missing], sep = " ")))
-    participant_exclude_list$identifier = participant_basis$identifier[missing]
-    participant_exclude_list$school_id = participant_basis$school_id[missing]
-    participant_basis = participant_basis[test_missing_value == 0, ]
-  }
-  # Write list of excluded files to file
-  sink(paste0(palmsplus_folder, "/", dataset_name, "_excluded_ids.txt"))
-  print(participant_exclude_list)
-  sink()
-  rm(missing)
-  # VvH turned this off because now only process IDs with complete data
-  # missing_ids_in_participant_basis <- setdiff(unique_ids_in_palms, unique_ids_in_participant_basis)
-  # if(length(missing_ids_in_participant_basis) > 0){
-  #   participant_basis <- rbind(participant_basis, data.frame(identifier = missing_ids_in_participant_basis, school_id = NA, class_id = NA))
-  #   write.csv(participant_basis, paste(str_interp("participant_basis_${dataset_name}.csv")))
-  # }
   
   # Load all shape files ----------------------------------------------------
   hometablefile = find_file(path = gisdir, namelowercase = "home_table.shp")
@@ -103,104 +79,19 @@ PALMSplusRshiny <- function(gisdir = "",
   home_nbh = sf::read_sf(lochomebuffersfile)
   school_nbh = sf::read_sf(locschoolbuffersfile)
   
-  check_N = function(home, home_nbh, school, school_nbh, participant_basis, palms) {
-    if (length(unique(school$school_id)) == 0) {
-      print("No school_id found in school$school_id")
-    }
-    if (length(unique(school_nbh$school_id)) == 0) {
-      print("No school_id found in school_nbh$school_id")
-    }
-    if (length(unique(home$identifier)) == 0) {
-      print("No identifier found in home$identifier")
-    }
-    if (length(unique(home_nbh$identifier)) == 0) {
-      print("No identifier found in home_nbh$identifier")
-    }
-    if (length(unique(participant_basis$identifier)) == 0) {
-      print("No identifier found in participant_basis$identifier")
-    }
-    if (length(unique(participant_basis$school_id)) == 0) {
-      print("No school_id found in participant_basis$school_id")
-    }
-    if (length(unique(palms$identifier)) == 0) {
-      print("No identifier found in palms$identifier")
-    }
-  }
-  check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
-  # at this point we should have a cleaned dataset with only consistent data in all objects
-  print("Number of unique IDs in all objects")
-  print(paste0("Number of unique IDs in participant_basis: ", length(unique(participant_basis$identifier))))
-  print(paste0("palms ", length(unique(palms$identifier))))
-  print(paste0("home ", length(unique(home$identifier))))
-  print(paste0("home_nbh ", length(unique(home_nbh$identifier))))
-  print(paste0("school ", length(unique(school$school_id))))
-  print(paste0("school_nbh ", length(unique(school_nbh$school_id))))
   
+  # Check for missing IDs -------------------------------------------------------------------------
+  withoutMissingId = hbt_check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
+                                          home, school, home_nbh, school_nbh)
+  palms = withoutMissingId$palms
+  participant_basis = withoutMissingId$participant_basis
   
-  # VvH test for incomplete id in palms object
-  missing_identifiers = unique(c(palms$identifier[which(palms$identifier %in% participant_basis$identifier == FALSE)],
-                                 participant_basis$identifier[which(participant_basis$identifier %in% palms$identifier == FALSE)]))
-  
-  if (length(missing_identifiers) > 0) {
-    print("Removing missing identifiers related to palms")
-    print(missing_identifiers)
-    participant_basis = participant_basis[participant_basis$identifier %in% missing_identifiers == FALSE,]
-    palms = palms[palms$identifier %in% missing_identifiers == FALSE,]
-  }
-  check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
-  
-  # # VvH test for incomplete home id
-  # missing_identifiers = unique(c(home$identifier[which(home$identifier %in% participant_basis$identifier == FALSE)],
-  #                         participant_basis$identifier[which(participant_basis$identifier %in% home$identifier == FALSE)],
-  #                         home_nbh$identifier[which(home_nbh$identifier %in% participant_basis$identifier == FALSE)],
-  #                         participant_basis$identifier[which(participant_basis$identifier %in% home_nbh$identifier == FALSE)]))
-  # if (length(missing_identifiers) > 0) {
-  #   print("Removing missing identifiers related to home")
-  #   print(missing_identifiers)
-  #   participant_basis = participant_basis[participant_basis$identifier %in% missing_identifiers == FALSE,]
-  #   home = home[home$identifier %in% missing_identifiers == FALSE,]
-  #   home_nbh = home_nbh[home_nbh$identifier %in% missing_identifiers == FALSE,]
+  # VvH turned this off because now only process IDs with complete data
+  # missing_ids_in_participant_basis <- setdiff(unique_ids_in_palms, unique_ids_in_participant_basis)
+  # if(length(missing_ids_in_participant_basis) > 0){
+  #   participant_basis <- rbind(participant_basis, data.frame(identifier = missing_ids_in_participant_basis, school_id = NA, class_id = NA))
+  #   write.csv(participant_basis, paste(str_interp("participant_basis_${dataset_name}.csv")))
   # }
-  # check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
-  # 
-  # missing_school_id = unique(c(school$school_id[which(school$school_id %in% participant_basis$school_id == FALSE)],
-  #                                participant_basis$school_id[which(participant_basis$school_id %in% school$school_id == FALSE)],
-  #                              school_nbh$school_id[which(school_nbh$school_id %in% participant_basis$school_id == FALSE)],
-  #                              participant_basis$school_id[which(participant_basis$school_id %in% school_nbh$school_id == FALSE)]))
-  # 
-  # if (length( missing_school_id) > 0) {
-  #   print("Removing missing schoolids")
-  #   print(missing_school_id)
-  #   participant_basis = participant_basis[participant_basis$school_id %in% missing_school_id == FALSE,]
-  #   school = school[school$school_id %in%  missing_school_id == FALSE,]
-  #   school_nbh = school_nbh[school_nbh$school_id %in% missing_school_id == FALSE,]
-  # }
-  # check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
-  
-  # getnrow = function(x) {
-  #   x = x[[1]]
-  #   x = x[rowSums(is.na(x)) == 0, ] 
-  #   v = nrow(x)
-  #   return(v)
-  # }
-  # school$nrowgeom = unlist(lapply(school$geometry, FUN = getnrow))
-  # school_nbh$nrowgeom = unlist(lapply(school_nbh$geometry, FUN = getnrow))
-  # home$nrowgeom = unlist(lapply(home$geometry, FUN = getnrow))
-  # home_nbh$nrowgeom = unlist(lapply(home_nbh$geometry, FUN = getnrow))
-  # 
-  # print(school$nrowgeom)
-  # print(school_nbh$nrowgeom)
-  # print(home$nrowgeom)
-  # print(home_nbh$nrowgeom)
-  # at this point we should have a cleaned dataset with only consistent data in all objects
-  print("Number of unique IDs in all objects")
-  print(paste0("participant_basis ", length(unique(participant_basis$identifier))))
-  print(paste0("palms ", length(unique(palms$identifier))))
-  print(paste0("home ", length(unique(home$identifier))))
-  print(paste0("home_nbh ", length(unique(home_nbh$identifier))))
-  print(paste0("school ", length(unique(school$school_id))))
-  print(paste0("school_nbh ", length(unique(school_nbh$school_id))))
-  
   write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
   
   
