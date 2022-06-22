@@ -29,19 +29,30 @@ hbt_build_trajectories <- function(data = NULL, config_file = NULL) {
   } else {
     config <- hbt_read_config(config_file) %>%
       filter(context == 'trajectory_location')
+    dolocation = TRUE
+    if (length(config) == 0) {
+      config <- hbt_read_config(config_file) %>%
+        filter(context == 'trajectory_field')
+      dolocation = FALSE
+    }
   }
   # Set args objects
   if (nrow(config) > 0) {
     args <- config %>% filter(after_conversion == FALSE)
     args_after <- config %>% filter(after_conversion == TRUE)
-    args <- setNames(args$formula, args$name) %>% lapply(parse_expr)
-    args_after <- setNames(args_after$formula, args_after$name) %>% lapply(parse_expr)
-    args_locations <- setNames(paste0("first(", config$start_criteria,
+    if (dolocation == TRUE) {
+      args <- setNames(args$formula, args$name) %>% lapply(parse_expr)
+      args_after <- setNames(args_after$formula, args_after$name) %>% lapply(parse_expr)
+      args_locations <- setNames(paste0("first(", config$start_criteria,
                                       ") & last(", config$end_criteria, ")"),
                                config$name) %>% lapply(parse_expr)
-    args <- c(args, args_locations)
+      args <- c(args, args_locations)
+    } else {
+      args <- setNames(args[[2]], args[[1]]) %>% lapply(parse_expr)
+      args_after <- setNames(args_after[[2]], args_after[[1]]) %>% lapply(parse_expr)
+    }
   } else {
-    stop("config file does not have trajectory locations")
+    stop("config file has neither trajectory fields or locations")
   }
   # Build data object
   data %>%

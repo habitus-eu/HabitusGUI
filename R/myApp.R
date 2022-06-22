@@ -335,6 +335,11 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           configs_ready = FALSE
         }
       }
+      if ("palmsplusr" %in% input$tools) {
+        if (length(paste0(configfilepalmsplusr())) == 0) {
+          configs_ready = FALSE
+        }
+      }
       if (configs_ready == TRUE) {
         showNotification("Saving configuration file(s) to output folder", type = "message", duration = 2)
         if ("GGIR" %in% input$tools) {
@@ -356,6 +361,12 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
         if ("PALMSpy" %in% input$tools) {
           if (configfilePALMSpy() != paste0(global$data_out, "/config.json")) {
             file.copy(from = configfilePALMSpy(), to = paste0(global$data_out, "/config.json"), 
+                      overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+          }
+        }
+        if ("palmsplusr" %in% input$tools) {
+          if (configfilepalmsplusr() != paste0(global$data_out, "/config_palmsplusr.csv")) {
+            file.copy(from = configfilepalmsplusr(), to = paste0(global$data_out, "/config_palmsplusr.csv"), 
                       overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
           }
         }
@@ -857,7 +868,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           logfile = paste0(isolate(global$data_out), "/palmsplusr.log")
           on.exit(file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE), add = TRUE)
           
-          # PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          # palmsplusr_shiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
           #   # participant_exclude_list, # <= Discuss, leave out from linkfile?
           #   gisdir = global$gis_in,
           #   palmsdir = expected_palmspy_results_dir,
@@ -866,19 +877,23 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           #   dataset_name = input$dataset_name)
           
           # Start palmsplusr
-          x_palmsplusr <- r_bg(func = function(PALMSplusRshiny, gisdir, palmsdir, gislinkfile, outputdir, dataset_name){
-            PALMSplusRshiny(gisdir, palmsdir, gislinkfile, outputdir, dataset_name)
+          x_palmsplusr <- r_bg(func = function(palmsplusr_shiny, gisdir, palmsdir,
+                                               gislinkfile, outputdir, dataset_name,
+                                               configfile){
+            palmsplusr_shiny(gisdir, palmsdir, gislinkfile,
+                            outputdir, dataset_name, configfile)
           },
-          args = list(PALMSplusRshiny = PALMSplusRshiny,
+          args = list(palmsplusr_shiny = palmsplusr_shiny,
                       gisdir = global$gis_in,
                       palmsdir = expected_palmspy_results_dir,
                       gislinkfile = global$gislinkfile_in,
                       outputdir = isolate(global$data_out),
-                      dataset_name = input$dataset_name),
+                      dataset_name = input$dataset_name,
+                      configfile =  paste0(global$data_out, "/config_palmsplusr.csv")),
           stdout = stdout_palmsplusr_tmp,
           stderr = "2>&1")
           #   # Start PALMSplusR
-          #   PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          #   palmsplusr_shiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
           #     # participant_exclude_list, # <= Discuss, leave out from linkfile?
           #     gisdir = global$gis_in,
           #     palmsdir = expected_palmspy_results_dir,

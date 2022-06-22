@@ -8,8 +8,6 @@ hbt_build_days(
   data = NULL,
   verbose = TRUE,
   config_file = NULL,
-  palmsplus_domains = NULL,
-  domain_field = NULL,
   palmsplus_fields = NULL,
   home = NULL,
   school = NULL,
@@ -24,10 +22,6 @@ hbt_build_days(
 \item{verbose}{Print progress to console. Default is \code{TRUE}.}
 
 \item{config_file}{Path to the config file}
-
-\item{palmsplus_domains}{...}
-
-\item{domain_field}{...}
 
 \item{palmsplus_fields}{...}
 

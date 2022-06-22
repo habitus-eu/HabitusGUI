@@ -15,8 +15,6 @@
 #' @param data The palmsplus data obtained from \code{\link{palms_build_palmsplus}}.
 #' @param verbose Print progress to console. Default is \code{TRUE}.
 #' @param config_file Path to the config file
-#' @param palmsplus_domains ...
-#' @param domain_field ...
 #' @param palmsplus_fields ...
 #' @param home home
 #' @param school school
@@ -33,14 +31,14 @@
 #' @importFrom purrr reduce
 #'
 #' @export
-hbt_build_days <- function(data = NULL, verbose = TRUE, config_file = NULL, palmsplus_domains = NULL, domain_field = NULL,
+hbt_build_days <- function(data = NULL, verbose = TRUE, config_file = NULL, 
                            palmsplus_fields = NULL,
                            home = NULL,
                            school = NULL,
                            home_nbh = NULL,
                            school_nbh = NULL,
                            participant_basis = NULL) {
-  duration = datetime = name = NULL
+  duration = datetime = name = domain_field = NULL
   
   if (is.null(data)) stop("No data provided")
   if (is.null(home)) stop("home object is missing")
@@ -50,23 +48,18 @@ hbt_build_days <- function(data = NULL, verbose = TRUE, config_file = NULL, palm
   if (is.null(participant_basis)) stop("participant_basis object is missing")
   
   domains <- "total"
-  domain_args <- setNames("1", "total") %>% lapply(parse_expr)
-  
-  # If using field tables
-  if (!is.null(palmsplus_domains)) {
-    if (verbose)
-      message("palms_build_days: No domains have been added - using totals only.")
-    
-  } else if (is.null(config_file)) {
-    domains <- c(domains, palmsplus_domains[[1]])
-    domain_args <- c(domain_args, setNames(palmsplus_domains[[2]], palmsplus_domains[[1]]) %>%
-                       lapply(parse_expr))
+  if (!is.null(config_file)) {
+    domains_tmp <- hbt_read_config(config_file) %>%
+      filter(context == 'palmsplus_fields') %>% filter(domain_field == TRUE) %>% pull(name)
+    if (is.null(domains_tmp))  domains <- "total"
   }
   
+  domain_args <- setNames("1", "total") %>% lapply(parse_expr)
+
   # If using config file
   if (!is.null(config_file)) {
     config <- hbt_read_config(config_file) %>%
-      filter(context == 'palmsplus_domain')
+      filter(context == 'palmsplus_fields') %>% filter(domain_field == TRUE)
     
     if (nrow(config) < 1) {
       
@@ -78,9 +71,7 @@ hbt_build_days <- function(data = NULL, verbose = TRUE, config_file = NULL, palm
       domain_args <- c(domain_args, config$formula, config$name) %>%
         lapply(parse_expr)
     }
-    
   }
-  
   
   data <- data %>%
     mutate(!!! domain_args) %>%
