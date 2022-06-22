@@ -53,7 +53,7 @@
 "windowsizes","c(5,900,3600)","params_general"
 "desiredtz","Europe/London","params_general"
 "configtz","c()","params_general"
-"idloc","1","params_general"
+"idloc","3","params_general"
 "dayborder","0","params_general"
 "part5_agg2_60seconds","FALSE","params_general"
 "sensor.location","wrist","params_general"

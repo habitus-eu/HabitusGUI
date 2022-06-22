@@ -160,7 +160,7 @@ myApp <- function(homedir=getwd(), ...) {
                ),
                conditionalPanel(condition = "input.tools.includes('palmsplusr')",
                                 h2("palmsplusr"),
-                                # modConfigUI("edit_palmsplusr_config"),
+                                modConfigUI("edit_palmsplusr_config"),
                                 hr()
                ),
                actionButton("page_32", "prev"),
@@ -570,7 +570,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
     # Check and Edit config files ---------------------------------------
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir)
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir)
-    # configfilepalmsplusr <- modConfigServer("edit_palmsplusr_palmsplusr", tool = reactive("palmsplusr"), homedir = homedir)
+    configfilepalmsplusr <- modConfigServer("edit_palmsplusr_config", tool = reactive("palmsplusr"), homedir = homedir)
     
     #========================================================================
     # Apply GGIR / BrondCounts after button is pressed

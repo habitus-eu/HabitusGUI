@@ -1,7 +1,7 @@
 #' update_params
 #'
 #' @param file Character to specify location of original configuration file
-#' @param format Character to specify format of configuration file: json_palsmpy or csv_GGIR
+#' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, or csv_palmsplusr
 #' @param new_params New parameters
 #' @return No object returned, function only reads original data, and overwrites parameters and stores it again
 #' @importFrom jsonlite fromJSON toJSON
@@ -48,5 +48,21 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
       params$value[ind] = new_params$value[j]
     }
     write.csv(x = params, file = file, row.names = FALSE)
+  } else if (format == "csv_palmsplusr") {
+    params = read.csv(file = file, sep = "\t")
+    # remove duplicates, just in case palmsplusr config files have duplicates
+    params$argument = with(params, paste0(context, "__",name))
+    dups = duplicated(params$argument)
+    params = params[!dups,]
+    rownames(params) = params$argument
+    # only overwrite the matching fields
+    for (j in 1:nrow(new_params)) {
+      ind = which(rownames(params) %in% rownames(new_params)[j] == TRUE)
+      if (new_params$value[j] != params$formula[ind]) {
+        params$formula[ind] = new_params$value[j]
+      }
+    }
+    params = params[,-which(colnames(params) %in% c("argument"))]
+    write.table(x = params, file = file, row.names = FALSE, sep = "\t")
   }
 }
