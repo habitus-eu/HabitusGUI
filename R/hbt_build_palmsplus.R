@@ -16,6 +16,7 @@
 #'
 #' @import dplyr
 #' @import sf
+#' @import palmsplusr
 #' @importFrom rlang parse_expr
 #' @importFrom stats setNames
 #' @importFrom data.table rbindlist
@@ -29,23 +30,21 @@ hbt_build_palmsplus <- function(data = NULL, config_file = NULL,
                                 home = NULL, school = NULL,
                                 home_nbh = NULL, school_nbh = NULL,
                                 participant_basis = NULL) {
-
   config <- hbt_read_config(config_file) %>%
     filter(context == 'palmsplus_field')
-  
   field_args <- setNames(config$formula, config$name) %>%
     lapply(parse_expr)
-  
   x <- list()
   j <- 1
   len <- length(unique(data$identifier))
 
   for (i in unique(data$identifier)) {
-    x[[i]] <- data %>%
-      filter(identifier == i) %>%
+    datai <- data %>%
+      filter(identifier == i)
+    
+    x[[i]] <- datai %>%
       mutate(!!! field_args) %>%
       mutate_if(is.logical, as.integer)
-
     if (verbose) {
       cat("[", j, "/", len, "] Computed palmsplus for: ", i, "\n", sep = "")
       j <- j + 1

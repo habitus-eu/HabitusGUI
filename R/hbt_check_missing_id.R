@@ -17,7 +17,6 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
   # Test for missing values in participant basis
   test_missing_value = rowSums(is.na(participant_basis[,c("identifier", "school_id")]))
   missing = which(test_missing_value > 1)
-  print(paste0("length missing: ", length(length(missing))))
   participant_exclude_list = list(identifier = NULL, school_id = NULL)
   if (length(missing) > 0) {
     print("\nMissing ID values in participant_basis\n")
@@ -49,36 +48,38 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
   # Check whether id is found in all objects
   check_N = function(home, home_nbh, school, school_nbh, participant_basis, palms) {
     if (length(unique(school$school_id)) == 0) {
-      print("No school_id found in school$school_id")
+      cat("\nNo school_id found in school$school_id")
     }
     if (length(unique(school_nbh$school_id)) == 0) {
-      print("No school_id found in school_nbh$school_id")
+      cat("\nNo school_id found in school_nbh$school_id")
     }
     if (length(unique(home$identifier)) == 0) {
-      print("No identifier found in home$identifier")
+      cat("\nNo identifier found in home$identifier")
     }
     if (length(unique(home_nbh$identifier)) == 0) {
-      print("No identifier found in home_nbh$identifier")
+      cat("\nNo identifier found in home_nbh$identifier")
     }
     if (length(unique(participant_basis$identifier)) == 0) {
-      print("No identifier found in participant_basis$identifier")
+      cat("\nNo identifier found in participant_basis$identifier")
     }
     if (length(unique(participant_basis$school_id)) == 0) {
-      print("No school_id found in participant_basis$school_id")
+      cat("\nNo school_id found in participant_basis$school_id")
     }
     if (length(unique(palms$identifier)) == 0) {
-      print("No identifier found in palms$identifier")
+      cat("\nNo identifier found in palms$identifier")
     }
+    cat("\n")
   }
   check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
   # at this point we should have a cleaned dataset with only consistent data in all objects
-  print("Number of unique IDs in all objects")
-  print(paste0("Number of unique IDs in participant_basis: ", length(unique(participant_basis$identifier))))
-  print(paste0("palms ", length(unique(palms$identifier))))
-  print(paste0("home ", length(unique(home$identifier))))
-  print(paste0("home_nbh ", length(unique(home_nbh$identifier))))
-  print(paste0("school ", length(unique(school$school_id))))
-  print(paste0("school_nbh ", length(unique(school_nbh$school_id))))
+  cat("\nNumber of unique IDs in all objects: ")
+  cat(paste0("\n  Number of unique IDs in participant_basis: ", length(unique(participant_basis$identifier))))
+  cat(paste0("\n  palms: ", length(unique(palms$identifier))))
+  cat(paste0("\n  home: ", length(unique(home$identifier))))
+  cat(paste0("\n  home_nbh: ", length(unique(home_nbh$identifier))))
+  cat(paste0("\n  school: ", length(unique(school$school_id))))
+  cat(paste0("\n  school_nbh: ", length(unique(school_nbh$school_id))))
+  cat("\n")
   check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
   
   # Test for incomplete shape files. I have commented this out as it is unclear whether 
@@ -127,13 +128,13 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
   # print(home$nrowgeom)
   # print(home_nbh$nrowgeom)
   # at this point we should have a cleaned dataset with only consistent data in all objects
-  print("Number of unique IDs in all objects")
-  print(paste0("participant_basis ", length(unique(participant_basis$identifier))))
-  print(paste0("palms ", length(unique(palms$identifier))))
-  print(paste0("home ", length(unique(home$identifier))))
-  print(paste0("home_nbh ", length(unique(home_nbh$identifier))))
-  print(paste0("school ", length(unique(school$school_id))))
-  print(paste0("school_nbh ", length(unique(school_nbh$school_id))))
-  
+  # cat("\nNumber of unique IDs in all objects:")
+  # cat(paste0("\n  participant_basis: ", length(unique(participant_basis$identifier))))
+  # cat(paste0("\n  palms: ", length(unique(palms$identifier))))
+  # cat(paste0("\n  home: ", length(unique(home$identifier))))
+  # cat(paste0("\n  home_nbh: ", length(unique(home_nbh$identifier))))
+  # cat(paste0("\n  school: ", length(unique(school$school_id))))
+  # cat(paste0("\n  school_nbh: ", length(unique(school_nbh$school_id))))
+  # cat("\n")
   invisible(list(palms = palms, participant_basis = participant_basis))
 }

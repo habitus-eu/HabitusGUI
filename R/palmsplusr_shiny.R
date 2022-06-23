@@ -24,17 +24,14 @@ palmsplusr_shiny <- function(gisdir = "",
                             configfile = "") {
   home = school = home_nbh = school_nbh = NULL
   . = lon = identifier = palms = NULL
-  
   if (length(configfile) > 0) {
     # check for missing parameters, such that palmsplusr can fall back on defaults
     # here the config_pamsplusr file inside the package is assumed to hold all the defaults.
     config_def  = system.file("testfiles_palmsplusr/config_palmsplusr.csv", package = "HabitusGUI")[1]
     params_def = load_params(file = config_def , format = "csv_palmsplusr")
-    params_def$id = with(params_def, paste0(context,  "__",  name))
-    
+    params_def$id = rownames(params_def) #with(params_def, paste0(context,  "__",  name))
     params = load_params(file = configfile , format = "csv_palmsplusr")
-    params$id = with(params, paste0(context,  "__",  name))
-    
+    params$id = rownames(params) #with(params, paste0(context,  "__",  name))
     missingPar = which(params_def$id %in% params$id == FALSE)
     if (length(missingPar) > 0) {
       # update the configfile as provide by the user
@@ -51,7 +48,7 @@ palmsplusr_shiny <- function(gisdir = "",
 
   palmsplus_folder = paste0(outputdir, "/PALMSplus_output")
   if (!dir.exists(palmsplus_folder)) {
-    cat("\nCreating PALMSplusR output directory")
+    cat("\nCreating PALMSplusR output directory\n")
     dir.create(palmsplus_folder)
   }
   sf::sf_use_s2(FALSE)
@@ -71,12 +68,11 @@ palmsplusr_shiny <- function(gisdir = "",
     activity = readr::col_integer()
   ))
   PALMS_combined <- bind_rows(csv_palms)
-  
   # Data cleaning:
-  print("start cleaning")
+  cat("\nstart cleaning\n")
   PALMS_reduced <- subset(PALMS_combined, lon > -180)
   palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, dataset_name)
-  print("cleaning completed")
+  cat("\ncleaning completed\n")
   
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
   PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv"))
@@ -90,7 +86,7 @@ palmsplusr_shiny <- function(gisdir = "",
     file_of_interest = allcsvfiles[which(tolower(basename(allcsvfiles)) == namelowercase)]
     return(file_of_interest)
   }
-  print("reading basis file")
+  cat("\nreading basis file\n")
   participant_basis = read_csv(gislinkfile)
   unique_ids_in_palms <- unique(palms$identifier)
   unique_ids_in_participant_basis <- unique(participant_basis$identifier)
@@ -167,7 +163,7 @@ palmsplusr_shiny <- function(gisdir = "",
   }
   
   
-  print("build_palmsplus")
+  cat("\n<<< building palmsplus... >>>\n")
   palmsplus <- hbt_build_palmsplus(data = palms, 
                                    config_file = config, 
                                    palmsplus_fields = palmsplus_fields,
@@ -178,7 +174,7 @@ palmsplusr_shiny <- function(gisdir = "",
                                    participant_basis = participant_basis)
   write_csv(palmsplus, file = fns[1])
   
-  print("build_days")
+  cat("\n<<< building days... >>>\n")
   days <- hbt_build_days(data = palmsplus,
                          palmsplus_fields = palmsplus_fields,
                          home = home,
@@ -189,12 +185,12 @@ palmsplusr_shiny <- function(gisdir = "",
   write_csv(days,  file = fns[2])
   # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
   
-  print("build_trajectories")
+  cat("\n<<< building trajectories... >>>\n")
   trajectories <- hbt_build_trajectories(palmsplus, config_file = config)
   write_csv(trajectories,  file = fns[3])
   sf::st_write(trajectories, paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp"))
   
-  print("build_multimodal")
+  cat("\n<<< building multimodal... >>>\n")
   multimodal <- hbt_build_multimodal(data = trajectories,
                                      spatial_threshold = 200,
                                      temporal_threshold = 10,
@@ -206,7 +202,5 @@ palmsplusr_shiny <- function(gisdir = "",
   write_csv(multimodal, file = fns[4])
   sf::st_write(multimodal, paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp"))
   
-  
-  print("end reached")
   return()
 }

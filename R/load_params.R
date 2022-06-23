@@ -58,7 +58,7 @@ load_params = function(file=c(), format="json_palmspy") {
     params = params_merged[, expected_tsv_columns]
     params = params[,-which(colnames(params) == "subfield")]
   } else if (format == "csv_palmsplusr") {
-    params = read.csv(file = file)
+    params = read.csv(file = file, sep = ",")
     # remove duplicates, because sometimes GGIR config files have duplicates
     dups = duplicated(params)
     params = params[!dups,]
@@ -66,7 +66,7 @@ load_params = function(file=c(), format="json_palmspy") {
     params_info_palmsplusr_file = system.file("testfiles_palmsplusr/params_description_palmsplusr.tsv", package = "HabitusGUI")[1]
     params_info_palmsplusr = read.table(file = params_info_palmsplusr_file, sep = "\t", header = TRUE)
     params_info_palmsplusr$id = with(params_info_palmsplusr, paste0(field,  "__",  parameter))
-    params$id = with(params, paste0(context, "__", name))
+    params$id = with(params, paste0(params$context, "__", params$name))
     params_merged = merge(params_info_palmsplusr, params, by.x = "id", by.y = "id")
     dups = duplicated(params_merged)
     params_merged = params_merged[!dups,]
