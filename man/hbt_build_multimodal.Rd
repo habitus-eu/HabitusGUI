@@ -10,8 +10,8 @@ hbt_build_multimodal(
   temporal_threshold,
   palmsplus = NULL,
   verbose = TRUE,
-  config_file = NULL,
-  palmsplus_copy = NULL
+  multimodal_fields = NULL,
+  trajectory_locations = NULL
 )
 }
 \arguments{
@@ -25,9 +25,9 @@ hbt_build_multimodal(
 
 \item{verbose}{Print progress after each step. Default is \code{TRUE}.}
 
-\item{config_file}{Path to the config file}
+\item{multimodal_fields}{...}
 
-\item{palmsplus_copy}{When using config files, a copy of the palmsplus dataframe is passed to this function (future use)}
+\item{trajectory_locations}{...}
 }
 \value{
 The input trajectories LINESTRING geometry, collapsed into multimodal trips

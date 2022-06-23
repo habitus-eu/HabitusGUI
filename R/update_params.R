@@ -49,7 +49,7 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
     }
     write.csv(x = params, file = file, row.names = FALSE)
   } else if (format == "csv_palmsplusr") {
-    params = read.csv(file = file, sep = "\t")
+    params = read.csv(file = file)
     # remove duplicates, just in case palmsplusr config files have duplicates
     params$argument = with(params, paste0(context, "__",name))
     dups = duplicated(params$argument)
@@ -63,6 +63,6 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
       }
     }
     params = params[,-which(colnames(params) %in% c("argument"))]
-    write.table(x = params, file = file, row.names = FALSE, sep = "\t")
+    write.csv(x = params, file = file, row.names = FALSE)
   }
 }

@@ -22,16 +22,16 @@ test_that("Parameters can be loaded and updated from config files", {
   params_palmspy$value[which(rownames(params_palmspy) == "interval")] = "25"
   update_params(new_params = params_palmspy, file = palmspy_config_json, format = "json_palmspy")
   params_palmspy2 = load_params(file = palmspy_config_json, format = "json_palmspy")
-  expect_equal(ncol(params_palmspy2), 10) 
+  expect_equal(ncol(params_palmspy2), 10)
   expect_equal(as.character(params_palmspy2$value[which(rownames(params_palmspy2) == "interval")]), "25")
-  
+
   # Update GGIR .csv file
   params_ggir$value[which(rownames(params_ggir) == "idloc")] = "3"
   update_params(new_params = params_ggir, file = ggir_config_csv, format = "csv_ggir")
   params_ggir2 = load_params(file = ggir_config_csv, format = "csv_ggir")
   expect_equal(ncol(params_ggir2), 9)
   expect_equal(params_ggir2$value[which(rownames(params_ggir2) == "idloc")] , "3")
-  
+
   # Update palmsplusr .csv file
   params_palmsplusr$value[which(rownames(params_palmsplusr) == "trajectory_field__sedentary")] = "sum(activityintensity == 1) * 15"
   # palmsplusr_config_csv_tmp = gsub(pattern = ".csv", replacement = "2.csv", x = palmsplusr_config_csv)

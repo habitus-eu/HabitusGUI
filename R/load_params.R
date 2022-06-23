@@ -58,8 +58,7 @@ load_params = function(file=c(), format="json_palmspy") {
     params = params_merged[, expected_tsv_columns]
     params = params[,-which(colnames(params) == "subfield")]
   } else if (format == "csv_palmsplusr") {
-    params = read.csv(file = file, sep = "\t")
-    print(head(params))
+    params = read.csv(file = file)
     # remove duplicates, because sometimes GGIR config files have duplicates
     dups = duplicated(params)
     params = params[!dups,]

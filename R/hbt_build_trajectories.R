@@ -18,24 +18,19 @@
 #' @importFrom stats setNames
 #'
 #' @export
+# Code modified from https://thets.github.io/palmsplusr/
 hbt_build_trajectories <- function(data = NULL, config_file = NULL) {
   name = after_conversion = tripnumber = NULL
   
-  if (is.null(data)) stop("No data provided")
-  
-  # Config file is required
-  if (is.null(config_file)) {
-    stop("Config file is missing")
-  } else {
+  config <- hbt_read_config(config_file) %>%
+    filter(context == 'trajectory_location')
+  dolocation = TRUE
+  if (length(config) == 0) {
     config <- hbt_read_config(config_file) %>%
-      filter(context == 'trajectory_location')
-    dolocation = TRUE
-    if (length(config) == 0) {
-      config <- hbt_read_config(config_file) %>%
-        filter(context == 'trajectory_field')
-      dolocation = FALSE
-    }
+      filter(context == 'trajectory_field')
+    dolocation = FALSE
   }
+  
   # Set args objects
   if (nrow(config) > 0) {
     args <- config %>% filter(after_conversion == FALSE)

@@ -143,17 +143,17 @@ palmsplusr_shiny <- function(gisdir = "",
   # trajectory_field = tibble(name = CONF$name[trajectory_field_rows],
   #                               formula = CONF$formula[trajectory_field_rows],
   #                               after_conversions = CONF$after_conversions[trajectory_field_rows])
-  #=============================
-  # multimodal_fields
+  # #=============================
+  # # multimodal_fields
   multimodal_fields_rows = which(CONF$context == "multimodal_field")
   multimodal_fields = tibble(name = CONF$name[multimodal_fields_rows],
                             func = CONF$formula[multimodal_fields_rows])
   # #=============================
   # # trajectory locations
-  # trajectory_location_rows = which(CONF$context == "trajectory_location")
-  # trajectory_location = tibble(name = CONF$name[trajectory_location_rows],
-  #                              start_criteria = CONF$start_criteria[trajectory_location_rows],
-  #                              end_criteria = CONF$end_criteria[trajectory_location_rows])
+  trajectory_location_rows = which(CONF$context == "trajectory_location")
+  trajectory_locations = tibble(name = CONF$name[trajectory_location_rows],
+                               start_criteria = CONF$start_criteria[trajectory_location_rows],
+                               end_criteria = CONF$end_criteria[trajectory_location_rows])
   
   
   # Run palmsplusr ----------------------------------------------------------
@@ -180,7 +180,6 @@ palmsplusr_shiny <- function(gisdir = "",
   
   print("build_days")
   days <- hbt_build_days(data = palmsplus,
-                         config_file = config, 
                          palmsplus_fields = palmsplus_fields,
                          home = home,
                          school = school,
@@ -199,9 +198,9 @@ palmsplusr_shiny <- function(gisdir = "",
   multimodal <- hbt_build_multimodal(data = trajectories,
                                      spatial_threshold = 200,
                                      temporal_threshold = 10,
-                                     config_file = config,
                                      palmsplus = palmsplus,
-                                     palmsplus_copy = palmsplus)
+                                     multimodal_fields = multimodal_fields,
+                                     trajectory_locations = trajectory_locations)
   
   
   write_csv(multimodal, file = fns[4])

@@ -1,41 +1,59 @@
 parameter	field	subfield	display	class	minimum	maximum	set	priority	description
-weekday	palmsplus_field		TRUE	formula				0	
-weekend	palmsplus_field		TRUE	formula				0	
-indoors	palmsplus_field		TRUE	formula				0	
-outdoors	palmsplus_field		TRUE	formula				0	
-in_vehicle	palmsplus_field		TRUE	formula				0	
-inserted	palmsplus_field		TRUE	formula				0	
-pedestrian	palmsplus_field		TRUE	formula				0	
-bicycle	palmsplus_field		TRUE	formula				0	
-vehicle	palmsplus_field		TRUE	formula				0	
-nonwear	palmsplus_field		TRUE	formula				0	
-wear	palmsplus_field		TRUE	formula				0	
-sedentary	palmsplus_field		TRUE	formula				0	
-light	palmsplus_field		TRUE	formula				0	
-moderate	palmsplus_field		TRUE	formula				0	
-vigorous	palmsplus_field		TRUE	formula				0	
-mvpa	palmsplus_field		TRUE	formula				0	
-mot	trajectory_field		TRUE	formula				0	
-date	trajectory_field		TRUE	formula				0	
-start	trajectory_field		TRUE	formula				0	
-end	trajectory_field		TRUE	formula				0	
-duration	trajectory_field		TRUE	formula				0	
-nonwear	trajectory_field		TRUE	formula				0	
-wear	trajectory_field		TRUE	formula				0	
-sedentary	trajectory_field		TRUE	formula				0	
-light	trajectory_field		TRUE	formula				0	
-moderate	trajectory_field		TRUE	formula				0	
-vigorous	trajectory_field		TRUE	formula				0	
-mvpa	trajectory_field		TRUE	formula				0	
-length	trajectory_field		TRUE	formula				0	
-speed	trajectory_field		TRUE	formula				0	
-duration	multimodal_field		TRUE	formula				0	
-nonwear	multimodal_field		TRUE	formula				0	
-wear	multimodal_field		TRUE	formula				0	
-sedentary	multimodal_field		TRUE	formula				0	
-light	multimodal_field		TRUE	formula				0	
-moderate	multimodal_field		TRUE	formula				0	
-vigorous	multimodal_field		TRUE	formula				0	
-mvpa	multimodal_field		TRUE	formula				0	
-length	multimodal_field		TRUE	formula				0	
-speed	multimodal_field		TRUE	formula				0	
+weekday	palmsplus_field		TRUE	formula				0	description missing
+weekend	palmsplus_field		TRUE	formula				0	description missing
+indoors	palmsplus_field		TRUE	formula				0	description missing
+outdoors	palmsplus_field		TRUE	formula				0	description missing
+in_vehicle	palmsplus_field		TRUE	formula				0	description missing
+inserted	palmsplus_field		TRUE	formula				0	description missing
+pedestrian	palmsplus_field		TRUE	formula				0	description missing
+bicycle	palmsplus_field		TRUE	formula				0	description missing
+vehicle	palmsplus_field		TRUE	formula				0	description missing
+nonwear	palmsplus_field		TRUE	formula				0	description missing
+wear	palmsplus_field		TRUE	formula				0	description missing
+sedentary	palmsplus_field		TRUE	formula				0	description missing
+light	palmsplus_field		TRUE	formula				0	description missing
+moderate	palmsplus_field		TRUE	formula				0	description missing
+vigorous	palmsplus_field		TRUE	formula				0	description missing
+mvpa	palmsplus_field		TRUE	formula				0	description missing
+at_home	palmsplus_field		TRUE	formula				0	description missing
+at_school	palmsplus_field		TRUE	formula				0	description missing
+at_home_nbh	palmsplus_field		TRUE	formula				0	description missing
+at_school_nbh	palmsplus_field		TRUE	formula				0	description missing
+mot	trajectory_field		TRUE	formula				0	description missing
+date	trajectory_field		TRUE	formula				0	description missing
+start	trajectory_field		TRUE	formula				0	description missing
+end	trajectory_field		TRUE	formula				0	description missing
+duration	trajectory_field		TRUE	formula				0	description missing
+nonwear	trajectory_field		TRUE	formula				0	description missing
+wear	trajectory_field		TRUE	formula				0	description missing
+sedentary	trajectory_field		TRUE	formula				0	description missing
+light	trajectory_field		TRUE	formula				0	description missing
+moderate	trajectory_field		TRUE	formula				0	description missing
+vigorous	trajectory_field		TRUE	formula				0	description missing
+mvpa	trajectory_field		TRUE	formula				0	description missing
+length	trajectory_field		TRUE	formula				0	description missing
+speed	trajectory_field		TRUE	formula				0	description missing
+home_school	trajectory_field		TRUE	formula				0	description missing
+school_home	trajectory_field		TRUE	formula				0	description missing
+school_school	trajectory_field		TRUE	formula				0	description missing
+home_home	trajectory_field		TRUE	formula				0	description missing
+duration	multimodal_field		TRUE	formula				0	description missing
+nonwear	multimodal_field		TRUE	formula				0	description missing
+wear	multimodal_field		TRUE	formula				0	description missing
+sedentary	multimodal_field		TRUE	formula				0	description missing
+light	multimodal_field		TRUE	formula				0	description missing
+moderate	multimodal_field		TRUE	formula				0	description missing
+vigorous	multimodal_field		TRUE	formula				0	description missing
+mvpa	multimodal_field		TRUE	formula				0	description missing
+length	multimodal_field		TRUE	formula				0	description missing
+speed	multimodal_field		TRUE	formula				0	description missing
+home_school	trajectory_location		TRUE	formula				0	description missing
+school_home	trajectory_location		TRUE	formula				0	description missing
+school_school	trajectory_location		TRUE	formula				0	description missing
+home_home	trajectory_location		TRUE	formula				0	description missing
+home	palmsplus_field		TRUE	formula				0	description missing
+school	palmsplus_field		TRUE	formula				0	description missing
+transport	palmsplus_field		TRUE	formula				0	description missing
+home_nbh	palmsplus_field		TRUE	formula				0	description missing
+school_nbh	palmsplus_field		TRUE	formula				0	description missing
+other	palmsplus_field		TRUE	formula				0	description missing
