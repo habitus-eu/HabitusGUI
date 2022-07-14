@@ -39,36 +39,23 @@ hbt_build_days <- function(data = NULL, verbose = TRUE,
                            school_nbh = NULL,
                            participant_basis = NULL) {
   duration = datetime = name = domain_field = NULL
-  
-  
-  
   domain_fields <- palmsplus_fields %>% filter(domain_field == TRUE)
-  
   domain_names <- domain_fields %>% pull(name)
+  
   if (is.null(domain_names)) {
     domain_names <- "total"
   }
-  
   domain_args <- setNames("1", "total") %>% lapply(parse_expr)
-  
-  
-  if (nrow(domain_fields) < 1) {
-    if (verbose) {
-      message("palms_build_days: No domains have been added - using totals only.")
-    }
-  } else {
-    domain_names <- c(domain_names, domain_fields$name)
-    domain_args <- c(domain_args, domain_fields$formula, domain_fields$name) %>%
-      lapply(parse_expr)
-  }
-  
+  domain_names<- c(domain_names,   domain_fields[[1]])
+  domain_args <- c(domain_args, setNames(domain_fields[[2]], domain_fields[[1]]) %>%
+                     lapply(parse_expr))
+
   data <- data %>%
     mutate(!!! domain_args) %>%
     mutate_if(is.logical, as.integer)
   
   
   fields <- palmsplus_fields %>% filter(domain_field == TRUE) %>% pull(name)
-  
   
   data <- data %>%
     st_set_geometry(NULL) %>%
@@ -77,7 +64,6 @@ hbt_build_days <- function(data = NULL, verbose = TRUE,
     mutate_at(vars(-identifier,-datetime), ~ . * palms_epoch(data) / 60) %>%
     group_by(identifier, date = as.Date(datetime)) %>%
     select(-datetime)
-  
   x <- list()
   for (i in domain_names) {
     x[[i]] <- data %>%
@@ -87,7 +73,6 @@ hbt_build_days <- function(data = NULL, verbose = TRUE,
       ungroup() %>%
       rename_at(vars(-identifier, -date), ~ paste0(i, "_", .))
   }
-  
   result <- x %>%
     reduce(left_join, by = c("identifier" = "identifier", "date" = "date"))
   

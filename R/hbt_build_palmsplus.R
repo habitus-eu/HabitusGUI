@@ -37,11 +37,10 @@ hbt_build_palmsplus <- function(data = NULL, config_file = NULL,
   x <- list()
   j <- 1
   len <- length(unique(data$identifier))
-
+  
   for (i in unique(data$identifier)) {
-    datai <- data %>%
+    datai = data %>%
       filter(identifier == i)
-    
     x[[i]] <- datai %>%
       mutate(!!! field_args) %>%
       mutate_if(is.logical, as.integer)
@@ -50,9 +49,7 @@ hbt_build_palmsplus <- function(data = NULL, config_file = NULL,
       j <- j + 1
     }
   }
-
   data <- rbindlist(x) %>%
     st_set_geometry(data$geometry)
-  
   return(data)
 }

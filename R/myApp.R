@@ -876,6 +876,15 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           #   outputdir = isolate(global$data_out),
           #   dataset_name = input$dataset_name)
           
+          
+          # print(list(palmsplusr_shiny = palmsplusr_shiny,
+          #            gisdir = global$gis_in,
+          #            palmsdir = expected_palmspy_results_dir,
+          #            gislinkfile = global$gislinkfile_in,
+          #            outputdir = isolate(global$data_out),
+          #            dataset_name = input$dataset_name,
+          #            configfile =  paste0(global$data_out, "/config_palmsplusr.csv")))
+          
           # Start palmsplusr
           x_palmsplusr <- r_bg(func = function(palmsplusr_shiny, gisdir, palmsdir,
                                                gislinkfile, outputdir, dataset_name,

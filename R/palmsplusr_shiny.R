@@ -55,7 +55,7 @@ palmsplusr_shiny <- function(gisdir = "",
   # identify palms csv output files in palmsdir:
   palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
   # read and combine the palms csv output files
-  csv_palms <- lapply(palms_country_files, FUN = read_csv, col_types = list(
+  csv_palms <- lapply(palms_country_files, FUN = readr::read_csv, col_types = list(
     identifier = readr::col_character(),
     dow = readr::col_integer(),
     lat = readr::col_double(),
@@ -127,7 +127,7 @@ palmsplusr_shiny <- function(gisdir = "",
 
   # #=============================
   # adding fields
-  CONF = read.csv(config, sep = "\t")
+  CONF = read.csv(config, sep = ",")
   palmsplusr_field_rows = which(CONF$context == "palmsplus_field")
   palmsplus_fields = tibble(name = CONF$name[palmsplusr_field_rows],
                             formula = CONF$formula[palmsplusr_field_rows],
@@ -162,7 +162,7 @@ palmsplusr_shiny <- function(gisdir = "",
     if (file.exists(fn)) file.remove(fn)
   }
   
-  
+
   cat("\n<<< building palmsplus... >>>\n")
   palmsplus <- hbt_build_palmsplus(data = palms, 
                                    config_file = config, 
