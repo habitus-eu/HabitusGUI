@@ -173,7 +173,7 @@ palmsplusr_shiny <- function(gisdir = "",
                                    school_nbh = school_nbh,
                                    participant_basis = participant_basis)
   write_csv(palmsplus, file = fns[1])
-  
+
   cat("\n<<< building days... >>>\n")
   days <- hbt_build_days(data = palmsplus,
                          palmsplus_fields = palmsplus_fields,
@@ -183,24 +183,30 @@ palmsplusr_shiny <- function(gisdir = "",
                          school_nbh = school_nbh,
                          participant_basis = participant_basis)
   write_csv(days,  file = fns[2])
+
+  
   # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
   
   cat("\n<<< building trajectories... >>>\n")
   trajectories <- hbt_build_trajectories(palmsplus, config_file = config)
   write_csv(trajectories,  file = fns[3])
-  sf::st_write(trajectories, paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp"))
+  
+  shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp")
+  if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
+  sf::st_write(obj = trajectories, dsn = shp_file)
   
   cat("\n<<< building multimodal... >>>\n")
+  
   multimodal <- hbt_build_multimodal(data = trajectories,
                                      spatial_threshold = 200,
                                      temporal_threshold = 10,
                                      palmsplus = palmsplus,
                                      multimodal_fields = multimodal_fields,
                                      trajectory_locations = trajectory_locations)
-  
-  
-  write_csv(multimodal, file = fns[4])
-  sf::st_write(multimodal, paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp"))
+  if (length(multimodal) > 0) {
+    write_csv(multimodal, file = fns[4])
+    sf::st_write(multimodal, paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp"))
+  }
   
   return()
 }

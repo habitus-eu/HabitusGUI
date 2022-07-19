@@ -21,7 +21,6 @@
 # Code modified from https://thets.github.io/palmsplusr/
 hbt_build_trajectories <- function(data = NULL, config_file = NULL) {
   name = after_conversion = tripnumber = NULL
-  
   config <- hbt_read_config(config_file) %>%
     filter(context == 'trajectory_location')
   dolocation = TRUE
@@ -30,7 +29,6 @@ hbt_build_trajectories <- function(data = NULL, config_file = NULL) {
       filter(context == 'trajectory_field')
     dolocation = FALSE
   }
-  
   # Set args objects
   if (nrow(config) > 0) {
     args <- config %>% filter(after_conversion == FALSE)
@@ -49,8 +47,9 @@ hbt_build_trajectories <- function(data = NULL, config_file = NULL) {
   } else {
     stop("config file has neither trajectory fields or locations")
   }
+  
   # Build data object
-  data %>%
+  data <- data %>%
     filter(tripnumber > 0) %>%
     group_by(identifier, tripnumber) %>%
     summarise(!!!args, do_union = FALSE) %>%
@@ -58,6 +57,7 @@ hbt_build_trajectories <- function(data = NULL, config_file = NULL) {
     mutate(!!!args_after) %>%
     ungroup() %>%
     mutate_if(is.logical, as.integer)
+
   return(data)
 }
 

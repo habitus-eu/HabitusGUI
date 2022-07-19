@@ -56,19 +56,18 @@ hbt_build_days <- function(data = NULL, verbose = TRUE,
   
   
   fields <- palmsplus_fields %>% filter(domain_field == TRUE) %>% pull(name)
-  
   data <- data %>%
     st_set_geometry(NULL) %>%
-    select(identifier, datetime, domain_names, fields) %>%
+    dplyr::select(identifier, datetime, domain_names, fields) %>%
     mutate(duration = 1) %>%
     mutate_at(vars(-identifier,-datetime), ~ . * palms_epoch(data) / 60) %>%
     group_by(identifier, date = as.Date(datetime)) %>%
-    select(-datetime)
+    dplyr::select(-datetime)
   x <- list()
   for (i in domain_names) {
     x[[i]] <- data %>%
       filter(UQ(as.name(i)) > 0) %>%
-      select(-one_of(domain_names), duration) %>%
+      dplyr::select(-one_of(domain_names), duration) %>%
       summarise_all(~ sum(.)) %>%
       ungroup() %>%
       rename_at(vars(-identifier, -date), ~ paste0(i, "_", .))
