@@ -7,6 +7,7 @@
 hbt_build_days(
   data = NULL,
   verbose = TRUE,
+  palmsplus_domains = NULL,
   palmsplus_fields = NULL,
   home = NULL,
   school = NULL,
@@ -19,6 +20,8 @@ hbt_build_days(
 \item{data}{The palmsplus data obtained from \code{\link{palms_build_palmsplus}}.}
 
 \item{verbose}{Print progress to console. Default is \code{TRUE}.}
+
+\item{palmsplus_domains}{...}
 
 \item{palmsplus_fields}{...}
 

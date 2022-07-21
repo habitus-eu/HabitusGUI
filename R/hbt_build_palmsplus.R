@@ -30,6 +30,10 @@ hbt_build_palmsplus <- function(data = NULL, config_file = NULL,
                                 home = NULL, school = NULL,
                                 home_nbh = NULL, school_nbh = NULL,
                                 participant_basis = NULL) {
+  # Note:
+  # home, school, home_nbh, school_nbh need to be present, 
+  # because the functions that are passed on assume that they exist
+  
   config <- hbt_read_config(config_file) %>%
     filter(context == 'palmsplus_field')
   field_args <- setNames(config$formula, config$name) %>%

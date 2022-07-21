@@ -23,7 +23,7 @@ trajectory_field,mot,first(tripmot),NA,FALSE,,
 trajectory_field,date,first(as.Date(datetime)),NA,FALSE,,
 trajectory_field,start,datetime[triptype==1],NA,FALSE,,
 trajectory_field,end,datetime[triptype==4],NA,FALSE,,
-trajectory_field,duration,as.numeric(difftime(end,NA,,,
+trajectory_field,duration,"as.numeric(difftime(end, start, units = ""secs"") + 30)",NA,FALSE,,
 trajectory_field,nonwear,sum(activityintensity < 0) * 15,NA,FALSE,,
 trajectory_field,wear,sum(activityintensity >= 0) * 15,NA,FALSE,,
 trajectory_field,sedentary,sum(activityintensity == 1) * 15,NA,FALSE,,
@@ -33,10 +33,10 @@ trajectory_field,vigorous,sum(activityintensity == 3) * 15,NA,FALSE,,
 trajectory_field,mvpa,moderate + vigorous,NA,FALSE,,
 trajectory_field,length,as.numeric(st_length(geometry)),NA,TRUE,,
 trajectory_field,speed,(length / duration) * 3.6,NA,TRUE,,
-trajectory_field,home_school,at_home,NA,at_home,,
-trajectory_field,school_home,at_school,NA,at_home,,
-trajectory_field,school_school,at_school,NA,at_home,,
-trajectory_field,home_home,at_home,NA,at_home,,
+trajectory_location,home_school,at_home,NA,at_home,at_home,at_school
+trajectory_location,school_home,at_school,NA,at_home,at_school,at_home
+trajectory_location,school_school,at_school,NA,at_home,at_school,at_school
+trajectory_location,home_home,at_home,NA,at_home,at_home,at_home
 multimodal_field,duration,sum,NA,NA,,
 multimodal_field,nonwear,sum,NA,NA,,
 multimodal_field,wear,sum,NA,NA,,
@@ -47,13 +47,9 @@ multimodal_field,vigorous,sum,NA,NA,,
 multimodal_field,mvpa,sum,NA,NA,,
 multimodal_field,length,sum,NA,NA,,
 multimodal_field,speed,mean,NA,NA,,
-trajectory_location,home_school,,NA,,at_home,at_school
-trajectory_location,school_home,,NA,,at_school,at_home
-trajectory_location,school_school,,NA,,at_school,at_school
-trajectory_location,home_home,,NA,,at_home,at_home
-palmsplus_field,home,at_home,FALSE,,,
-palmsplus_field,school,(!at_home & at_school),FALSE,,,
-palmsplus_field,transport,!at_home & !(at_school) & (pedestrian | bicycle | vehicle),FALSE,,,
-palmsplus_field,home_nbh,!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh,FALSE,,,
-palmsplus_field,school_nbh,!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) &  !(at_home_nbh) & at_school_nbh,FALSE,,,
-palmsplus_field,other,!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & !(at_school_nbh),FALSE,,,
+palmsplus_domain,home,at_home,FALSE,,,
+palmsplus_domain,school,(!at_home & at_school),FALSE,,,
+palmsplus_domain,transport,!at_home & !(at_school) & (pedestrian | bicycle | vehicle),FALSE,,,
+palmsplus_domain,home_nbh,!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & at_home_nbh,FALSE,,,
+palmsplus_domain,school_nbh,!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) &  !(at_home_nbh) & at_school_nbh,FALSE,,,
+palmsplus_domain,other,!at_home & !(at_school) & (!pedestrian & !bicycle & !vehicle) & !(at_home_nbh) & !(at_school_nbh),FALSE,,,

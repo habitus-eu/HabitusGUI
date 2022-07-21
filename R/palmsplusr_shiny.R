@@ -101,7 +101,6 @@ palmsplusr_shiny <- function(gisdir = "",
   home_nbh = sf::read_sf(lochomebuffersfile)
   school_nbh = sf::read_sf(locschoolbuffersfile)
   
-  
   # Check for missing IDs -------------------------------------------------------------------------
   withoutMissingId = hbt_check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
                                           home, school, home_nbh, school_nbh)
@@ -132,6 +131,11 @@ palmsplusr_shiny <- function(gisdir = "",
   palmsplus_fields = tibble(name = CONF$name[palmsplusr_field_rows],
                             formula = CONF$formula[palmsplusr_field_rows],
                             domain_field = CONF$domain_field[palmsplusr_field_rows])
+  
+  palmsplusr_domain_rows = which(CONF$context == "palmsplus_domain")
+  palmsplus_domains = tibble(name = CONF$name[palmsplusr_domain_rows],
+                            formula = CONF$formula[palmsplusr_domain_rows],
+                            domain_field = CONF$domain_field[palmsplusr_domain_rows])
   # #=============================
   # # trajectory_fields
   # CONF = read.csv(config, sep = "\t")
@@ -153,7 +157,6 @@ palmsplusr_shiny <- function(gisdir = "",
   
   
   # Run palmsplusr ----------------------------------------------------------
-  
   fns = c(paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.csv"),
           paste0(palmsplus_folder, "/", dataset_name, "_days.csv"),
           paste0(palmsplus_folder, "/", dataset_name, "_trajectories.csv"),
@@ -162,6 +165,7 @@ palmsplusr_shiny <- function(gisdir = "",
     if (file.exists(fn)) file.remove(fn)
   }
   
+  # save(palms, home, home_nbh, school_nbh,participant_basis, file = "~/projects/fontys/state_1_gui.RData")
 
   cat("\n<<< building palmsplus... >>>\n")
   palmsplus <- hbt_build_palmsplus(data = palms, 
@@ -174,8 +178,13 @@ palmsplusr_shiny <- function(gisdir = "",
                                    participant_basis = participant_basis)
   write_csv(palmsplus, file = fns[1])
 
+  config_test <- hbt_read_config(config) %>%
+    filter(context == 'palmsplus_field')
+  # save(palmsplus, config_test, file = "~/projects/fontys/state_2_gui.RData")
+  
   cat("\n<<< building days... >>>\n")
   days <- hbt_build_days(data = palmsplus,
+                         palmsplus_domains = palmsplus_domains,
                          palmsplus_fields = palmsplus_fields,
                          home = home,
                          school = school,
@@ -184,19 +193,19 @@ palmsplusr_shiny <- function(gisdir = "",
                          participant_basis = participant_basis)
   write_csv(days,  file = fns[2])
 
-  
+  # save(days, file = "~/projects/fontys/state_3_gui.RData")
   # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
   
   cat("\n<<< building trajectories... >>>\n")
   trajectories <- hbt_build_trajectories(palmsplus, config_file = config)
   write_csv(trajectories,  file = fns[3])
-  
   shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp")
   if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
   sf::st_write(obj = trajectories, dsn = shp_file)
   
-  cat("\n<<< building multimodal... >>>\n")
+  # save(trajectories, file = "~/projects/fontys/state_4_gui.RData")
   
+  cat("\n<<< building multimodal... >>>\n")
   multimodal <- hbt_build_multimodal(data = trajectories,
                                      spatial_threshold = 200,
                                      temporal_threshold = 10,

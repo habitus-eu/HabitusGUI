@@ -90,20 +90,20 @@ hbt_build_multimodal <- function(data = NULL,
       group_by(identifier) %>%
       mutate(mmt_number = data.table::rleid(mmt_number)) %>%
       ungroup() %>%
-      select(-c(start_point, end_point, end_prev, mmt_criteria, time_diff, distance_diff))
+      dplyr::select(-c(start_point, end_point, end_prev, mmt_criteria, time_diff, distance_diff))
     
     if(verbose) cat('done\nCalculating fields...')
     
     # Split varables into each mot
     mot_split <- data %>%
-      select(c("mot", "mmt_number", "identifier", "geometry", multimodal_fields$name)) %>%
+      dplyr::select(c("mot", "mmt_number", "identifier", "geometry", multimodal_fields$name)) %>%
       mutate(mot = paste0("mot_", mot)) %>%
       gather(variable, value, -mmt_number, -mot, -identifier, -geometry) %>%
       unite(col, mot, variable) %>%
       spread(col, value) %>%
       arrange(identifier, mmt_number) %>%
       cbind(data) %>%
-      select(-ends_with(".1"))
+      dplyr::select(-ends_with(".1"))
     
     # Calculate multimodal_fields
     df_fields <- list()
@@ -131,7 +131,7 @@ hbt_build_multimodal <- function(data = NULL,
     lookup <- palmsplus %>%
       filter(tripnumber > 0 & triptype %in% c(1, 4)) %>%
       as.data.frame() %>%
-      select(c("identifier", "tripnumber", "triptype", all_of(names)))
+      dplyr::select(c("identifier", "tripnumber", "triptype", all_of(names)))
     
     # Helper function to lookup start and end locations from the lookup table
     lookup_locations <- function(identifier, start_trip, start_loc, end_trip, end_loc) {
@@ -161,7 +161,7 @@ hbt_build_multimodal <- function(data = NULL,
       rowwise() %>%
       mutate(!!!args_locations) %>%
       ungroup() %>%
-      select(-c(start_trip, end_trip)) %>%
+      dplyr::select(-c(start_trip, end_trip)) %>%
       mutate_if(is.logical, as.integer)
     
     if (exists("df_fields")) {

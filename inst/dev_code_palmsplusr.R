@@ -16,7 +16,7 @@ for (i in 1:length(ffnames)) {
 # source("~/projects/HabitusGUI/R/hbt_build_trajectories.R")
 # source("~/projects/HabitusGUI/R/load_params.R")
 
-
+setwd("~/projects/HabitusGUI")
 library(readr)
 library(dplyr)
 library(tidyr)
@@ -24,6 +24,7 @@ library(palmsplusr)
 library(rlang)
 library(data.table)
 library(purrr)
+library(geosphere)
 palmsplusr_shiny(gisdir = "/home/vincent/projects/fontys/test_palmsplusr/GIS",
                  palmsdir = "/home/vincent/projects/fontys/test_palmsplusr/PALMS_output",
                  gislinkfile = "~/projects/fontys/test_palmsplusr/Tables/participant_basis.csv",

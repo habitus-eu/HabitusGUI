@@ -14,6 +14,7 @@
 #'
 #' @param data The palmsplus data obtained from \code{\link{palms_build_palmsplus}}.
 #' @param verbose Print progress to console. Default is \code{TRUE}.
+#' @param palmsplus_domains ...
 #' @param palmsplus_fields ...
 #' @param home home
 #' @param school school
@@ -32,6 +33,7 @@
 #' @export
 # Code modified from https://thets.github.io/palmsplusr/
 hbt_build_days <- function(data = NULL, verbose = TRUE, 
+                           palmsplus_domains = NULL,
                            palmsplus_fields = NULL,
                            home = NULL,
                            school = NULL,
@@ -39,23 +41,25 @@ hbt_build_days <- function(data = NULL, verbose = TRUE,
                            school_nbh = NULL,
                            participant_basis = NULL) {
   duration = datetime = name = domain_field = NULL
-  domain_fields <- palmsplus_fields %>% filter(domain_field == TRUE)
+  
+  domain_fields <- palmsplus_domains %>% filter(domain_field == TRUE)
   domain_names <- domain_fields %>% pull(name)
   
   if (is.null(domain_names)) {
     domain_names <- "total"
+  } else {
+    domain_names <- c("total", domain_names)
   }
   domain_args <- setNames("1", "total") %>% lapply(parse_expr)
-  domain_names<- c(domain_names,   domain_fields[[1]])
   domain_args <- c(domain_args, setNames(domain_fields[[2]], domain_fields[[1]]) %>%
                      lapply(parse_expr))
-
+  
   data <- data %>%
     mutate(!!! domain_args) %>%
     mutate_if(is.logical, as.integer)
   
-  
   fields <- palmsplus_fields %>% filter(domain_field == TRUE) %>% pull(name)
+  
   data <- data %>%
     st_set_geometry(NULL) %>%
     dplyr::select(identifier, datetime, domain_names, fields) %>%
@@ -63,6 +67,7 @@ hbt_build_days <- function(data = NULL, verbose = TRUE,
     mutate_at(vars(-identifier,-datetime), ~ . * palms_epoch(data) / 60) %>%
     group_by(identifier, date = as.Date(datetime)) %>%
     dplyr::select(-datetime)
+  
   x <- list()
   for (i in domain_names) {
     x[[i]] <- data %>%
@@ -72,8 +77,8 @@ hbt_build_days <- function(data = NULL, verbose = TRUE,
       ungroup() %>%
       rename_at(vars(-identifier, -date), ~ paste0(i, "_", .))
   }
+  
   result <- x %>%
     reduce(left_join, by = c("identifier" = "identifier", "date" = "date"))
-  
   return(result)
 }
