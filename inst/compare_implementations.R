@@ -79,27 +79,29 @@ rm(list = ls())
 
 # # #===========================================================
 load("~/projects/fontys/state_4_gui.RData")
+# multimodal_fields is the same
+# trajectory_locations is the same, only order of rows is different
 gtra = trajectories
 print(dim(gtra))
 load("~/projects/fontys/state_4_lynne.RData")
 ltra = trajectories
 print(dim(ltra))
 
-print(table(gtra == ltra))
+# print(table(gtra == ltra))
+# print(table(gtl == ltl))
 
-# 
-# for (i in 1:nrow(gtra)) {
-#   for (j in 1:ncol(gtra)) {
-#     if (!all(is.na(gtra[i,j])) & !all(is.na(ltra[i,j]))) {
-#       if (any(gtra[i,j] != ltra[i,j])) {
-#         print(paste0(i, " - ", j))
-#         print(colnames(ltra[i,j]))
-#         print(paste0(gtra[i,j], " ", ltra[i,j]))
-#         kkkk
-#       }
-#     }
-#   }
-# }
+for (i in 1:nrow(gtra)) {
+  for (j in 1:ncol(gtra)) {
+    if (!all(is.na(gtra[i,j])) & !all(is.na(ltra[i,j]))) {
+      if (any(gtra[i,j] != ltra[i,j])) {
+        print(paste0(i, " - ", j))
+        print(colnames(ltra[i,j]))
+        print(paste0(gtra[i,j], " ", ltra[i,j]))
+        kkkk
+      }
+    }
+  }
+}
 
 # ldays = days
 # print(dim(ldays))

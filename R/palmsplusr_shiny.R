@@ -147,7 +147,7 @@ palmsplusr_shiny <- function(gisdir = "",
   # # multimodal_fields
   multimodal_fields_rows = which(CONF$context == "multimodal_field")
   multimodal_fields = tibble(name = CONF$name[multimodal_fields_rows],
-                            func = CONF$formula[multimodal_fields_rows])
+                            formula = CONF$formula[multimodal_fields_rows])
   # #=============================
   # # trajectory locations
   trajectory_location_rows = which(CONF$context == "trajectory_location")
@@ -203,7 +203,7 @@ palmsplusr_shiny <- function(gisdir = "",
   if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
   sf::st_write(obj = trajectories, dsn = shp_file)
   
-  # save(trajectories, file = "~/projects/fontys/state_4_gui.RData")
+  # save(trajectories, multimodal_fields, trajectory_locations, file = "~/projects/fontys/state_4_gui.RData")
   
   cat("\n<<< building multimodal... >>>\n")
   multimodal <- hbt_build_multimodal(data = trajectories,
