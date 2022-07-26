@@ -4,10 +4,12 @@ Description: Shiny app to ease processing behavioural data with research softwar
 Version: 0.1.4
 Date: 2022-07-26
 Authors@R: 
-    person(given = "Vincent",
+    c(person(given = "Vincent",
            family = "van Hees",
            role = c("aut", "cre"),
-           email = "v.vanhees@accelting.com")
+           email = "v.vanhees@accelting.com"),
+           person("Tom", "Stewart", role = "cph", email = "tom.stewart@aut.ac.nz",
+           comment = "holds copyright over original palmsplusr code"))
 License: Apache License version 2.0 | file LICENSE
 Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, activityCounts,
     dplyr, magrittr, shinyjs, sf, readr, tidyr, stringr, callr, palmsplusr,
