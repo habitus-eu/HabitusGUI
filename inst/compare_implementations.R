@@ -27,28 +27,28 @@ rm(list = ls())
 # At this point data is identical
 
 # #===========================================================
-# load("~/projects/fontys/state_2_gui.RData")
+load("~/projects/fontys/state_2_gui.RData")
 # 
-# gpalmsplus = palmsplus
-# gpalmsplus_fields = config_test[,c("name", "formula", "domain_field")]
-# load("~/projects/fontys/state_2_lynne.RData")
+gpalmsplus = palmsplus
+gpalmsplus_fields = config_test[,c("name", "formula", "domain_field")]
+load("~/projects/fontys/state_2_lynne.RData")
 # 
-# lpalmsplus = palmsplus
-# lpalmsplus_fields = palmsplus_fields
-# 
-# GP = colnames(gpalmsplus)
-# LP = colnames(lpalmsplus)
+lpalmsplus = palmsplus
+lpalmsplus_fields = palmsplus_fields
+
+GP = colnames(gpalmsplus)
+LP = colnames(lpalmsplus)
 # print(GP[GP %in% LP == FALSE])
 # print(LP[LP %in% GP == FALSE])
 # 
 # print(table(gpalmsplus[,GP[GP %in% LP == TRUE]] == lpalmsplus[,LP[LP %in% GP == TRUE]]))
-# print(table(gpalmsplus_fields == lpalmsplus_fields, ))
+print(table(gpalmsplus_fields == lpalmsplus_fields, ))
 
 # config_test is used instead of palmsplus_field
 # difference comes from palmsplus, which has added columns "home"       "school"     "transport"  "home_nbh"   "school_nbh" "other"  
 # however, the other columns are identical
-
-
+kkk
+# 
 # # #===========================================================
 # load("~/projects/fontys/state_3_gui.RData")
 # gdays = days
@@ -87,8 +87,8 @@ load("~/projects/fontys/state_4_lynne.RData")
 ltra = trajectories
 print(dim(ltra))
 
-# print(table(gtra == ltra))
-# print(table(gtl == ltl))
+print(table(gtra == ltra))
+print(table(gtl == ltl))
 
 for (i in 1:nrow(gtra)) {
   for (j in 1:ncol(gtra)) {
