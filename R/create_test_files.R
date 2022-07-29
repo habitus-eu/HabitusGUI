@@ -18,7 +18,7 @@ create_test_files = function(dir=c(), Nfiles=10, Nobs = 10) {
     y = runif(min = 0, max = 100, n = Nobs)
     data = data.frame(x = x,
                       y = y)
-    data = round(data, digits=4)
+    data = round(data, digits = 4)
     
     write.csv(x = data, file = paste0(dir,"/",new_file_names[i]))
     rm(data)

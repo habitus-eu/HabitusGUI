@@ -50,10 +50,10 @@ myApp <- function(homedir=getwd(), ...) {
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ", # GGIR
                                                    "(input.availabledata.indexOf(`ACount`) > -1 && ", # PALMSpy
                                                    "input.availabledata.indexOf(`GPS`) > -1) || ",
-                                                   "(input.availabledata.indexOf(`ACount`) > -1 && ", # PALMSplus variant 1
+                                                   "(input.availabledata.indexOf(`ACount`) > -1 && ", # palmsplusr variant 1
                                                    "input.availabledata.indexOf(`GPS`) > -1 && ",
                                                    "input.availabledata.indexOf(`GIS`) > -1) || ", 
-                                                   "(input.availabledata.indexOf(`PALMSpy_out`) > -1 && ", #PALMSplus variant 2
+                                                   "(input.availabledata.indexOf(`PALMSpy_out`) > -1 && ", #palmsplusr variant 2
                                                    "input.availabledata.indexOf(`GIS`) > -1)"),
                                 hr(),
                                 # If there is enough input data then show second check box to ask user about their research goals
@@ -66,8 +66,8 @@ myApp <- function(homedir=getwd(), ...) {
                                                    choiceNames = list("GGIR (R package)",
                                                                       "BrondCounts (R packages activityCounts + GGIR)",
                                                                       "PALMSpy (Python library)",
-                                                                      "PALMSplus (R package)"),
-                                                   choiceValues = list("GGIR", "BrondCounts", "PALMSpy", "PALMSplus"), width = '100%')
+                                                                      "palmsplusr (R package)"),
+                                                   choiceValues = list("GGIR", "BrondCounts", "PALMSpy", "palmsplusr"), width = '100%')
                ), 
                actionButton("page_12", "next")
       ),
@@ -99,7 +99,7 @@ myApp <- function(homedir=getwd(), ...) {
                                 verbatimTextOutput("gpsdir", placeholder = TRUE)
                ),
                # Select input folder GIS data and GIS linkage file -----------------------------------
-               conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`PALMSplus`)",
+               conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
                                 shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
                                                            title = "Select GIS data directory"),
                                 verbatimTextOutput("gisdir", placeholder = TRUE),
@@ -110,7 +110,7 @@ myApp <- function(homedir=getwd(), ...) {
                ),
                # Select input folder PALMSpy output data -----------------------------------
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`PALMSpy_out`) > -1 && ",
-                                                   "input.tools.includes(`PALMSplus`) && !input.tools.includes(`PALMSpy`)"),
+                                                   "input.tools.includes(`palmsplusr`) && !input.tools.includes(`PALMSpy`)"),
                                 shinyFiles::shinyDirButton("palmspyoutdir", label = "Previously generated PALMS(py) output directory...",
                                                            title = "Select PALMS(py) output directory"),
                                 verbatimTextOutput("palmspyoutdir", placeholder = TRUE)
@@ -130,7 +130,7 @@ myApp <- function(homedir=getwd(), ...) {
                  )
                ),
                # Provide dataset name (only needed when working with GIS data ---------------------------------
-               conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`PALMSplus`)",
+               conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
                                 strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
                ),
                
@@ -158,9 +158,9 @@ myApp <- function(homedir=getwd(), ...) {
                                 modConfigUI("edit_palmspy_config"),
                                 hr()
                ),
-               conditionalPanel(condition = "input.tools.includes('PALMSplus')",
-                                h2("PALMSplus"),
-                                p("No parameters are needed for the PALMSplus"),
+               conditionalPanel(condition = "input.tools.includes('palmsplusr')",
+                                h2("palmsplusr"),
+                                modConfigUI("edit_palmsplusr_config"),
                                 hr()
                ),
                actionButton("page_32", "prev"),
@@ -191,7 +191,7 @@ myApp <- function(homedir=getwd(), ...) {
                                 p("\n"),
                                 verbatimTextOutput("mylog_GGIR"),
                                 tags$head(tags$style("#mylog_GGIR{color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
+overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                 p("\n"),
                                 htmlOutput("ggir_end_message"),
                                 p("\n"),
@@ -205,25 +205,25 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                                 p("\n"),
                                 verbatimTextOutput("mylog_PALMSpy"),
                                 tags$head(tags$style("#mylog_PALMSpy{color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
+overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                 p("\n"),
                                 htmlOutput("palmspy_end_message"),
                                 p("\n"),
                                 DT::dataTableOutput("PALMSpy_file1"),
                                 hr()
                ),
-               conditionalPanel(condition = "input.tools.includes('PALMSplus')",
-                                h3("PALMSplus:"),
+               conditionalPanel(condition = "input.tools.includes('palmsplusr')",
+                                h3("palmsplusr:"),
                                 shinyjs::useShinyjs(),
-                                actionButton("start_palmsplus", "Start analysis", width = '300px'),
+                                actionButton("start_palmsplusr", "Start analysis", width = '300px'),
                                 p("\n"),
                                 verbatimTextOutput("mylog_palmsplusr"),
                                 tags$head(tags$style("#mylog_palmsplusr{color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
+overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                 p("\n"),
-                                htmlOutput("palmsplus_end_message"),
+                                htmlOutput("palmsplusr_end_message"),
                                 p("\n"),
-                                DT::dataTableOutput("PALMSplus_file1"),
+                                DT::dataTableOutput("palmsplusr_file1"),
                                 hr()
                ),
                actionButton("page_43", "prev")
@@ -263,12 +263,12 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
               if ("PALMSpy" %in% input$tools == TRUE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE)) {
                 showNotification("PALMSpy not possible without access to Accelerometer data", type = "error")
               } else {
-                if ("PALMSplus" %in% input$tools == TRUE & "GIS" %in% input$availabledata == FALSE) {
-                  showNotification("PALMSplus not possible without access to GIS data", type = "error")
+                if ("palmsplusr" %in% input$tools == TRUE & "GIS" %in% input$availabledata == FALSE) {
+                  showNotification("palmsplusr not possible without access to GIS data", type = "error")
                 } else {
-                  if ("PALMSplus" %in% input$tools == TRUE & ("PALMSpy_out" %in% input$availabledata == FALSE &
+                  if ("palmsplusr" %in% input$tools == TRUE & ("PALMSpy_out" %in% input$availabledata == FALSE &
                                                               "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
-                    showNotification("PALMSplus requires either previously generated PALMS(py) output or GPS and Accelerometer data", type = "error")
+                    showNotification("palmsplusr requires either previously generated PALMS(py) output or GPS and Accelerometer data", type = "error")
                   } else {
                     if ("BrondCounts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
                       showNotification("BrondCounts not possible without access to raw accelerometer data", type = "error")
@@ -304,12 +304,12 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
               } else {
                 current_gislinkfile = as.character(parseFilePaths(c(home = homedir), input$gislinkfile)$datapath)
                 if ("GIS" %in% input$availabledata &
-                    "PALMSplus" %in% input$tools &
+                    "palmsplusr" %in% input$tools &
                     (as.character(input$gisdir)[1] == "0" |
                      length(current_gislinkfile) == 0)) {
                     showNotification("Select GIS data directory and GIS linkage file", type = "error")
                 } else {
-                  if ("PALMSpy_out" %in% input$availabledata & "PALMSplus" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0") {
+                  if ("PALMSpy_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0") {
                     showNotification("Select previously generated PALMS(py) output directory", type = "error")
                   } else {
                     switch_page(3)
@@ -335,6 +335,11 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           configs_ready = FALSE
         }
       }
+      if ("palmsplusr" %in% input$tools) {
+        if (length(paste0(configfilepalmsplusr())) == 0) {
+          configs_ready = FALSE
+        }
+      }
       if (configs_ready == TRUE) {
         showNotification("Saving configuration file(s) to output folder", type = "message", duration = 2)
         if ("GGIR" %in% input$tools) {
@@ -356,6 +361,12 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
         if ("PALMSpy" %in% input$tools) {
           if (configfilePALMSpy() != paste0(global$data_out, "/config.json")) {
             file.copy(from = configfilePALMSpy(), to = paste0(global$data_out, "/config.json"), 
+                      overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+          }
+        }
+        if ("palmsplusr" %in% input$tools) {
+          if (configfilepalmsplusr() != paste0(global$data_out, "/config_palmsplusr.csv")) {
+            file.copy(from = configfilepalmsplusr(), to = paste0(global$data_out, "/config_palmsplusr.csv"), 
                       overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
           }
         }
@@ -570,6 +581,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
     # Check and Edit config files ---------------------------------------
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir)
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir)
+    configfilepalmsplusr <- modConfigServer("edit_palmsplusr_config", tool = reactive("palmsplusr"), homedir = homedir)
     
     #========================================================================
     # Apply GGIR / BrondCounts after button is pressed
@@ -804,15 +816,15 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
       return()
     })
     #========================================================================
-    # Apply PALMSplus after button is pressed
+    # Apply palmsplusr after button is pressed
     #========================================================================
-    runPALMSplus <- eventReactive(input$start_palmsplus, {
-      PALMSplus_message = ""
+    runpalmsplusr <- eventReactive(input$start_palmsplusr, {
+      palmsplusr_message = ""
       
-      if ("PALMSplus" %in% input$tools) {
-        PALMSplus_message = "Error: Contact maintainer"
+      if ("palmsplusr" %in% input$tools) {
+        palmsplusr_message = "Error: Contact maintainer"
         # Basic check before running function:
-        ready_to_run_palmsplus = FALSE
+        ready_to_run_palmsplusr = FALSE
         # Check for PALMSpy output (two possible sources either from this run or from a previous run)
         if (dir.exists(paste0(global$data_out,"/PALMSpy_output"))) {
           expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
@@ -827,26 +839,26 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
               Nfiles_in_gisdir = length(dir(path = global$gis_in, recursive = FALSE, full.names = FALSE))
               if (Nfiles_in_gisdir > 0) {
                 if (file.exists(global$gislinkfile_in)) {
-                  ready_to_run_palmsplus = TRUE
+                  ready_to_run_palmsplusr = TRUE
                 } else {
-                  PALMSplus_message = paste0("GIS link file not found: ", global$gislinkfile_in)
+                  palmsplusr_message = paste0("GIS link file not found: ", global$gislinkfile_in)
                 }
               } else {
-                PALMSplus_message = paste0("No files found in GIS folder: ", global$gis_in)
+                palmsplusr_message = paste0("No files found in GIS folder: ", global$gis_in)
               }
             } else {
-              PALMSplus_message = paste0("Folder that is supposed to hold  GIS files does not exist: ", global$gis_in)
+              palmsplusr_message = paste0("Folder that is supposed to hold  GIS files does not exist: ", global$gis_in)
             }
           } else {
-            PALMSplus_message = paste0("No files found in PALMSpy output folder: ", expected_palmspy_results_dir)
+            palmsplusr_message = paste0("No files found in PALMSpy output folder: ", expected_palmspy_results_dir)
           }
         } else {
-          PALMSplus_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", expected_palmspy_results_dir)
+          palmsplusr_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", expected_palmspy_results_dir)
         }
         # Only run function when checks are met:
-        if (ready_to_run_palmsplus == TRUE) {
-          shinyjs::hide(id = "start_palmsplus")
-          id_palmsplusr = showNotification("PALMSplusR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+        if (ready_to_run_palmsplusr == TRUE) {
+          shinyjs::hide(id = "start_palmsplusr")
+          id_palmsplusr = showNotification("palmsplusr in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           output$mylog_palmsplusr <- renderText({
             paste(mylog_palmsplusr(), collapse = '\n')
           })
@@ -856,7 +868,7 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           logfile = paste0(isolate(global$data_out), "/palmsplusr.log")
           on.exit(file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE), add = TRUE)
           
-          # PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          # palmsplusr_shiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
           #   # participant_exclude_list, # <= Discuss, leave out from linkfile?
           #   gisdir = global$gis_in,
           #   palmsdir = expected_palmspy_results_dir,
@@ -864,20 +876,33 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
           #   outputdir = isolate(global$data_out),
           #   dataset_name = input$dataset_name)
           
+          
+          # print(list(palmsplusr_shiny = palmsplusr_shiny,
+          #            gisdir = global$gis_in,
+          #            palmsdir = expected_palmspy_results_dir,
+          #            gislinkfile = global$gislinkfile_in,
+          #            outputdir = isolate(global$data_out),
+          #            dataset_name = input$dataset_name,
+          #            configfile =  paste0(global$data_out, "/config_palmsplusr.csv")))
+          
           # Start palmsplusr
-          x_palmsplusr <- r_bg(func = function(PALMSplusRshiny, gisdir, palmsdir, gislinkfile, outputdir, dataset_name){
-            PALMSplusRshiny(gisdir, palmsdir, gislinkfile, outputdir, dataset_name)
+          x_palmsplusr <- r_bg(func = function(palmsplusr_shiny, gisdir, palmsdir,
+                                               gislinkfile, outputdir, dataset_name,
+                                               configfile){
+            palmsplusr_shiny(gisdir, palmsdir, gislinkfile,
+                            outputdir, dataset_name, configfile)
           },
-          args = list(PALMSplusRshiny = PALMSplusRshiny,
+          args = list(palmsplusr_shiny = palmsplusr_shiny,
                       gisdir = global$gis_in,
                       palmsdir = expected_palmspy_results_dir,
                       gislinkfile = global$gislinkfile_in,
                       outputdir = isolate(global$data_out),
-                      dataset_name = input$dataset_name),
+                      dataset_name = input$dataset_name,
+                      configfile =  paste0(global$data_out, "/config_palmsplusr.csv")),
           stdout = stdout_palmsplusr_tmp,
           stderr = "2>&1")
           #   # Start PALMSplusR
-          #   PALMSplusRshiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          #   palmsplusr_shiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
           #     # participant_exclude_list, # <= Discuss, leave out from linkfile?
           #     gisdir = global$gis_in,
           #     palmsdir = expected_palmspy_results_dir,
@@ -895,30 +920,30 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
                 file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE)     
               }
               # Now check whether results are correctly generated:
-              expected_palmsplus_folder = paste0(isolate(global$data_out), "/PALMSplus_output")
-              if (dir.exists(expected_palmsplus_folder) == TRUE) {
-                csv_files_palmsplus = dir(expected_palmsplus_folder,pattern = "csv", recursive = TRUE)
-                if (length(csv_files_palmsplus) > 0) {
-                  PALMSplus_message = paste0(#"PALMSplusR successfully completed at ", Sys.time(),
-                                             "Output is stored in: ", expected_palmsplus_folder, #<br/>
-                                             "<br/>The table below shows the content of ", basename(csv_files_palmsplus),
+              expected_palmsplusr_folder = paste0(isolate(global$data_out), "/palmsplusr_output")
+              if (dir.exists(expected_palmsplusr_folder) == TRUE) {
+                csv_files_palmsplusr = dir(expected_palmsplusr_folder,pattern = "csv", recursive = TRUE)
+                if (length(csv_files_palmsplusr) > 0) {
+                  palmsplusr_message = paste0(#"PALMSplusR successfully completed at ", Sys.time(),
+                                             "Output is stored in: ", expected_palmsplusr_folder, #<br/>
+                                             "<br/>The table below shows the content of ", basename(csv_files_palmsplusr),
                                              "<br/>Log file: ", logfile)
-                  # PALMSplus_file1 = read.csv(file = csv_files_palmsplus[1])
-                  # if (length(PALMSplus_file1) > 0) {
-                  #   # output$PALMSplus_file1 <- DT::renderDataTable(PALMSplus_file1, options = list(scrollX = TRUE))
+                  # palmsplusr_file1 = read.csv(file = csv_files_palmsplusr[1])
+                  # if (length(palmsplusr_file1) > 0) {
+                  #   # output$palmsplusr_file1 <- DT::renderDataTable(palmsplusr_file1, options = list(scrollX = TRUE))
                   # }
                 } else {
-                  PALMSplus_message = paste0("PALMSplusR unsuccessful",
-                                             "<br/>No file found inside: ", expected_palmsplus_folder, #<br/>
+                  palmsplusr_message = paste0("palmsplusr unsuccessful",
+                                             "<br/>No file found inside: ", expected_palmsplusr_folder, #<br/>
                                              "<br/>Log file: ", logfile)
                 }
               } else {
-                PALMSplus_message = paste0("PALMSplusR unsuccessful",
-                                           "<br/>No file found inside: ", expected_palmsplus_folder,
+                palmsplusr_message = paste0("palmsplusr unsuccessful",
+                                           "<br/>No file found inside: ", expected_palmsplusr_folder,
                                            "<br/>Log file: ", logfile)
               }
-              output$palmsplus_end_message <- renderUI({
-                HTML(paste0(PALMSplus_message))
+              output$palmsplusr_end_message <- renderUI({
+                HTML(paste0(palmsplusr_message))
               })
             }
           })
@@ -946,8 +971,8 @@ overflow-y:scroll; max-height: 150px; background: ghostwhite;}")),
     output$palmspy_end_message <- renderText({
       message = runPALMSpy()
     })
-    output$palmsplus_end_message <- renderText({
-      message = runPALMSplus()
+    output$palmsplusr_end_message <- renderText({
+      message = runpalmsplusr()
     })
   }
   # Run the application 

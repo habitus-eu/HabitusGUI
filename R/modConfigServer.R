@@ -12,6 +12,7 @@ modConfigServer = function(id, tool, homedir = getwd()) {
   
   moduleServer(id, function(input, output, session) {
     observeEvent(tool(), {
+    
       if (tool() == "PALMSpy") {
         output$download = downloadHandler(
           filename = "palmspy-params.json",
@@ -25,6 +26,14 @@ modConfigServer = function(id, tool, homedir = getwd()) {
           filename = "config.csv",
           content <- function(file) {
             config_default = system.file("testfiles_ggir/config.csv", package = "HabitusGUI")[1]
+            if (config_default != file) file.copy(config_default, file)
+          },
+          contentType = "text/csv")
+      } else if (tool() == "palmsplusr") {
+        output$download = downloadHandler(
+          filename = "config_palmsplusr.csv",
+          content <- function(file) {
+            config_default = system.file("testfiles_palmsplusr/config_palmsplusr.csv", package = "HabitusGUI")[1]
             if (config_default != file) file.copy(config_default, file)
           },
           contentType = "text/csv")
@@ -45,6 +54,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
           params = load_params(file = current_config, format = "json_palmspy") #$datapath
         } else if (tool() == "GGIR") {
           params = load_params(file = current_config, format = "csv_ggir") #$datapath
+        } else if (tool() == "palmsplusr") {
+          params = load_params(file = current_config, format = "csv_palmsplusr") #$datapath
         }
         params_errors = check_params(params, tool = tool())
         output$config_issues <- renderUI({
@@ -87,6 +98,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
               update_params(new_params = v$params, file = current_config, format = "json_palmspy") #$datapath
             } else if (tool() == "GGIR") {
               update_params(new_params = v$params, file = current_config, format = "csv_ggir") #$datapath
+            } else if (tool() == "palmsplusr") {
+              update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
             }
           }
         })
@@ -100,6 +113,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
             update_params(new_params = v$params, file = current_config, format = "json_palmspy") #$datapath
           } else if (tool() == "GGIR") {
             update_params(new_params = v$params, file = current_config, format = "csv_ggir") #$datapath
+          } else if (tool() == "palmsplusr") {
+            update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
           }
           # update list with errors
           params_errors = check_params(params, tool = tool())
@@ -149,6 +164,9 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         explanation = paste0("PALMSpy takes as input summarised accelerometer data (ActiGraph counts) ",
                              "and GPS data and uses them to estimate movement behaviours from the ",
                              "perspective location in a country or city and travel distance and speed")
+      } else if (tool() == "palmsplusr") {
+        explanation = paste0("palmsplusr takes as input PALMSpy output, GIS shape, and a GISlinkage file ",
+                             "and uses these to describe behaviour per domain.")
       }
       explanation
     })
@@ -158,6 +176,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         config_explanation2 = "GGIR configuration files are in .csv format. If you do not have one Download a template below."
       } else if (tool() == "PALMSpy") {
         config_explanation2 = "PALMSpy configuration files are in .json. If you do not have one Download a template below."
+      } else if (tool() == "palmsplusr") {
+        config_explanation2 = "palmsplusr configuration files are in .csv. If you do not have one Download a template below."
       }
       config_explanation2
     })

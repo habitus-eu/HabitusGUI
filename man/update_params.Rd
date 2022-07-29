@@ -11,7 +11,7 @@ update_params(new_params = c(), file = c(), format = "json_palmspy")
 
 \item{file}{Character to specify location of original configuration file}
 
-\item{format}{Character to specify format of configuration file: json_palsmpy or csv_GGIR}
+\item{format}{Character to specify format of configuration file: json_palsmpy, csv_GGIR, or csv_palmsplusr}
 }
 \value{
 No object returned, function only reads original data, and overwrites parameters and stores it again
