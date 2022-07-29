@@ -46,7 +46,7 @@ palmsplusr_shiny <- function(gisdir = "",
     config <- system.file("testfiles_palmsplusr/config_palmsplusr.csv", package = "HabitusGUI")[1]
   }
   
-  palmsplus_folder = paste0(outputdir, "/PALMSplus_output")
+  palmsplus_folder = paste0(outputdir, "/palmsplusr_output")
   if (!dir.exists(palmsplus_folder)) {
     cat("\nCreating PALMSplusR output directory\n")
     dir.create(palmsplus_folder)
