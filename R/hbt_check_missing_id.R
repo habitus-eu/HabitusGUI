@@ -19,9 +19,9 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
   missing = which(test_missing_value > 1)
   participant_exclude_list = list(identifier = NULL, school_id = NULL)
   if (length(missing) > 0) {
-    print("\nMissing ID values in participant_basis\n")
-    print(paste0("\nIgnoring identifier ", paste(participant_basis$identifier[missing], sep = " ")))
-    print(paste0("\nIgnoring schoolid ", paste(participant_basis$school_id[missing], sep = " ")))
+    cat("\nMissing ID values in participant_basis\n")
+    cat(paste0("  Ignoring identifier ", paste(participant_basis$identifier[missing], sep = " "), "\n"))
+    cat(paste0("  Ignoring schoolid ", paste(participant_basis$school_id[missing], sep = " "), "\n"))
     participant_exclude_list$identifier = participant_basis$identifier[missing]
     participant_exclude_list$school_id = participant_basis$school_id[missing]
     participant_basis = participant_basis[test_missing_value == 0, ]
@@ -38,8 +38,9 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
                                  participant_basis$identifier[which(participant_basis$identifier %in% palms$identifier == FALSE)]))
   
   if (length(missing_identifiers) > 0) {
-    print("Removing missing identifiers related to palms")
-    print(missing_identifiers)
+    cat("\nRemoving missing identifiers related to palms: ")
+    cat(missing_identifiers)
+    cat("\n")
     participant_basis = participant_basis[participant_basis$identifier %in% missing_identifiers == FALSE,]
     palms = palms[palms$identifier %in% missing_identifiers == FALSE,]
   }

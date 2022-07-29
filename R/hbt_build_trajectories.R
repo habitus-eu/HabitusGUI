@@ -8,7 +8,8 @@
 #' and \code{\link{palms_add_trajectory_location}}.
 #'
 #' @param data The palmsplus data obtained from \code{\link{palms_build_palmsplus}}.
-#' @param config_file Path to the config file
+#' @param trajectory_fields trajectory_fields
+#' @param trajectory_locations trajectory_locations
 #'
 #' @return A table of individual trips represented as \code{LINESTRING} geometry.
 #'
@@ -19,35 +20,24 @@
 #'
 #' @export
 # Code modified from https://thets.github.io/palmsplusr/
-hbt_build_trajectories <- function(data = NULL, config_file = NULL) {
+hbt_build_trajectories <- function(data = NULL, trajectory_fields = NULL, trajectory_locations = NULL) {
   name = after_conversion = tripnumber = NULL
   
-  # Field
-  config <- hbt_read_config(config_file) %>%
-    filter(context == 'trajectory_field')
   
-  if (nrow(config) > 0) {
-    if (nrow(config) > 0) {
-      args <- config %>% filter(after_conversion == FALSE)
-      args_after <- config %>% filter(after_conversion == TRUE)
-      
-      args <- setNames(args$formula, args$name) %>% lapply(parse_expr)
-      args_after <- setNames(args_after$formula, args_after$name) %>% lapply(parse_expr)
-    } else {
-      args <- list()
-      args_after <- list()
-    }
-  }
-  # Location
-  config <- hbt_read_config(config_file) %>%
-    filter(context == 'trajectory_location')
+  args <- trajectory_fields %>% filter(after_conversion == FALSE)
+  args_after <- trajectory_fields %>% filter(after_conversion == TRUE)
   
-  if (nrow(config) > 0) {
-    args_locations <- setNames(paste0("first(", config$start_criteria,
-                                      ") & last(", config$end_criteria, ")"),
-                               config$name) %>% lapply(parse_expr)
+  args <- setNames(args$formula, args$name) %>% lapply(parse_expr)
+  args_after <- setNames(args_after$formula, args_after$name) %>% lapply(parse_expr)
+  
+  if (length(trajectory_locations) > 0) {
+    args_locations <- setNames(paste0("first(", trajectory_locations$start_criteria,
+                                      ") & last(", trajectory_locations$end_criteria, ")"),
+                               trajectory_locations$name) %>% lapply(parse_expr)
+    args_locations = args_locations[order(names(args_locations))]
     args <- c(args, args_locations)
   }
+  
   # Build data object
   data <- data %>%
     filter(tripnumber > 0) %>%

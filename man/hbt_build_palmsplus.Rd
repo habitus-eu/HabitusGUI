@@ -6,7 +6,6 @@
 \usage{
 hbt_build_palmsplus(
   data = NULL,
-  config_file = NULL,
   verbose = TRUE,
   palmsplus_fields = NULL,
   home = NULL,
@@ -18,8 +17,6 @@ hbt_build_palmsplus(
 }
 \arguments{
 \item{data}{The PALMS data obtained using \code{\link{read_palms}}.}
-
-\item{config_file}{Path to the config file}
 
 \item{verbose}{Print progress to console after each iteration. Default is \code{TRUE}.}
 

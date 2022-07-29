@@ -28,26 +28,25 @@ rm(list = ls())
 
 # #===========================================================
 load("~/projects/fontys/state_2_gui.RData")
-# 
+#
 gpalmsplus = palmsplus
-gpalmsplus_fields = config_test[,c("name", "formula", "domain_field")]
+gpalmsplus_fields = palmsplus_fields
+
 load("~/projects/fontys/state_2_lynne.RData")
-# 
+
 lpalmsplus = palmsplus
 lpalmsplus_fields = palmsplus_fields
 
 GP = colnames(gpalmsplus)
 LP = colnames(lpalmsplus)
-# print(GP[GP %in% LP == FALSE])
-# print(LP[LP %in% GP == FALSE])
-# 
-# print(table(gpalmsplus[,GP[GP %in% LP == TRUE]] == lpalmsplus[,LP[LP %in% GP == TRUE]]))
-print(table(gpalmsplus_fields == lpalmsplus_fields, ))
 
-# config_test is used instead of palmsplus_field
-# difference comes from palmsplus, which has added columns "home"       "school"     "transport"  "home_nbh"   "school_nbh" "other"  
-# however, the other columns are identical
-kkk
+
+print(table(gpalmsplus == lpalmsplus))
+
+print(table(gpalmsplus_fields[1:16,] == lpalmsplus_fields[1:16,]))
+# Only difference is that we define datai in palms_in_polygon instead of .
+
+
 # 
 # # #===========================================================
 # load("~/projects/fontys/state_3_gui.RData")
@@ -74,34 +73,48 @@ kkk
 #   }
 # }
 # print(table(gdays == ldays))
-# Minor differences in 68 values (rounding problems??), the 3412 other values are identical
+# # Identical
+# 
 
-
-# # #===========================================================
-load("~/projects/fontys/state_4_gui.RData")
-# multimodal_fields is the same
-# trajectory_locations is the same, only order of rows is different
-gtra = trajectories
-print(dim(gtra))
-load("~/projects/fontys/state_4_lynne.RData")
-ltra = trajectories
-print(dim(ltra))
-
-print(table(gtra == ltra))
-print(table(gtl == ltl))
-
-for (i in 1:nrow(gtra)) {
-  for (j in 1:ncol(gtra)) {
-    if (!all(is.na(gtra[i,j])) & !all(is.na(ltra[i,j]))) {
-      if (any(gtra[i,j] != ltra[i,j])) {
-        print(paste0(i, " - ", j))
-        print(colnames(ltra[i,j]))
-        print(paste0(gtra[i,j], " ", ltra[i,j]))
-        kkkk
-      }
-    }
-  }
-}
+# # # #===========================================================
+# load("~/projects/fontys/state_4_gui.RData")
+# # multimodal_fields and trajectory_locations are identical
+# # main difference is in the trajectories object
+# 
+# gm2 = multimodal_fields
+# gpp = palmsplus
+# gt2 = trajectory_locations
+# gtra = trajectories
+# 
+# print(dim(gtra))
+# load("~/projects/fontys/state_4_lynne.RData")
+# 
+# lm2 = multimodal_fields
+# lt2 = trajectory_locations
+# ltra = trajectories
+# lpp = palmsplus
+# 
+# print(dim(ltra))
+# 
+# print(table(gtra == ltra))
+# print(table(gm2 == lm2))
+# print(table(gt2 == lt2))
+# # print(table(gpp == lpp))
+# 
+# 
+# for (i in 1:nrow(gtra)) {
+#   for (j in 1:ncol(gtra)) {
+#     if (!all(is.na(gtra[i,j])) & !all(is.na(ltra[i,j]))) {
+#       if (any(gtra[i,j] != ltra[i,j])) {
+#         print(paste0(i, " - ", j))
+#         print(colnames(ltra[i,j]))
+#         print(paste0(gtra[i,j], " ", ltra[i,j]))
+#         kkkk
+#       }
+#     }
+#   }
+# }
+# kkkk
 
 # ldays = days
 # print(dim(ldays))
@@ -129,3 +142,35 @@ for (i in 1:nrow(gtra)) {
 #  
 # lpalmsplus = palmsplus
 # lpalmsplus_fields = palmsplus_fields
+
+
+# #===========================================================
+# load("~/projects/fontys/state_5_gui.RData")
+# gm = multimodal
+# 
+# load("~/projects/fontys/state_5_lynne.RData")
+# 
+# lm2 = multimodal
+# lm2 = lm2[order(names(lm2))]
+# gm = gm[order(names(gm))]
+# print(names(lm2) == names(gm))
+# for (i in 1:nrow(gm)) {
+#   for (j in 1:ncol(gm)) {
+#     if (length(gm[i,j]) == 1) {
+#       if (!is.na(gm[i,j]) & !is.na(lm2[i,j])) {
+#         if (!(gm[i,j] == lm2[i,j])) {
+#           print(paste0(i, " - ", j))
+#           print(colnames(lm2[i,j]))
+#           print(paste0(gm[i,j], " ", lm2[i,j]))
+#         }
+#       }
+#     } else {
+#       if (any(gm[i,j] != lm2[i,j], na.rm = TRUE)) {
+#         print(paste0(i, " - ", j))
+#         print(colnames(lm2[i,j]))
+#         print(paste0(gm[i,j], " ", lm2[i,j]))
+#         kkkk
+#       }
+#     }
+#   }
+# }

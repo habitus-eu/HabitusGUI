@@ -6,7 +6,6 @@
 #'
 #' @param data The PALMS data obtained using \code{\link{read_palms}}.
 #' @param verbose Print progress to console after each iteration. Default is \code{TRUE}.
-#' @param config_file Path to the config file
 #' @param palmsplus_fields fields defined in PALMSplusRshiny
 #' @param home home
 #' @param school school
@@ -25,8 +24,7 @@
 #' @export
 #' 
 # Code modified from https://thets.github.io/palmsplusr/
-hbt_build_palmsplus <- function(data = NULL, config_file = NULL,
-                                verbose = TRUE, palmsplus_fields = NULL,
+hbt_build_palmsplus <- function(data = NULL, verbose = TRUE, palmsplus_fields = NULL,
                                 home = NULL, school = NULL,
                                 home_nbh = NULL, school_nbh = NULL,
                                 participant_basis = NULL) {
@@ -34,10 +32,9 @@ hbt_build_palmsplus <- function(data = NULL, config_file = NULL,
   # home, school, home_nbh, school_nbh need to be present, 
   # because the functions that are passed on assume that they exist
   
-  config <- hbt_read_config(config_file) %>%
-    filter(context == 'palmsplus_field')
-  field_args <- setNames(config$formula, config$name) %>%
+  field_args <- setNames(palmsplus_fields$formula, palmsplus_fields$name) %>%
     lapply(parse_expr)
+  
   x <- list()
   j <- 1
   len <- length(unique(data$identifier))

@@ -4,12 +4,18 @@
 \alias{hbt_build_trajectories}
 \title{Build trajectories from the palmsplus dataset}
 \usage{
-hbt_build_trajectories(data = NULL, config_file = NULL)
+hbt_build_trajectories(
+  data = NULL,
+  trajectory_fields = NULL,
+  trajectory_locations = NULL
+)
 }
 \arguments{
 \item{data}{The palmsplus data obtained from \code{\link{palms_build_palmsplus}}.}
 
-\item{config_file}{Path to the config file}
+\item{trajectory_fields}{trajectory_fields}
+
+\item{trajectory_locations}{trajectory_locations}
 }
 \value{
 A table of individual trips represented as \code{LINESTRING} geometry.

@@ -17,11 +17,11 @@
 #' @export
 
 palmsplusr_shiny <- function(gisdir = "",
-                            palmsdir = "",
-                            gislinkfile = "",
-                            outputdir = "",
-                            dataset_name = "",
-                            configfile = "") {
+                             palmsdir = "",
+                             gislinkfile = "",
+                             outputdir = "",
+                             dataset_name = "",
+                             configfile = "") {
   home = school = home_nbh = school_nbh = NULL
   . = lon = identifier = palms = NULL
   if (length(configfile) > 0) {
@@ -45,7 +45,7 @@ palmsplusr_shiny <- function(gisdir = "",
     # If no configfile is provided fall back on default
     config <- system.file("testfiles_palmsplusr/config_palmsplusr.csv", package = "HabitusGUI")[1]
   }
-
+  
   palmsplus_folder = paste0(outputdir, "/PALMSplus_output")
   if (!dir.exists(palmsplus_folder)) {
     cat("\nCreating PALMSplusR output directory\n")
@@ -76,7 +76,7 @@ palmsplusr_shiny <- function(gisdir = "",
   
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
   PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv"))
-  print(paste0("Check PALMS_reduced_file: ", PALMS_reduced_file))
+  cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
   palms = palmsplusr::read_palms(PALMS_reduced_file)
   
@@ -123,7 +123,7 @@ palmsplusr_shiny <- function(gisdir = "",
   # involved super assignment operators which seem to be causing issues,
   # defaults are now taken care of in the config file preparation
   
-
+  
   # #=============================
   # adding fields
   CONF = read.csv(config, sep = ",")
@@ -134,26 +134,25 @@ palmsplusr_shiny <- function(gisdir = "",
   
   palmsplusr_domain_rows = which(CONF$context == "palmsplus_domain")
   palmsplus_domains = tibble(name = CONF$name[palmsplusr_domain_rows],
-                            formula = CONF$formula[palmsplusr_domain_rows],
-                            domain_field = CONF$domain_field[palmsplusr_domain_rows])
+                             formula = CONF$formula[palmsplusr_domain_rows],
+                             domain_field = CONF$domain_field[palmsplusr_domain_rows])
   # #=============================
   # # trajectory_fields
-  # CONF = read.csv(config, sep = "\t")
-  # trajectory_field_rows = which(CONF$context == "trajectory_field")
-  # trajectory_field = tibble(name = CONF$name[trajectory_field_rows],
-  #                               formula = CONF$formula[trajectory_field_rows],
-  #                               after_conversions = CONF$after_conversions[trajectory_field_rows])
+  trajectory_field_rows = which(CONF$context == "trajectory_field")
+  trajectory_fields = tibble(name = CONF$name[trajectory_field_rows],
+                             formula = CONF$formula[trajectory_field_rows],
+                             after_conversion = CONF$after_conversion[trajectory_field_rows])
   # #=============================
   # # multimodal_fields
   multimodal_fields_rows = which(CONF$context == "multimodal_field")
   multimodal_fields = tibble(name = CONF$name[multimodal_fields_rows],
-                            formula = CONF$formula[multimodal_fields_rows])
+                             formula = CONF$formula[multimodal_fields_rows])
   # #=============================
   # # trajectory locations
   trajectory_location_rows = which(CONF$context == "trajectory_location")
   trajectory_locations = tibble(name = CONF$name[trajectory_location_rows],
-                               start_criteria = CONF$start_criteria[trajectory_location_rows],
-                               end_criteria = CONF$end_criteria[trajectory_location_rows])
+                                start_criteria = CONF$start_criteria[trajectory_location_rows],
+                                end_criteria = CONF$end_criteria[trajectory_location_rows])
   
   
   # Run palmsplusr ----------------------------------------------------------
@@ -165,56 +164,74 @@ palmsplusr_shiny <- function(gisdir = "",
     if (file.exists(fn)) file.remove(fn)
   }
   
-  # save(palms, home, home_nbh, school_nbh,participant_basis, file = "~/projects/fontys/state_1_gui.RData")
-
-  cat("\n<<< building palmsplus... >>>\n")
-  palmsplus <- hbt_build_palmsplus(data = palms, 
-                                   config_file = config, 
-                                   palmsplus_fields = palmsplus_fields,
-                                   home = home,
-                                   school = school,
-                                   home_nbh = home_nbh,
-                                   school_nbh = school_nbh,
-                                   participant_basis = participant_basis)
-  write_csv(palmsplus, file = fns[1])
-
-  config_test <- hbt_read_config(config) %>%
-    filter(context == 'palmsplus_field')
-  # save(palmsplus, config_test, file = "~/projects/fontys/state_2_gui.RData")
+  cat("\n<<< building palmsplus...\n")
+  if (length(palms) > 0 & length(palmsplus_fields) &
+      length(home) > 0 & length(school) > 0 & length(home_nbh) > 0 & length(school_nbh) > 0 &
+      length(participant_basis) > 0) {
+    palmsplus <- hbt_build_palmsplus(data = palms, 
+                                     palmsplus_fields = palmsplus_fields,
+                                     home = home,
+                                     school = school,
+                                     home_nbh = home_nbh,
+                                     school_nbh = school_nbh,
+                                     participant_basis = participant_basis)
+    write_csv(palmsplus, file = fns[1])
+    cat("done>>>\n")
+  } else {
+    cat("skipped because insufficient input data>>>\n")
+  }
   
-  cat("\n<<< building days... >>>\n")
-  days <- hbt_build_days(data = palmsplus,
-                         palmsplus_domains = palmsplus_domains,
-                         palmsplus_fields = palmsplus_fields,
-                         home = home,
-                         school = school,
-                         home_nbh = home_nbh,
-                         school_nbh = school_nbh,
-                         participant_basis = participant_basis)
-  write_csv(days,  file = fns[2])
-
-  # save(days, file = "~/projects/fontys/state_3_gui.RData")
-  # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
+  cat("\n<<< building days...")
+  if (length(palmsplus) > 0 & length(palmsplus_domains) > 0 & length(palmsplus_fields) &
+      length(home) > 0 & length(school) > 0 & length(home_nbh) > 0 & length(school_nbh) > 0 &
+      length(participant_basis) > 0) {
+    days <- hbt_build_days(data = palmsplus,
+                           palmsplus_domains = palmsplus_domains,
+                           palmsplus_fields = palmsplus_fields,
+                           home = home,
+                           school = school,
+                           home_nbh = home_nbh,
+                           school_nbh = school_nbh,
+                           participant_basis = participant_basis)
+    write_csv(days,  file = fns[2])
+    # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
+    cat("done>>>\n")
+  } else {
+    cat("skipped because insufficient input data>>>\n")
+  }
   
-  cat("\n<<< building trajectories... >>>\n")
-  trajectories <- hbt_build_trajectories(palmsplus, config_file = config)
-  write_csv(trajectories,  file = fns[3])
-  shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp")
-  if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
-  sf::st_write(obj = trajectories, dsn = shp_file)
-  
-  # save(trajectories, multimodal_fields, trajectory_locations, file = "~/projects/fontys/state_4_gui.RData")
-  
-  cat("\n<<< building multimodal... >>>\n")
-  multimodal <- hbt_build_multimodal(data = trajectories,
-                                     spatial_threshold = 200,
-                                     temporal_threshold = 10,
-                                     palmsplus = palmsplus,
-                                     multimodal_fields = multimodal_fields,
-                                     trajectory_locations = trajectory_locations)
-  if (length(multimodal) > 0) {
-    write_csv(multimodal, file = fns[4])
-    sf::st_write(multimodal, paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp"))
+  trajectory_locations = trajectory_locations[order(trajectory_locations$name),]
+  cat("\n<<< building trajectories...")
+  if (length(palmsplus) > 0 & length(trajectory_fields) > 0) {
+    trajectories <- hbt_build_trajectories(data = palmsplus,
+                                           trajectory_fields = trajectory_fields,
+                                           trajectory_locations = trajectory_locations)
+    
+    write_csv(trajectories,  file = fns[3])
+    shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp")
+    if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
+    sf::st_write(obj = trajectories, dsn = shp_file)
+    cat("done>>>\n")
+  } else {
+    cat("skipped because insufficient input data>>>\n")
+  }
+  cat("\n<<< building multimodal...")
+  if (length(palmsplus) > 0 & length(multimodal_fields) > 0 & length(trajectory_locations) > 0) {
+    multimodal <- hbt_build_multimodal(data = trajectories,
+                                       spatial_threshold = 200,
+                                       temporal_threshold = 10,
+                                       palmsplus = palmsplus,
+                                       multimodal_fields = multimodal_fields,
+                                       trajectory_locations = trajectory_locations)
+    if (length(multimodal) > 0) {
+      write_csv(multimodal, file = fns[4])
+      shp_file = paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp")
+      if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
+      sf::st_write(obj = multimodal, dsn = shp_file)
+    }
+    cat("done>>>\n")
+  } else {
+    cat("skipped because insufficient input data>>>\n")
   }
   
   return()
