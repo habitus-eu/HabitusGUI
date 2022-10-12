@@ -14,8 +14,8 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
   if (length(sleepdiary) == 0) sleepdiary = c()
   if (length(configfile) == 0) configfile = c()
   
-  # create R script with the code to run the analysis via a command line call
-  # in this way turning off or restarting the app will not kill the analyses
+  # create R script with the code to run the data analysis via a command line call
+  # in this way turning off or restarting the app will not kill the data analysis
   fileConn <- file(paste0(outputdir, "/ggir_cmdline.R"))
   writeLines(c("#!/usr/bin/env Rscript",
                "args = commandArgs(trailingOnly = TRUE)",
@@ -34,24 +34,14 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
                "}",
                "HabitusGUI::Counts2csv(outputdir = paste0(args[2], \"/output_\", basename(args[1])), configfile = args[4])"),
              fileConn)
-  
-   close(fileConn)
+  close(fileConn)
    
-   if (dir.exists("/work")) {
-     path = "/work"
-   } else {
-     if (dir.exists(outputdir)) {
-       path = outputdir
-     } else {
-       path = "."
-     }
-   }
    basecommand = paste0("cd ", outputdir, " ; nohup Rscript ggir_cmdline.R ",
                        rawaccdir, " ",
                        outputdir, " ",
                        do.Counts, " ",
                        configfile, " ",
-                       sleepdiary, " > ", path, "/GGIR.log 2>&1 &")
+                       sleepdiary, " > ", outputdir, "/GGIR.log 2>&1 &")
   
   system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
           stdout = "", stderr = "", wait = TRUE)
