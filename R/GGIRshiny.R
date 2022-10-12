@@ -9,7 +9,8 @@
 #' @import GGIR
 #' @export
 
-GGIRshiny = function(rawaccdir, outputdir, sleepdiary=c(), configfile=c(),  do.Counts = FALSE) {
+GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
+                     do.Counts = FALSE) {
   if (length(sleepdiary) == 0) sleepdiary = c()
   if (length(configfile) == 0) configfile = c()
   
@@ -18,7 +19,6 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary=c(), configfile=c(),  do.C
   fileConn <- file(paste0(outputdir, "/ggir_cmdline.R"))
   writeLines(c("#!/usr/bin/env Rscript",
                "args = commandArgs(trailingOnly = TRUE)",
-               "print(args)",
                "if (length(args) < 4) {",
                "stop(\"At least four arguments are expected\", call. = FALSE)",
                "}",
@@ -36,13 +36,22 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary=c(), configfile=c(),  do.C
              fileConn)
   
    close(fileConn)
-  
+   
+   if (dir.exists("/work")) {
+     path = "/work"
+   } else {
+     if (dir.exists(outputdir)) {
+       path = outputdir
+     } else {
+       path = "."
+     }
+   }
    basecommand = paste0("cd ", outputdir, " ; nohup Rscript ggir_cmdline.R ",
                        rawaccdir, " ",
                        outputdir, " ",
                        do.Counts, " ",
                        configfile, " ",
-                       sleepdiary, " > GGIR.log 2>&1 &")
+                       sleepdiary, " > ", path, "/GGIR.log 2>&1 &")
   
   system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
           stdout = "", stderr = "", wait = TRUE)
