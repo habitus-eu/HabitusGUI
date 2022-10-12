@@ -7,10 +7,18 @@
 #' @export
 
 PALMSpyshiny = function(outputdir, gpsdir, count_file_location) {
-  basecommand = paste0("cd ",outputdir," ; nohup palmspy --gps-path ", gpsdir,
+  if (tolower(Sys.getenv("USERNAME")) %in% c("ucloud", "", "shiny") == FALSE) {
+    #assuming palmspy is in a local conda environment"
+    palmspypath = "; conda activate palmspy"
+  } else {
+    #assuming palmspy is directly available from command line (ucloud)
+    palmspypath = ""
+  }
+  basecommand = paste0("cd ",outputdir, palmspypath, "; nohup palmspy --gps-path ", gpsdir,
                        " --acc-path ", count_file_location,
                        " --config-file ", paste0(outputdir, "/config.json"),
                        " > ", outputdir, "/PALMSpy.log 2>&1 &")
+  print(basecommand)
   system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
           stdout = "", stderr = "", wait = TRUE)
   return()
