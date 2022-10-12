@@ -11,7 +11,7 @@ Authors@R:
            person("Tom", "Stewart", role = "cph", email = "tom.stewart@aut.ac.nz",
            comment = "holds copyright over original palmsplusr code"))
 License: Apache License version 2.0 | file LICENSE
-Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, activityCounts,
+Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, 
     dplyr, magrittr, shinyjs, sf, readr, tidyr, stringr, callr, palmsplusr,
     data.table, rlang, purrr, geosphere
 Remotes: vincentvanhees/palmsplusr
@@ -20,4 +20,4 @@ Suggests: testthat, covr, rmarkdown
 Depends: stats, utils, R (>= 3.5.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1

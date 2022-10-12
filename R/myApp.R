@@ -64,10 +64,10 @@ myApp <- function(homedir=getwd(), ...) {
                                 hr(),
                                 checkboxGroupInput("tools", label = "Select the tools you would like to use:",
                                                    choiceNames = list("GGIR (R package)",
-                                                                      "BrondCounts (R packages activityCounts + GGIR)",
+                                                                      "Neishabouri Counts / actilifecounts (R package)",
                                                                       "PALMSpy (Python library)",
                                                                       "palmsplusr (R package)"),
-                                                   choiceValues = list("GGIR", "BrondCounts", "PALMSpy", "palmsplusr"), width = '100%')
+                                                   choiceValues = list("GGIR", "Counts", "PALMSpy", "palmsplusr"), width = '100%')
                ), 
                actionButton("page_12", "next")
       ),
@@ -79,7 +79,7 @@ myApp <- function(homedir=getwd(), ...) {
                # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
                conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1 && ",
                                                    "(input.tools.includes(`GGIR`) || ",
-                                                   "input.tools.includes(`BrondCounts`))"),
+                                                   "input.tools.includes(`Counts`))"),
                                 shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
                                                            title = "Select raw accelerometer data directory"),
                                 verbatimTextOutput("rawaccdir", placeholder = TRUE)
@@ -148,9 +148,9 @@ myApp <- function(homedir=getwd(), ...) {
                                 modConfigUI("edit_ggir_config"),
                                 hr()
                ),
-               conditionalPanel(condition = "input.tools.includes('BrondCounts')",
-                                h2("BrondCounts"),
-                                p("No parameters are needed for the BrondCounts"),
+               conditionalPanel(condition = "input.tools.includes('Counts')",
+                                h2("Counts"),
+                                p("No parameters are needed for the Counts"),
                                 hr()
                ),
                conditionalPanel(condition = "input.tools.includes('PALMSpy')",
@@ -177,13 +177,13 @@ myApp <- function(homedir=getwd(), ...) {
                # hr(),
                p("\n"),
                conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
-                                                   "input.tools.includes('BrondCounts')"),
+                                                   "input.tools.includes('Counts')"),
                                 conditionalPanel(condition =
                                                    paste0("input.tools.indexOf(`GGIR`) > -1  && ",
-                                                          "input.tools.indexOf(`BrondCounts`) > -1"), 
-                                                 h3("GGIR and BrondCounts:")
+                                                          "input.tools.indexOf(`Counts`) > -1"), 
+                                                 h3("GGIR and Counts:")
                                 ),
-                                conditionalPanel(condition = "input.tools.indexOf(`BrondCounts`) == -1", 
+                                conditionalPanel(condition = "input.tools.indexOf(`Counts`) == -1", 
                                                  h3("GGIR:")
                                 ),
                                 shinyjs::useShinyjs(),
@@ -270,8 +270,8 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                                               "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
                     showNotification("palmsplusr requires either previously generated PALMS(py) output or GPS and Accelerometer data", type = "error")
                   } else {
-                    if ("BrondCounts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
-                      showNotification("BrondCounts not possible without access to raw accelerometer data", type = "error")
+                    if ("Counts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
+                      showNotification("Counts not possible without access to raw accelerometer data", type = "error")
                     } else {
                       switch_page(2)
                     }
@@ -288,7 +288,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0") {
         showNotification("Select raw accelerometer data directory", type = "error")
       } else {
-        if ("AccRaw" %in% input$availabledata & "BrondCounts" %in% input$tools & as.character(input$rawaccdir)[1] == "0") {
+        if ("AccRaw" %in% input$availabledata & "Counts" %in% input$tools & as.character(input$rawaccdir)[1] == "0") {
           showNotification("Select raw accelerometer data directory", type = "error")
         } else {
           if ("ACount" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$countaccdir)[1] == "0") {
@@ -584,34 +584,34 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     configfilepalmsplusr <- modConfigServer("edit_palmsplusr_config", tool = reactive("palmsplusr"), homedir = homedir)
     
     #========================================================================
-    # Apply GGIR / BrondCounts after button is pressed
+    # Apply GGIR / Counts after button is pressed
     #========================================================================
     runGGIR <- eventReactive(input$start_ggir, {
-      GIRBrondCounts_message = ""
+      GIRCounts_message = ""
       
-      if ("GGIR" %in% input$tools | "BrondCounts" %in% input$tools) {
-        GGIRBrondCounts_message = ""
+      if ("GGIR" %in% input$tools | "Counts" %in% input$tools) {
+        GGIRCounts_message = ""
         # Basic check before running function:
-        ready_to_run_ggirbrondcounts = FALSE
+        ready_to_run_ggirCounts = FALSE
         if (dir.exists(global$raw_acc_in)) {
           acc_files_available = length(dir(path = global$raw_acc_in, pattern = "csv|bin|gt3x|bin|cwa|wav", recursive = FALSE, full.names = FALSE)) > 0
           if (acc_files_available == TRUE) {
-            ready_to_run_ggirbrondcounts = TRUE
+            ready_to_run_ggirCounts = TRUE
           } else {
-            GGIRBrondCounts_message = paste0("No count files found in ", global$raw_acc_in)
+            GGIRCounts_message = paste0("No count files found in ", global$raw_acc_in)
           }
         } else {
-          GGIRBrondCounts_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", global$raw_acc_in)
+          GGIRCounts_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", global$raw_acc_in)
         }
         # Only run function when checks are met:
-        if (ready_to_run_ggirbrondcounts == TRUE) {
+        if (ready_to_run_ggirCounts == TRUE) {
           shinyjs::hide(id = "start_ggir")
-          if ("BrondCounts" %in% input$tools) {
-            id_ggir = showNotification("GGIR and BrondCounts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-            do.BrondCounts = TRUE
+          if ("Counts" %in% input$tools) {
+            id_ggir = showNotification("GGIR and Counts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+            do.Counts = TRUE
           } else {
             id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-            do.BrondCounts = FALSE
+            do.Counts = FALSE
           }
           
           
@@ -632,22 +632,22 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           
           # Start GGIR
           x_ggir <- r_bg(func = function(GGIRshiny, rawaccdir, outputdir, 
-                                         sleepdiary, configfile, do.BrondCounts){
+                                         sleepdiary, configfile, do.Counts){
             GGIRshiny(rawaccdir, outputdir, 
-                      sleepdiary, configfile, do.BrondCounts)
+                      sleepdiary, configfile, do.Counts)
           },
           args = list(GGIRshiny = GGIRshiny,
                       rawaccdir = isolate(global$raw_acc_in),
                       outputdir = global$data_out, 
                                 sleepdiary = sleepdiaryfile_local,
                                 configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
-                                do.BrondCounts = do.BrondCounts),
+                                do.Counts = do.Counts),
                     stdout = stdout_GGIR_tmp,
                     stderr = "2>&1")
           
           # GGIRshiny(rawaccdir = isolate(global$raw_acc_in), outputdir = global$data_out, 
           #           sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
-          #           do.BrondCounts = do.BrondCounts)
+          #           do.Counts = do.Counts)
           
           
           
@@ -662,24 +662,24 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
               expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
               expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
               if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
-                if ("BrondCounts" %in% input$tools) { # if BrondCounts was suppoed to run
-                  expected_outputdir_brondcounts = paste0(global$data_out, "/actigraph")
-                  if (dir.exists(expected_outputdir_brondcounts) == TRUE) { # checks whether output dir was created
-                    if (length(dir(expected_outputdir_brondcounts) > 0)) { # checks whether it has been filled with results
-                      GGIRBrondCounts_message = paste0(#"BrondCounts and GGIR successfully completed at ", Sys.time(), 
-                                                      "Output is stored in ", expected_outputdir_brondcounts, " and ",
+                if ("Counts" %in% input$tools) { # if Counts was suppoed to run
+                  expected_outputdir_Counts = paste0(global$data_out, "/actigraph")
+                  if (dir.exists(expected_outputdir_Counts) == TRUE) { # checks whether output dir was created
+                    if (length(dir(expected_outputdir_Counts) > 0)) { # checks whether it has been filled with results
+                      GGIRCounts_message = paste0(#"Counts and GGIR successfully completed at ", Sys.time(), 
+                                                      "Output is stored in ", expected_outputdir_Counts, " and ",
                                                        expected_outputdir_ggir, 
                                                       "<br/>The table below shows the content of part2_daysummary.csv")
                       GGIRpart2 = read.csv(expected_ggiroutput_file)
                       output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
                     } else {
-                      GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. No file found inside ", expected_outputdir_brondcounts)
+                      GGIRCounts_message = paste0("Counts unsuccessful. No file found inside ", expected_outputdir_Counts)
                     }
                   } else {
-                    GGIRBrondCounts_message = paste0("BrondCounts unsuccessful. Dir ",expected_outputdir_brondcounts, " not found")
+                    GGIRCounts_message = paste0("Counts unsuccessful. Dir ",expected_outputdir_Counts, " not found")
                   }
                 } else {
-                  GGIRBrondCounts_message = paste0(#"GGIR successfully completed at ", Sys.time(), 
+                  GGIRCounts_message = paste0(#"GGIR successfully completed at ", Sys.time(), 
                                                    "Output is stored in: ",  #<br/>
                                                    expected_outputdir_ggir,
                                                    "<br/>The table below shows the content of part2_daysummary.csv:")
@@ -687,7 +687,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                   output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
                 }
                 output$ggir_end_message <- renderUI({
-                  HTML(paste0(GGIRBrondCounts_message))
+                  HTML(paste0(GGIRCounts_message))
                 })
               }
             }
@@ -726,7 +726,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           }
         } else {
           PALMSpy_message = paste0("Folder that is supposed to hold count files does not exist: ", 
-                                   count_file_location, " First run GGIR and BrondCounts.")
+                                   count_file_location, " First run GGIR and Counts.")
         }
       }
       if (ready_to_run_palsmpy == TRUE) {
@@ -953,9 +953,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     })
     output$recommendorder <- renderText({
       pipeline = proposed_pipeline()
-      if ("GGIR" %in% pipeline & "BrondCounts" %in% pipeline) {
-        pipeline = pipeline[-which(pipeline %in% c("GGIR", "BrondCounts"))]
-        pipeline = c("GGIR & Brondcounts", pipeline)
+      if ("GGIR" %in% pipeline & "Counts" %in% pipeline) {
+        pipeline = pipeline[-which(pipeline %in% c("GGIR", "Counts"))]
+        pipeline = c("GGIR & Counts", pipeline)
       }
       if (length(pipeline) > 1) {
         message = paste0("Recommended order of analyses: ", paste0(pipeline, collapse = " -> "))

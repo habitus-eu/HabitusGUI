@@ -1,4 +1,4 @@
-#' BrondCounts2csv
+#' Counts2csv
 #'
 #' @param outputdir Path to output directory
 #' @param configfile Path to configuration file
@@ -7,7 +7,7 @@
 #' @importFrom utils write.table
 #' @export
 #' 
-BrondCounts2csv = function(outputdir = c(), configfile = c()) {
+Counts2csv = function(outputdir = c(), configfile = c()) {
   # Create imitated Actigraph file from counts in GGIR output
   #------------------------------------------------------------------------
   # Add folder for simulated actigraph output:
@@ -65,7 +65,7 @@ BrondCounts2csv = function(outputdir = c(), configfile = c()) {
                  "Current Battery Voltage: 4.03     Mode = 13",
                  "--------------------------------------------------")
       # Aggregate GGIR counts per 15 minutes
-      colsofinterest = c("countx", "county", "countz")
+      colsofinterest = c("NeishabouriCount_x", "NeishabouriCount_y", "NeishabouriCount_z")
       counts5sec = M$metashort[, colsofinterest]
       counts5sec$timenum = floor(seq(0, nrow(counts5sec) - 1, 1) / ((15)/ws3))
       # Assuming that count unit is counts/min, so we have sum the epochs per 15 minutes and then devide by 15

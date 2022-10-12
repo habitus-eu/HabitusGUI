@@ -9,7 +9,7 @@ GGIRshiny(
   outputdir,
   sleepdiary = c(),
   configfile = c(),
-  do.BrondCounts = FALSE
+  do.Counts = FALSE
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ GGIRshiny(
 
 \item{configfile}{Configfile path}
 
-\item{do.BrondCounts}{Boolean to indicate whether BrondCounts should be derived}
+\item{do.Counts}{Boolean to indicate whether BrondCounts should be derived}
 }
 \value{
 no object is returned, only a new file is created in the output directory
