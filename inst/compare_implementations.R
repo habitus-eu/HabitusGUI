@@ -22,7 +22,7 @@ print(table(ghome == lhome))
 print(table(ghome_nbh == lhome_nbh))
 print(table(gparticipant_basis == lparticipant_basis))
 print(table(gschool_nbh== lschool_nbh))
-print(table(gpalms == lpalms))
+# print(table(gpalms == lpalms))
 
 # At this point data is identical
 

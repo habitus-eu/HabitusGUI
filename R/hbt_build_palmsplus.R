@@ -35,6 +35,8 @@ hbt_build_palmsplus <- function(data = NULL, verbose = TRUE, palmsplus_fields = 
       eval(parse(text = txt))
     }
   }
+  
+
   field_args <- setNames(palmsplus_fields$formula, palmsplus_fields$name) %>%
     lapply(parse_expr)
   

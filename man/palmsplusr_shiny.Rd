@@ -10,7 +10,8 @@ palmsplusr_shiny(
   gislinkfile = "",
   outputdir = "",
   dataset_name = "",
-  configfile = ""
+  configfile = "",
+  verbose = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ palmsplusr_shiny(
 \item{dataset_name}{Name of dataset}
 
 \item{configfile}{Configuration file}
+
+\item{verbose}{verbose Boolean}
 }
 \value{
 palms_to_clean_lower object

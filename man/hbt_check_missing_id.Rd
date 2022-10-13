@@ -10,7 +10,8 @@ hbt_check_missing_id(
   dataset_name,
   palms,
   loca,
-  groupinglocation = "school"
+  groupinglocation = "school",
+  verbose = TRUE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ hbt_check_missing_id(
 \item{loca}{Nested list with location information}
 
 \item{groupinglocation}{groupinglocation}
+
+\item{verbose}{verbose}
 }
 \value{
 List with participant_basis and palms object without non-matching IDs
