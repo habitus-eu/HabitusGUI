@@ -114,10 +114,10 @@ palmsplusr_shiny <- function(gisdir = "",
   #----------------
   # NEW CODE
   for (jj in 1:Nlocations) {
-    loca[[i]][3] =  find_file(path = gisdir, namelowercase = paste0(locationNames[jj], "_table.shp")) #home
-    loca[[i]][4] =  find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], "buffers.shp")) #school
-    loca[[i]][1] = sf::read_sf(loca[[i]][3]) #home_nbh
-    loca[[i]][2] = sf::read_sf(loca[[i]][4]) #school_nbh
+    loca[[jj]][3] =  find_file(path = gisdir, namelowercase = paste0(locationNames[jj], "_table.shp"))
+    loca[[jj]][4] =  find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], "buffers.shp"))
+    loca[[jj]][[1]] = sf::read_sf(loca[[jj]][3]) #home_nbh
+    loca[[jj]][[2]] = sf::read_sf(loca[[jj]][4]) #school_nbh
   }
   
   #--------------------
@@ -134,7 +134,7 @@ palmsplusr_shiny <- function(gisdir = "",
   
   # Check for missing IDs -------------------------------------------------------------------------
   withoutMissingId = hbt_check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
-                                          loca, groupinglocation)
+                                          loca, groupinglocation = "school")
   palms = withoutMissingId$palms
   participant_basis = withoutMissingId$participant_basis
   
@@ -184,7 +184,6 @@ palmsplusr_shiny <- function(gisdir = "",
   trajectory_locations = tibble(name = CONF$name[trajectory_location_rows],
                                 start_criteria = CONF$start_criteria[trajectory_location_rows],
                                 end_criteria = CONF$end_criteria[trajectory_location_rows])
-  
   
   # Run palmsplusr ----------------------------------------------------------
   fns = c(paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.csv"),

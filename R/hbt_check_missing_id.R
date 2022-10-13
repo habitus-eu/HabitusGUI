@@ -12,14 +12,17 @@
 #' 
 hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_name, palms,
                                 loca, groupinglocation = "school") {
+  
   # Test for missing values in participant basis
   locationNames = names(loca)
+  locationNames2 = NULL
   if (groupinglocation %in% locationNames) {
     locationNames2 = locationNames[which(locationNames == groupinglocation)] # focus here on school
   } else {
     locationNames2 = locationNames
   }
-  loc_id = locationNames[which(names(participant_basis) %in% paste0(locationNames2, "_id"))][1]
+  loc_id = paste0(locationNames[which(names(participant_basis) %in% paste0(locationNames2, "_id"))][1], "_id")
+  
   test_missing_value = rowSums(is.na(participant_basis[,c("identifier", loc_id)])) #"school_id"
   missing = which(test_missing_value > 1)
   participant_exclude_list = list(identifier = NULL, loc_id = NULL)
@@ -41,11 +44,10 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
   sink()
   rm(missing)
   
-  
   # Test for incomplete id in palms object
   missing_identifiers = unique(c(palms$identifier[which(palms$identifier %in% participant_basis$identifier == FALSE)],
                                  participant_basis$identifier[which(participant_basis$identifier %in% palms$identifier == FALSE)]))
-  
+
   if (length(missing_identifiers) > 0) {
     cat("\nRemoving missing identifiers related to palms: ")
     cat(missing_identifiers)
@@ -53,7 +55,6 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
     participant_basis = participant_basis[participant_basis$identifier %in% missing_identifiers == FALSE,]
     palms = palms[palms$identifier %in% missing_identifiers == FALSE,]
   }
-  
   
   # Check whether id is found in all objects
   check_N = function(loca, participant_basis, palms, groupinglocation) {
@@ -66,11 +67,12 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
         loc_id = "identifier"
       } 
       for (j in 1:2) {
-        N = length(unique(loca[[locationNames[i]]][j][[loc_id]]))
+        N = length(unique(loca[[i]][j][[1]][[loc_id]]))
+        tibblename = names(loca[[i]][j])
         if (N == 0) {
-          cat(paste0("\nNo ",loc_id ," found in ", names(loca[[i]][j]), "$", loc_id))
+          cat(paste0("\nNo ",loc_id ," found in ", tibblename, "$", loc_id))
         } else {
-          cat(paste0("\n  ", names(loca[[i]][j]), ": ", N))
+          cat(paste0("\n  ", tibblename, ": ", N))
         }
       }
     }
@@ -115,6 +117,7 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
   # cat(paste0("\n  school_nbh: ", length(unique(school_nbh$school_id))))
   check_N(loca, participant_basis, palms, groupinglocation)
   cat("\n")
+  
   # check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
   
   # Test for incomplete shape files. I have commented this out as it is unclear whether 
