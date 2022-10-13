@@ -22,8 +22,27 @@ palmsplusr_shiny <- function(gisdir = "",
                              outputdir = "",
                              dataset_name = "",
                              configfile = "") {
-  home = school = home_nbh = school_nbh = NULL
-  . = lon = identifier = palms = NULL
+  
+  #-----------------------------
+  # NEW CODE
+  # identify location names:
+  gisdir = "~/projects/fontys/test_palmsplusr/GIS"
+  shapefilenames = dir(path = gisdir, full.names = FALSE, pattern = "[.]shp")
+  locationNames = unique(gsub(pattern = "table|_|buffers|[.]|xml|shp|loc", replacement = "", x = shapefilenames))
+  # create list structure to house the objects
+  Nlocations = length(locationNames)
+  loca = vector("list", Nlocations)
+  names(loca) = locationNames
+  for (i in 1:Nlocations) {
+    loca[[i]] = vector("list", 4)
+    names(loca[[i]]) =  c(locationNames[i], paste0(locationNames[i], "_nbh"), 
+                          paste0(locationNames[i], "_tablefile"), paste0(locationNames[i], "_locbufferfile"))
+  }
+  #------------------------
+  # OLD CODE
+  # home = school = home_nbh = school_nbh = NULL
+  #------------------------
+  lon = identifier = palms = NULL # . = was also included, but probably wrong
   if (length(configfile) > 0) {
     # check for missing parameters, such that palmsplusr can fall back on defaults
     # here the config_pamsplusr file inside the package is assumed to hold all the defaults.
@@ -92,18 +111,30 @@ palmsplusr_shiny <- function(gisdir = "",
   unique_ids_in_participant_basis <- unique(participant_basis$identifier)
   
   # Load all shape files ----------------------------------------------------
-  hometablefile = find_file(path = gisdir, namelowercase = "home_table.shp")
-  schooltablefile = find_file(path = gisdir, namelowercase = "school_table.shp")
-  lochomebuffersfile = find_file(path = gisdir, namelowercase = "loc_homebuffers.shp")
-  locschoolbuffersfile = find_file(path = gisdir, namelowercase = "loc_schoolbuffers.shp")
-  home = sf::read_sf(hometablefile) #
-  school = sf::read_sf(schooltablefile)
-  home_nbh = sf::read_sf(lochomebuffersfile)
-  school_nbh = sf::read_sf(locschoolbuffersfile)
+  #----------------
+  # NEW CODE
+  for (jj in 1:Nlocations) {
+    loca[[i]][3] =  find_file(path = gisdir, namelowercase = paste0(locationNames[jj], "_table.shp")) #home
+    loca[[i]][4] =  find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], "buffers.shp")) #school
+    loca[[i]][1] = sf::read_sf(loca[[i]][3]) #home_nbh
+    loca[[i]][2] = sf::read_sf(loca[[i]][4]) #school_nbh
+  }
+  
+  #--------------------
+  # OLD CODE
+  # hometablefile = find_file(path = gisdir, namelowercase = "home_table.shp")
+  # schooltablefile = find_file(path = gisdir, namelowercase = "school_table.shp")
+  # lochomebuffersfile = find_file(path = gisdir, namelowercase = "loc_homebuffers.shp")
+  # locschoolbuffersfile = find_file(path = gisdir, namelowercase = "loc_schoolbuffers.shp")
+  # home = sf::read_sf(hometablefile) #
+  # school = sf::read_sf(schooltablefile)
+  # home_nbh = sf::read_sf(lochomebuffersfile)
+  # school_nbh = sf::read_sf(locschoolbuffersfile)
+  #--------------------
   
   # Check for missing IDs -------------------------------------------------------------------------
   withoutMissingId = hbt_check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
-                                          home, school, home_nbh, school_nbh)
+                                          loca, groupinglocation)
   palms = withoutMissingId$palms
   participant_basis = withoutMissingId$participant_basis
   

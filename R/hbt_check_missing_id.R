@@ -4,26 +4,35 @@
 #' @param palmsplus_folder output folder path for storing log of excluded IDs
 #' @param dataset_name Name of dataset
 #' @param palms palms object as loaded inside PALMSplusRshiny
-#' @param home home
-#' @param school school
-#' @param home_nbh home_nbh
-#' @param school_nbh school_nbh
+#' @param loca Nested list with location information
+#' @param groupinglocation groupinglocation
 #' @return List with participant_basis and palms object without non-matching IDs
 #'
 #' @export
 #' 
 hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_name, palms,
-                                home, school, home_nbh, school_nbh) {
+                                loca, groupinglocation = "school") {
   # Test for missing values in participant basis
-  test_missing_value = rowSums(is.na(participant_basis[,c("identifier", "school_id")]))
+  locationNames = names(loca)
+  if (groupinglocation %in% locationNames) {
+    locationNames2 = locationNames[which(locationNames == groupinglocation)] # focus here on school
+  } else {
+    locationNames2 = locationNames
+  }
+  loc_id = locationNames[which(names(participant_basis) %in% paste0(locationNames2, "_id"))][1]
+  test_missing_value = rowSums(is.na(participant_basis[,c("identifier", loc_id)])) #"school_id"
   missing = which(test_missing_value > 1)
-  participant_exclude_list = list(identifier = NULL, school_id = NULL)
+  participant_exclude_list = list(identifier = NULL, loc_id = NULL)
+  names(participant_exclude_list)[2] = loc_id
+  
   if (length(missing) > 0) {
     cat("\nMissing ID values in participant_basis\n")
     cat(paste0("  Ignoring identifier ", paste(participant_basis$identifier[missing], sep = " "), "\n"))
-    cat(paste0("  Ignoring schoolid ", paste(participant_basis$school_id[missing], sep = " "), "\n"))
+    # cat(paste0("  Ignoring schoolid ", paste(participant_basis$school_id[missing], sep = " "), "\n"))
+    cat(paste0("  Ignoring ", loc_id, " ", paste(participant_basis[[loc_id]][missing], sep = " "), "\n"))
     participant_exclude_list$identifier = participant_basis$identifier[missing]
-    participant_exclude_list$school_id = participant_basis$school_id[missing]
+    # participant_exclude_list$school_id = participant_basis$school_id[missing]
+    participant_exclude_list[[loc_id]] = participant_basis[[loc_id]][missing]
     participant_basis = participant_basis[test_missing_value == 0, ]
   }
   # Write list of excluded files to file
@@ -47,41 +56,66 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
   
   
   # Check whether id is found in all objects
-  check_N = function(home, home_nbh, school, school_nbh, participant_basis, palms) {
-    if (length(unique(school$school_id)) == 0) {
-      cat("\nNo school_id found in school$school_id")
+  check_N = function(loca, participant_basis, palms, groupinglocation) {
+    # Check loca
+    locationNames = names(loca)
+    for (i in 1:length(loca)) {
+      if (locationNames[i] != "home") {
+        loc_id = paste0(groupinglocation, "_id")
+      } else  if (locationNames[i] == "home") { # assumption that home is always the identifier for individuals
+        loc_id = "identifier"
+      } 
+      for (j in 1:2) {
+        N = length(unique(loca[[locationNames[i]]][j][[loc_id]]))
+        if (N == 0) {
+          cat(paste0("\nNo ",loc_id ," found in ", names(loca[[i]][j]), "$", loc_id))
+        } else {
+          cat(paste0("\n  ", names(loca[[i]][j]), ": ", N))
+        }
+      }
     }
-    if (length(unique(school_nbh$school_id)) == 0) {
-      cat("\nNo school_id found in school_nbh$school_id")
+    # OLD CODE:
+    # if (length(unique(school$school_id)) == 0) {
+    #   cat("\nNo school_id found in school$school_id")
+    # }
+    # if (length(unique(school_nbh$school_id)) == 0) {
+    #   cat("\nNo school_id found in school_nbh$school_id")
+    # }
+    # if (length(unique(home$identifier)) == 0) {
+    #   cat("\nNo identifier found in home$identifier")
+    # }
+    # if (length(unique(home_nbh$identifier)) == 0) {
+    #   cat("\nNo identifier found in home_nbh$identifier")
+    # }
+    # if (length(unique(participant_basis$school_id)) == 0) {
+    #   cat("\nNo school_id found in participant_basis$school_id")
+    # }
+    # Check participant_basis
+    if (length(unique(participant_basis[[paste0(groupinglocation, "_id")]])) == 0) {
+      cat(paste0("\nNo ", groupinglocation, "_id found in participant_basis$", groupinglocation, "_id"))
     }
-    if (length(unique(home$identifier)) == 0) {
-      cat("\nNo identifier found in home$identifier")
-    }
-    if (length(unique(home_nbh$identifier)) == 0) {
-      cat("\nNo identifier found in home_nbh$identifier")
-    }
+    # NOT CHANGED:
     if (length(unique(participant_basis$identifier)) == 0) {
       cat("\nNo identifier found in participant_basis$identifier")
-    }
-    if (length(unique(participant_basis$school_id)) == 0) {
-      cat("\nNo school_id found in participant_basis$school_id")
     }
     if (length(unique(palms$identifier)) == 0) {
       cat("\nNo identifier found in palms$identifier")
     }
     cat("\n")
   }
-  check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
+
   # at this point we should have a cleaned dataset with only consistent data in all objects
   cat("\nNumber of unique IDs in all objects: ")
   cat(paste0("\n  Number of unique IDs in participant_basis: ", length(unique(participant_basis$identifier))))
   cat(paste0("\n  palms: ", length(unique(palms$identifier))))
-  cat(paste0("\n  home: ", length(unique(home$identifier))))
-  cat(paste0("\n  home_nbh: ", length(unique(home_nbh$identifier))))
-  cat(paste0("\n  school: ", length(unique(school$school_id))))
-  cat(paste0("\n  school_nbh: ", length(unique(school_nbh$school_id))))
+  # OLD CODE: Now part of check_N function
+  # cat(paste0("\n  home: ", length(unique(home$identifier))))
+  # cat(paste0("\n  home_nbh: ", length(unique(home_nbh$identifier))))
+  # cat(paste0("\n  school: ", length(unique(school$school_id))))
+  # cat(paste0("\n  school_nbh: ", length(unique(school_nbh$school_id))))
+  check_N(loca, participant_basis, palms, groupinglocation)
   cat("\n")
-  check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
+  # check_N(home, home_nbh, school_nbh, school_nbh, participant_basis, palms)
   
   # Test for incomplete shape files. I have commented this out as it is unclear whether 
   # missing shape files or redundant shape files is a problem for palmsplusr
