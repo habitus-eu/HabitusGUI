@@ -123,6 +123,39 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
   # Test for incomplete shape files. I have commented this out as it is unclear whether 
   # missing shape files or redundant shape files is a problem for palmsplusr
   # home id
+  
+  # # Experimental code to clean up data
+  # for (k in locationNames) {
+  #   for (i in c(k, paste0(k, "_nbh"))) {
+  #     if (k == "home")  {
+  #       idloc = "identifier"
+  #     } else {
+  #       idloc = paste0(k,"_id")
+  #     }
+  #     missing_identifiers = unique(c(loca[[k]][[i]][[idloc]][which(loca[[k]][[i]][[idloc]] %in% participant_basis$identifier == FALSE)],
+  #                                    participant_basis$identifier[which(participant_basis$identifier %in% loca[[k]][[i]][[idloc]] == FALSE)]))
+  #     if (length(missing_identifiers) > 0) {
+  #       print(paste0("Removing missing identifiers related to ", k))
+  #       print(missing_identifiers)
+  #       participant_basis = participant_basis[which(participant_basis$identifier %in% missing_identifiers == FALSE),]
+  #       loca[[k]][[i]] = loca[[k]][[i]][which(loca[[k]][[i]][[idloc]] %in% missing_identifiers == FALSE),]
+  #     }
+  #   }
+  # }
+  # check_N(loca, participant_basis, palms, groupinglocation)
+  
+  # for (i in c("home", "home_nbh")) {
+  #   missing_identifiers = unique(c(loca[["home"]][[i]]$identifier[which(loca[["home"]][[i]]$identifier %in% participant_basis$identifier == FALSE)],
+  #                                  participant_basis$identifier[which(participant_basis$identifier %in% loca[["home"]][[i]]$identifier == FALSE)]))
+  #   if (length(missing_identifiers) > 0) {
+  #     print("Removing missing identifiers related to home")
+  #     print(missing_identifiers)
+  #     participant_basis = participant_basis[which(participant_basis$identifier %in% missing_identifiers == FALSE),]
+  #     loca[["home"]][[i]] = loca[["home"]][[i]][which(loca[["home"]][[i]]$identifier %in% missing_identifiers == FALSE),]
+  #   }
+  # }
+  # check_N(loca, participant_basis, palms, groupinglocation)
+  
   # missing_identifiers = unique(c(home$identifier[which(home$identifier %in% participant_basis$identifier == FALSE)],
   #                         participant_basis$identifier[which(participant_basis$identifier %in% home$identifier == FALSE)],
   #                         home_nbh$identifier[which(home_nbh$identifier %in% participant_basis$identifier == FALSE)],

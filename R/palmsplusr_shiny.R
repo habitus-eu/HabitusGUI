@@ -26,7 +26,9 @@ palmsplusr_shiny <- function(gisdir = "",
   #-----------------------------
   # NEW CODE
   # identify location names:
-  gisdir = "~/projects/fontys/test_palmsplusr/GIS"
+  # gisdir = "~/projects/fontys/test_palmsplusr/GIS"
+  groupinglocation = "school"
+  
   shapefilenames = dir(path = gisdir, full.names = FALSE, pattern = "[.]shp")
   locationNames = unique(gsub(pattern = "table|_|buffers|[.]|xml|shp|loc", replacement = "", x = shapefilenames))
   # create list structure to house the objects
@@ -38,6 +40,7 @@ palmsplusr_shiny <- function(gisdir = "",
     names(loca[[i]]) =  c(locationNames[i], paste0(locationNames[i], "_nbh"), 
                           paste0(locationNames[i], "_tablefile"), paste0(locationNames[i], "_locbufferfile"))
   }
+  
   #------------------------
   # OLD CODE
   # home = school = home_nbh = school_nbh = NULL
@@ -120,6 +123,22 @@ palmsplusr_shiny <- function(gisdir = "",
     loca[[jj]][[2]] = sf::read_sf(loca[[jj]][4]) #school_nbh
   }
   
+  
+  # Force id numbers to be characrer(
+  locationNames = names(loca)
+  for (i in 1:length(loca)) {
+    if (locationNames[i] != "home") {
+      loc_id = paste0(groupinglocation, "_id")
+    } else  if (locationNames[i] == "home") { # assumption that home is always the identifier for individuals
+      loc_id = "identifier"
+    } 
+    for (j in 1:2) {
+      loca[[i]][j][[1]][[loc_id]] = as.character(loca[[i]][j][[1]][[loc_id]])
+    }
+  }
+  
+  # OLD CODE:
+  
   #--------------------
   # OLD CODE
   # hometablefile = find_file(path = gisdir, namelowercase = "home_table.shp")
@@ -134,10 +153,12 @@ palmsplusr_shiny <- function(gisdir = "",
   
   # Check for missing IDs -------------------------------------------------------------------------
   withoutMissingId = hbt_check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
-                                          loca, groupinglocation = "school")
+                                          loca, groupinglocation = groupinglocation)
   palms = withoutMissingId$palms
   participant_basis = withoutMissingId$participant_basis
   
+  
+
   # VvH turned this off because now only process IDs with complete data
   # missing_ids_in_participant_basis <- setdiff(unique_ids_in_palms, unique_ids_in_participant_basis)
   # if(length(missing_ids_in_participant_basis) > 0){
@@ -184,7 +205,7 @@ palmsplusr_shiny <- function(gisdir = "",
   trajectory_locations = tibble(name = CONF$name[trajectory_location_rows],
                                 start_criteria = CONF$start_criteria[trajectory_location_rows],
                                 end_criteria = CONF$end_criteria[trajectory_location_rows])
-  
+  # save(palms, loca, participant_basis, file = "~/projects/fontys/state_1_gui.RData")
   # Run palmsplusr ----------------------------------------------------------
   fns = c(paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.csv"),
           paste0(palmsplus_folder, "/", dataset_name, "_days.csv"),
@@ -194,16 +215,18 @@ palmsplusr_shiny <- function(gisdir = "",
     if (file.exists(fn)) file.remove(fn)
   }
   
+  Nlocation_objects = NULL
+  for (i in 1:Nlocations) {
+    Nlocation_objects = c(Nlocation_objects, length(loca[[i]][[1]]), length(loca[[i]][[2]]))
+  }
   cat("\n<<< building palmsplus...\n")
   if (length(palms) > 0 & length(palmsplus_fields) &
-      length(home) > 0 & length(school) > 0 & length(home_nbh) > 0 & length(school_nbh) > 0 &
-      length(participant_basis) > 0) {
+      all(Nlocation_objects > 0) & length(participant_basis) > 0) {
+    
+    
     palmsplus <- hbt_build_palmsplus(data = palms, 
                                      palmsplus_fields = palmsplus_fields,
-                                     home = home,
-                                     school = school,
-                                     home_nbh = home_nbh,
-                                     school_nbh = school_nbh,
+                                     loca = loca,
                                      participant_basis = participant_basis)
     write_csv(palmsplus, file = fns[1])
     cat("done>>>\n")
@@ -211,6 +234,7 @@ palmsplusr_shiny <- function(gisdir = "",
     cat("skipped because insufficient input data>>>\n")
   }
   
+  kkkk
   cat("\n<<< building days...")
   if (length(palmsplus) > 0 & length(palmsplus_domains) > 0 & length(palmsplus_fields) &
       length(home) > 0 & length(school) > 0 & length(home_nbh) > 0 & length(school_nbh) > 0 &
@@ -218,10 +242,7 @@ palmsplusr_shiny <- function(gisdir = "",
     days <- hbt_build_days(data = palmsplus,
                            palmsplus_domains = palmsplus_domains,
                            palmsplus_fields = palmsplus_fields,
-                           home = home,
-                           school = school,
-                           home_nbh = home_nbh,
-                           school_nbh = school_nbh,
+                           loca = loca,
                            participant_basis = participant_basis)
     write_csv(days,  file = fns[2])
     # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
@@ -229,6 +250,7 @@ palmsplusr_shiny <- function(gisdir = "",
   } else {
     cat("skipped because insufficient input data>>>\n")
   }
+  
   
   trajectory_locations = trajectory_locations[order(trajectory_locations$name),]
   cat("\n<<< building trajectories...")

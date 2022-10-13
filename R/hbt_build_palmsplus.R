@@ -7,10 +7,7 @@
 #' @param data The PALMS data obtained using \code{\link{read_palms}}.
 #' @param verbose Print progress to console after each iteration. Default is \code{TRUE}.
 #' @param palmsplus_fields fields defined in PALMSplusRshiny
-#' @param home home
-#' @param school school
-#' @param home_nbh home_nbh
-#' @param school_nbh school_nbh
+#' @param loca Nested list with location information
 #' @param participant_basis participant_basis
 #'
 #' @import dplyr
@@ -25,13 +22,19 @@
 #' 
 # Code modified from https://thets.github.io/palmsplusr/
 hbt_build_palmsplus <- function(data = NULL, verbose = TRUE, palmsplus_fields = NULL,
-                                home = NULL, school = NULL,
-                                home_nbh = NULL, school_nbh = NULL,
+                                loca = NULL,
                                 participant_basis = NULL) {
   # Note:
-  # home, school, home_nbh, school_nbh need to be present, 
+  # home, school, home_nbh, school_nbh (or similar) need to be present, 
   # because the functions that are passed on assume that they exist
-  
+  # So, now we need to create those objects from object loca
+  Nlocations = length(loca)
+  for (i in 1:Nlocations) {
+    for (j in 1:2) {
+      txt = paste0(names(loca[[i]])[j], " = loca[[i]][[j]]")
+      eval(parse(text = txt))
+    }
+  }
   field_args <- setNames(palmsplus_fields$formula, palmsplus_fields$name) %>%
     lapply(parse_expr)
   

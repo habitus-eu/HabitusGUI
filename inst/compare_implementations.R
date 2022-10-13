@@ -1,54 +1,54 @@
 rm(list = ls())
 
 
-# # =================================================================
-# load("~/projects/fontys/state_1_gui.RData")
-# 
-# ghome = home
-# ghome_nbh = home_nbh
-# gpalms = palms
-# gparticipant_basis = participant_basis
-# gschool_nbh = school_nbh
-# 
-# load("~/projects/fontys/state_1_lynne.RData")
-# 
-# lhome = home
-# lhome_nbh = home_nbh
-# lpalms = palms
-# lparticipant_basis = participant_basis
-# lschool_nbh = school_nbh
-# 
-# print(table(ghome == lhome))
-# print(table(ghome_nbh == lhome_nbh))
-# print(table(gparticipant_basis == lparticipant_basis))
-# print(table(gschool_nbh== lschool_nbh))
-# print(table(gpalms == lpalms))
+# =================================================================
+load("~/projects/fontys/state_1_gui.RData")
+
+ghome = loca$home$home
+ghome_nbh = loca$home$home_nbh
+gpalms = palms
+gparticipant_basis = participant_basis
+gschool_nbh = loca$school$school_nbh
+
+load("~/projects/fontys/state_1_lynne.RData")
+
+lhome = home
+lhome_nbh = home_nbh
+lpalms = palms
+lparticipant_basis = participant_basis
+lschool_nbh = school_nbh
+
+print(table(ghome == lhome))
+print(table(ghome_nbh == lhome_nbh))
+print(table(gparticipant_basis == lparticipant_basis))
+print(table(gschool_nbh== lschool_nbh))
+print(table(gpalms == lpalms))
 
 # At this point data is identical
 
-# #===========================================================
-load("~/projects/fontys/state_2_gui.RData")
-#
-gpalmsplus = palmsplus
-gpalmsplus_fields = palmsplus_fields
-
-load("~/projects/fontys/state_2_lynne.RData")
-
-lpalmsplus = palmsplus
-lpalmsplus_fields = palmsplus_fields
-
-GP = colnames(gpalmsplus)
-LP = colnames(lpalmsplus)
-
-
-print(table(gpalmsplus == lpalmsplus))
-
-print(table(gpalmsplus_fields[1:16,] == lpalmsplus_fields[1:16,]))
-# Only difference is that we define datai in palms_in_polygon instead of .
-
-
-# 
 # # #===========================================================
+# load("~/projects/fontys/state_2_gui.RData")
+# #
+# gpalmsplus = palmsplus
+# gpalmsplus_fields = palmsplus_fields
+# 
+# load("~/projects/fontys/state_2_lynne.RData")
+# 
+# lpalmsplus = palmsplus
+# lpalmsplus_fields = palmsplus_fields
+# 
+# GP = colnames(gpalmsplus)
+# LP = colnames(lpalmsplus)
+# 
+# 
+# print(table(gpalmsplus == lpalmsplus))
+# 
+# print(table(gpalmsplus_fields[1:16,] == lpalmsplus_fields[1:16,]))
+# # Only difference is that we define datai in palms_in_polygon instead of .
+# 
+# 
+# # 
+# # # #===========================================================
 # load("~/projects/fontys/state_3_gui.RData")
 # gdays = days
 # print(dim(gdays))
