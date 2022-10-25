@@ -25,15 +25,11 @@ palmsplusr_shiny <- function(gisdir = "",
                              configfile = "",
                              verbose = TRUE) {
   
-  #-----------------------------
-  # NEW CODE
-  # identify location names:
-  # gisdir = "~/projects/fontys/test_palmsplusr/GIS"
   groupinglocation = "school"
-  
+  # create list structure to house the location objects
   shapefilenames = dir(path = gisdir, full.names = FALSE, pattern = "[.]shp")
   locationNames = unique(gsub(pattern = "table|_|buffers|[.]|xml|shp|loc", replacement = "", x = shapefilenames))
-  # create list structure to house the objects
+
   Nlocations = length(locationNames)
   loca = vector("list", Nlocations)
   names(loca) = locationNames
@@ -42,11 +38,6 @@ palmsplusr_shiny <- function(gisdir = "",
     names(loca[[i]]) =  c(locationNames[i], paste0(locationNames[i], "_nbh"), 
                           paste0(locationNames[i], "_tablefile"), paste0(locationNames[i], "_locbufferfile"))
   }
-  
-  #------------------------
-  # OLD CODE
-  # home = school = home_nbh = school_nbh = NULL
-  #------------------------
   lon = identifier = palms = NULL # . = was also included, but probably wrong
   if (length(configfile) > 0) {
     # check for missing parameters, such that palmsplusr can fall back on defaults
@@ -138,20 +129,6 @@ palmsplusr_shiny <- function(gisdir = "",
     }
   }
   
-  # OLD CODE:
-  
-  #--------------------
-  # OLD CODE
-  # hometablefile = find_file(path = gisdir, namelowercase = "home_table.shp")
-  # schooltablefile = find_file(path = gisdir, namelowercase = "school_table.shp")
-  # lochomebuffersfile = find_file(path = gisdir, namelowercase = "loc_homebuffers.shp")
-  # locschoolbuffersfile = find_file(path = gisdir, namelowercase = "loc_schoolbuffers.shp")
-  # home = sf::read_sf(hometablefile) #
-  # school = sf::read_sf(schooltablefile)
-  # home_nbh = sf::read_sf(lochomebuffersfile)
-  # school_nbh = sf::read_sf(locschoolbuffersfile)
-  #--------------------
-  
   # Check for missing IDs -------------------------------------------------------------------------
   withoutMissingId = hbt_check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
                                           loca, groupinglocation = groupinglocation,
@@ -161,23 +138,12 @@ palmsplusr_shiny <- function(gisdir = "",
   loca = withoutMissingId$loca
   
   
-
-  # VvH turned this off because now only process IDs with complete data
-  # missing_ids_in_participant_basis <- setdiff(unique_ids_in_palms, unique_ids_in_participant_basis)
-  # if(length(missing_ids_in_participant_basis) > 0){
-  #   participant_basis <- rbind(participant_basis, data.frame(identifier = missing_ids_in_participant_basis, school_id = NA, class_id = NA))
-  #   write.csv(participant_basis, paste(str_interp("participant_basis_${dataset_name}.csv")))
-  # }
   write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
   
   
   #===========================================================================================  
   # Create field tables
-  
-  # Note: I have removed the dependency on palmsplusr for this as it
-  # involved super assignment operators which seem to be causing issues,
-  # defaults are now taken care of in the config file preparation
-  
+
   # #=============================
   # adding fields
   CONF = read.csv(config, sep = ",")
@@ -305,6 +271,5 @@ palmsplusr_shiny <- function(gisdir = "",
   } else {
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }
-  
   return()
 }
