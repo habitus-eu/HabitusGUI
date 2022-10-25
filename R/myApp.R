@@ -618,10 +618,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           } else {
             sleepdiaryfile_local = c()
           }
-          
-          
-          
-          
           # on.exit(file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE))
           # on.exit(file.copy(from = logfile, to = stdout_GGIR_tmp, overwrite = TRUE))
           
@@ -740,12 +736,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         shinyjs::hide(id = "start_palmspy")
         
         write.table(x = NULL, file = stdout_PALMSpy_tmp) # initialise empty file
+        
         output$mylog_PALMSpy <- renderText({
           paste(mylog_PALMSpy(), collapse = '\n')
         })
         
-        logfile = paste0(isolate(global$data_out), "/PALMSpy.log")
-
+        
         # # Start PALMSpy
         x_palmspy <- r_bg(func = function(PALMSpyshiny, outputdir, gpsdir, count_file_location) {
           PALMSpyshiny(outputdir, gpsdir, count_file_location)
@@ -757,11 +753,15 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         stdout = "",
         stderr = "")
         
+        logfile = paste0(isolate(global$data_out), "/PALMSpy.log")
+        
         observe({
           if (x_palmspy$poll_io(0)[["process"]] != "ready") {
-            file.copy(from = logfile, to = stdout_PALMSpy_tmp, overwrite = TRUE)
+            print("status: PALMSpy not ready yet")
+            if (file.exists(logfile)) file.copy(from = logfile, to = stdout_PALMSpy_tmp, overwrite = TRUE)
             invalidateLater(2000)
           } else {
+            print("status: PALMSpy ready")
             file.copy(from = logfile, to = stdout_PALMSpy_tmp, overwrite = TRUE)
             on.exit(removeNotification(id_palmspy), add = TRUE)
             # When process is finished copy tmp log file to actual log file for user to see
