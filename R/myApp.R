@@ -757,11 +757,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         
         observe({
           if (x_palmspy$poll_io(0)[["process"]] != "ready") {
-            print("status: PALMSpy not ready yet")
             if (file.exists(logfile)) file.copy(from = logfile, to = stdout_PALMSpy_tmp, overwrite = TRUE)
             invalidateLater(2000)
           } else {
-            print("status: PALMSpy ready")
             file.copy(from = logfile, to = stdout_PALMSpy_tmp, overwrite = TRUE)
             on.exit(removeNotification(id_palmspy), add = TRUE)
             # When process is finished copy tmp log file to actual log file for user to see
