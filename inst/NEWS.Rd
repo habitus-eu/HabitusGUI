@@ -4,11 +4,11 @@
 
 \section{Changes in version 0.1.5 (GitHub-only-release date: ??-??-2022)}{
   \itemize{
-    \item PALMSpy now persistent (PR #58)
+    \item PALMSpy now run via persistent command line call (PR #58)
     \item BrondCounts deprecated and replaced by Neishabouricounts
+    \item GGIR now run via persistent command line call (issue #60)
   }
 }
-
 \section{Changes in version 0.1.4 (GitHub-only-release date: 26-07-2022)}{
   \itemize{
     \item Improved integrated of palmsplusr which now also uses GIS files
