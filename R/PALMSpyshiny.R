@@ -9,7 +9,7 @@
 PALMSpyshiny = function(outputdir, gpsdir, count_file_location) {
   if (tolower(Sys.getenv("USERNAME")) %in% c("ucloud", "", "shiny") == FALSE) {
     #assuming palmspy is in a local conda environment"
-    palmspypath = "/home/vincent/miniconda3/bin/conda run -n palmspy "
+    palmspypath = "/home/vincent/miniconda3/bin/conda run --no-capture-output -n palmspy "
   } else {
     #assuming palmspy is directly available from command line (ucloud)
     palmspypath = ""
