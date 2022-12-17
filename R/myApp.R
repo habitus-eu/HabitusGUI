@@ -613,22 +613,18 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
             do.Counts = FALSE
           }
-          
-          
           if (file.exists(paste0(global$data_out, "/sleepdiary.csv"))) { # because this is not a global variable
             sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
           } else {
             sleepdiaryfile_local = c()
           }
-
+          # on.exit(file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE))
+          # on.exit(file.copy(from = logfile, to = stdout_GGIR_tmp, overwrite = TRUE))
+          
+          write.table(x = NULL, file = stdout_GGIR_tmp) # initialise empty file
           output$mylog_GGIR <- renderText({
             paste(mylog_GGIR(), collapse = '\n')
           })
-          
-          # If process somehow unexpectedly terminates, always copy tmp log 
-          # file to actual log file for user to see
-          logfile = paste0(isolate(global$data_out), "/GGIR.log")
-          on.exit(file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE))
           
           # Start GGIR
           x_ggir <- r_bg(func = function(GGIRshiny, rawaccdir, outputdir, 
@@ -639,25 +635,31 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           args = list(GGIRshiny = GGIRshiny,
                       rawaccdir = isolate(global$raw_acc_in),
                       outputdir = global$data_out, 
-                                sleepdiary = sleepdiaryfile_local,
-                                configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
-                                do.Counts = do.Counts),
-                    stdout = stdout_GGIR_tmp,
-                    stderr = "2>&1")
-          
-          # GGIRshiny(rawaccdir = isolate(global$raw_acc_in), outputdir = global$data_out, 
-          #           sleepdiary = sleepdiaryfile_local, configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
-          #           do.Counts = do.Counts)
-          
-          
-          
+                      sleepdiary = sleepdiaryfile_local,
+                      configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
+                      do.Counts = do.Counts),
+                    stdout = "", #,
+                    stderr = "")
+         
+          # Expected location of log file
+          logfile = paste0(isolate(global$data_out), "/GGIR.log")
+
           observe({
             if (x_ggir$poll_io(0)[["process"]] != "ready") {
-              invalidateLater(5000)
+              # Copy local log file to server to update progress log
+              if (file.exists(logfile)) file.copy(from = logfile, to = stdout_GGIR_tmp, overwrite = TRUE)
+              invalidateLater(2000)
             } else {
+              # Copy local log file to server to update progress log
+              if (file.exists(logfile)) file.copy(from = logfile, to = stdout_GGIR_tmp, overwrite = TRUE)
               on.exit(removeNotification(id_ggir), add = TRUE)
-              # When process is finished copy tmp log file to actual log file for user to see
-              file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE)
+              
+              # Delete Rscript that is created by GGIRshiny because user does not need this
+              ggir_cmdline = paste0(global$data_out, "/ggir_cmdline.R")
+              if (file.exists(ggir_cmdline)) {
+                file.remove(ggir_cmdline)
+              }
+              
               # Now check whether results are correctly generated:
               expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
               expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
@@ -732,62 +734,33 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       if (ready_to_run_palsmpy == TRUE) {
         id_palmspy = showNotification("PALMSpy in progress ...", type = "message", duration = NULL, closeButton = FALSE)
         shinyjs::hide(id = "start_palmspy")
-        # on.exit(removeNotification(id_palmspy), add = TRUE)
+        
+        write.table(x = NULL, file = stdout_PALMSpy_tmp) # initialise empty file
         
         output$mylog_PALMSpy <- renderText({
           paste(mylog_PALMSpy(), collapse = '\n')
         })
         
         
-        # basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
-        #                      " --acc-path ", count_file_location,
-        #                      " --config-file ", paste0(global$data_out, "/config.json"))
-        
-        # # system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
-        # #         stdout = "stdout_palmspy.log", stderr = "stderr_palmspy.log", wait = TRUE)
-        # 
         # # Start PALMSpy
-        # x_palmspy <- r_bg(func = function(system2, command, args, stdout, stderr, wait){
-        #   system2(command, args, stdout, stderr, wait)
-        # },
-        # args = list(system2 = system2,
-        #             command = "cd",
-        #             args = gsub(pattern = "cd ", replacement = "", x = basecommand),
-        #             stdout = "", 
-        #             stderr = "",
-        #             wait = TRUE),
-        # stdout = stdout_PALMSpy_tmp,
-        # stderr = "2>&1")
-        # 
-        
-        # If process somehow unexpectedly terminates, always copy tmp log 
-        # file to actual log file for user to see
-        logfile = paste0(isolate(global$data_out), "/PALMSpy.log")
-        on.exit(file.copy(from = stdout_PALMSpy_tmp, to = logfile, overwrite = TRUE))
-        
-        # # Start PALMSpy
-        x_palmspy <- r_bg(func = function(PALMSpyshiny, outputdir, gpsdir, count_file_location){
+        x_palmspy <- r_bg(func = function(PALMSpyshiny, outputdir, gpsdir, count_file_location) {
           PALMSpyshiny(outputdir, gpsdir, count_file_location)
         },
         args = list(PALMSpyshiny = PALMSpyshiny,
-                   outputdir = global$data_out,
-                   gpsdir = global$gps_in,
-                   count_file_location = count_file_location),
-        stdout = stdout_PALMSpy_tmp,
-        stderr = "2>&1")
+                    outputdir = global$data_out,
+                    gpsdir = global$gps_in,
+                    count_file_location = count_file_location),
+        stdout = "",
+        stderr = "")
         
-        # basecommand = paste0("cd ",global$data_out," ; palmspy --gps-path ", global$gps_in,
-        #                      " --acc-path ", count_file_location,
-        #                      " --config-file ", paste0(global$data_out, "/config.json"))
-        # # stdout = system(command = basecommand, intern = TRUE) # old command
-        # system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
-        #         stdout = "stdout_palmspy.log", stderr = "stderr_palmspy.log", wait = TRUE)
-        
+        logfile = paste0(isolate(global$data_out), "/PALMSpy.log")
         
         observe({
           if (x_palmspy$poll_io(0)[["process"]] != "ready") {
-            invalidateLater(5000)
+            if (file.exists(logfile)) file.copy(from = logfile, to = stdout_PALMSpy_tmp, overwrite = TRUE)
+            invalidateLater(2000)
           } else {
+            file.copy(from = logfile, to = stdout_PALMSpy_tmp, overwrite = TRUE)
             on.exit(removeNotification(id_palmspy), add = TRUE)
             # When process is finished copy tmp log file to actual log file for user to see
             file.copy(from = stdout_PALMSpy_tmp, to = logfile, overwrite = TRUE)     
@@ -859,6 +832,8 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         if (ready_to_run_palmsplusr == TRUE) {
           shinyjs::hide(id = "start_palmsplusr")
           id_palmsplusr = showNotification("palmsplusr in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+          
+          write.table(x = NULL, file = stdout_PALMSpy_tmp) # initialise empty file
           output$mylog_palmsplusr <- renderText({
             paste(mylog_palmsplusr(), collapse = '\n')
           })
