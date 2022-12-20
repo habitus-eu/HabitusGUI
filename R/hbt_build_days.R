@@ -16,10 +16,7 @@
 #' @param verbose Print progress to console. Default is \code{TRUE}.
 #' @param palmsplus_domains ...
 #' @param palmsplus_fields ...
-#' @param home home
-#' @param school school
-#' @param home_nbh home_nbh
-#' @param school_nbh school_nbh
+#' @param loca Nested list with location information
 #' @param participant_basis participant_basis
 #'
 #'
@@ -35,11 +32,19 @@
 hbt_build_days <- function(data = NULL, verbose = TRUE, 
                            palmsplus_domains = NULL,
                            palmsplus_fields = NULL,
-                           home = NULL,
-                           school = NULL,
-                           home_nbh = NULL,
-                           school_nbh = NULL,
+                           loca = NULL,
                            participant_basis = NULL) {
+  
+  # Note:
+  # home, school, home_nbh, school_nbh (or similar) need to be present, 
+  # because the functions that are passed on assume that they exist
+  # So, now we need to create those objects from object loca
+  Nlocations = length(loca)
+  for (i in 1:Nlocations) {
+    txt = paste0(names(loca[[i]])[1], " = loca[[i]][[1]]")
+    eval(parse(text = txt))
+  }
+  
   duration = datetime = name = domain_field = NULL
   
   domain_fields <- palmsplus_domains %>% filter(domain_field == TRUE)
@@ -59,15 +64,14 @@ hbt_build_days <- function(data = NULL, verbose = TRUE,
     mutate_if(is.logical, as.integer)
   
   fields <- palmsplus_fields %>% filter(domain_field == TRUE) %>% pull(name)
-  
   data <- data %>%
     st_set_geometry(NULL) %>%
-    dplyr::select(identifier, datetime, domain_names, fields) %>%
+    dplyr::select(identifier, datetime, domain_names, all_of(fields)) %>%
     mutate(duration = 1) %>%
     mutate_at(vars(-identifier,-datetime), ~ . * palms_epoch(data) / 60) %>%
     group_by(identifier, date = as.Date(datetime)) %>%
     dplyr::select(-datetime)
-  
+
   x <- list()
   for (i in domain_names) {
     x[[i]] <- data %>%

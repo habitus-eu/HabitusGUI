@@ -6,6 +6,7 @@
 #' @param outputdir Path to outputdir location
 #' @param dataset_name Name of dataset
 #' @param configfile Configuration file
+#' @param verbose verbose Boolean
 #' @return palms_to_clean_lower object
 #' @importFrom stats end start formula as.formula
 #' @importFrom tidyr pivot_wider
@@ -21,9 +22,23 @@ palmsplusr_shiny <- function(gisdir = "",
                              gislinkfile = "",
                              outputdir = "",
                              dataset_name = "",
-                             configfile = "") {
-  home = school = home_nbh = school_nbh = NULL
-  . = lon = identifier = palms = NULL
+                             configfile = "",
+                             verbose = TRUE) {
+  
+  groupinglocation = "school"
+  # create list structure to house the location objects
+  shapefilenames = dir(path = gisdir, full.names = FALSE, pattern = "[.]shp")
+  locationNames = unique(gsub(pattern = "table|_|buffers|[.]|xml|shp|loc", replacement = "", x = shapefilenames))
+
+  Nlocations = length(locationNames)
+  loca = vector("list", Nlocations)
+  names(loca) = locationNames
+  for (i in 1:Nlocations) {
+    loca[[i]] = vector("list", 4)
+    names(loca[[i]]) =  c(locationNames[i], paste0(locationNames[i], "_nbh"), 
+                          paste0(locationNames[i], "_tablefile"), paste0(locationNames[i], "_locbufferfile"))
+  }
+  lon = identifier = palms = NULL # . = was also included, but probably wrong
   if (length(configfile) > 0) {
     # check for missing parameters, such that palmsplusr can fall back on defaults
     # here the config_pamsplusr file inside the package is assumed to hold all the defaults.
@@ -48,7 +63,7 @@ palmsplusr_shiny <- function(gisdir = "",
   
   palmsplus_folder = paste0(outputdir, "/palmsplusr_output")
   if (!dir.exists(palmsplus_folder)) {
-    cat("\nCreating PALMSplusR output directory\n")
+    if (verbose) cat("\nCreating PALMSplusR output directory\n")
     dir.create(palmsplus_folder)
   }
   sf::sf_use_s2(FALSE)
@@ -69,14 +84,14 @@ palmsplusr_shiny <- function(gisdir = "",
   ))
   PALMS_combined <- bind_rows(csv_palms)
   # Data cleaning:
-  cat("\nstart cleaning\n")
+  if (verbose) cat("\nstart cleaning\n")
   PALMS_reduced <- subset(PALMS_combined, lon > -180)
   palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, dataset_name)
-  cat("\ncleaning completed\n")
+  if (verbose) cat("\ncleaning completed\n")
   
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
   PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv"))
-  cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
+  if (verbose) cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
   palms = palmsplusr::read_palms(PALMS_reduced_file)
   
@@ -86,47 +101,94 @@ palmsplusr_shiny <- function(gisdir = "",
     file_of_interest = allcsvfiles[which(tolower(basename(allcsvfiles)) == namelowercase)]
     return(file_of_interest)
   }
-  cat("\nreading basis file\n")
+  if (verbose) cat("\nreading basis file\n")
   participant_basis = read_csv(gislinkfile)
   unique_ids_in_palms <- unique(palms$identifier)
   unique_ids_in_participant_basis <- unique(participant_basis$identifier)
   
   # Load all shape files ----------------------------------------------------
-  hometablefile = find_file(path = gisdir, namelowercase = "home_table.shp")
-  schooltablefile = find_file(path = gisdir, namelowercase = "school_table.shp")
-  lochomebuffersfile = find_file(path = gisdir, namelowercase = "loc_homebuffers.shp")
-  locschoolbuffersfile = find_file(path = gisdir, namelowercase = "loc_schoolbuffers.shp")
-  home = sf::read_sf(hometablefile) #
-  school = sf::read_sf(schooltablefile)
-  home_nbh = sf::read_sf(lochomebuffersfile)
-  school_nbh = sf::read_sf(locschoolbuffersfile)
+  #----------------
+  # NEW CODE
+  for (jj in 1:Nlocations) {
+    loca[[jj]][3] =  find_file(path = gisdir, namelowercase = paste0(locationNames[jj], "_table.shp"))
+    loca[[jj]][4] =  find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], "buffers.shp"))
+    loca[[jj]][[1]] = sf::read_sf(loca[[jj]][3]) #home_nbh
+    loca[[jj]][[2]] = sf::read_sf(loca[[jj]][4]) #school_nbh
+  }
+  
+  # Force id numbers to be characrer(
+  locationNames = names(loca)
+  for (i in 1:length(loca)) {
+    if (locationNames[i] != "home") {
+      loc_id = paste0(groupinglocation, "_id")
+    } else  if (locationNames[i] == "home") { # assumption that home is always the identifier for individuals
+      loc_id = "identifier"
+    } 
+    for (j in 1:2) {
+      loca[[i]][j][[1]][[loc_id]] = as.character(loca[[i]][j][[1]][[loc_id]])
+    }
+  }
   
   # Check for missing IDs -------------------------------------------------------------------------
   withoutMissingId = hbt_check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
-                                          home, school, home_nbh, school_nbh)
+                                          loca, groupinglocation = groupinglocation,
+                                          verbose = verbose)
   palms = withoutMissingId$palms
   participant_basis = withoutMissingId$participant_basis
+  loca = withoutMissingId$loca
   
-  # VvH turned this off because now only process IDs with complete data
-  # missing_ids_in_participant_basis <- setdiff(unique_ids_in_palms, unique_ids_in_participant_basis)
-  # if(length(missing_ids_in_participant_basis) > 0){
-  #   participant_basis <- rbind(participant_basis, data.frame(identifier = missing_ids_in_participant_basis, school_id = NA, class_id = NA))
-  #   write.csv(participant_basis, paste(str_interp("participant_basis_${dataset_name}.csv")))
-  # }
+  
   write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
   
   
   #===========================================================================================  
   # Create field tables
-  
-  # Note: I have removed the dependency on palmsplusr for this as it
-  # involved super assignment operators which seem to be causing issues,
-  # defaults are now taken care of in the config file preparation
-  
-  
+
   # #=============================
   # adding fields
   CONF = read.csv(config, sep = ",")
+  CONF$start_criteria = ""
+  CONF$end_criteria = ""
+  # add standard location based fields to CONF object:
+  for (i in 1:Nlocations) {
+    if (locationNames[i] == "home") {
+      CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+                                 paste0("at_", locationNames[i]), 
+                                 paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
+                                        locationNames[i],", identifier == i), identifier)"),
+                                 NA, "", "", "")
+      CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+                                 paste0("at_", locationNames[i], "_nbh"), 
+                                 paste0("palms_in_polygon(datai, polygons = dplyr::filter(",
+                                        locationNames[i], "_nbh, identifier == i), identifier)"),
+                                 NA, "", "", "")
+    } else {
+      CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+                                 paste0("at_", locationNames[i]), 
+                                 paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
+                                        locationNames[i],",", locationNames[i],
+                                        "_id == participant_basis %>% filter(identifier == i) %>% pull(",
+                                        locationNames[i], "_id)))"),
+                                 NA, "", "", "")
+      CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+                                 paste0("at_", locationNames[i], "_nbh"), 
+                                 paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
+                                        locationNames[i], "_nbh,", locationNames[i],
+                                        "_id == participant_basis %>% filter(identifier == i) %>% pull(",
+                                        locationNames[i], "_id)))"),
+                                 NA, "", "", "")
+    }
+    for (j in 1:Nlocations) {
+      CONF[nrow(CONF) + 1, ] = c("trajectory_location",
+                                 paste0(locationNames[i], "_", locationNames[i]),
+                                 paste0("at_", locationNames[i]), NA, "at_home",
+                                 paste0("at_", locationNames[i]),
+                                 paste0("at_", locationNames[j]))
+    }
+    CONF = CONF[!duplicated(CONF),]
+  }
+  
+  # browser()
   palmsplusr_field_rows = which(CONF$context == "palmsplus_field")
   palmsplus_fields = tibble(name = CONF$name[palmsplusr_field_rows],
                             formula = CONF$formula[palmsplusr_field_rows],
@@ -153,8 +215,7 @@ palmsplusr_shiny <- function(gisdir = "",
   trajectory_locations = tibble(name = CONF$name[trajectory_location_rows],
                                 start_criteria = CONF$start_criteria[trajectory_location_rows],
                                 end_criteria = CONF$end_criteria[trajectory_location_rows])
-  
-  
+  # save(palms, loca, participant_basis, file = "~/projects/fontys/state_1_gui.RData")
   # Run palmsplusr ----------------------------------------------------------
   fns = c(paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.csv"),
           paste0(palmsplus_folder, "/", dataset_name, "_days.csv"),
@@ -164,75 +225,93 @@ palmsplusr_shiny <- function(gisdir = "",
     if (file.exists(fn)) file.remove(fn)
   }
   
-  cat("\n<<< building palmsplus...\n")
+  
+
+  Nlocation_objects = NULL
+  for (i in 1:Nlocations) {
+    Nlocation_objects = c(Nlocation_objects, length(loca[[i]][[1]]), length(loca[[i]][[2]]))
+  }
+  if (verbose) cat("\n<<< building palmsplus...\n")
   if (length(palms) > 0 & length(palmsplus_fields) &
-      length(home) > 0 & length(school) > 0 & length(home_nbh) > 0 & length(school_nbh) > 0 &
-      length(participant_basis) > 0) {
+      all(Nlocation_objects > 0) & length(participant_basis) > 0) {
+    
+    
     palmsplus <- hbt_build_palmsplus(data = palms, 
                                      palmsplus_fields = palmsplus_fields,
-                                     home = home,
-                                     school = school,
-                                     home_nbh = home_nbh,
-                                     school_nbh = school_nbh,
-                                     participant_basis = participant_basis)
+                                     loca = loca,
+                                     participant_basis = participant_basis,
+                                     verbose = verbose)
     write_csv(palmsplus, file = fns[1])
-    cat("done>>>\n")
+    if (verbose) cat(">>>\n")
   } else {
-    cat("skipped because insufficient input data>>>\n")
+    if (verbose) cat("skipped because insufficient input data>>>\n")
   }
   
-  cat("\n<<< building days...")
+  
+  if (verbose) cat("\n<<< building days...")
   if (length(palmsplus) > 0 & length(palmsplus_domains) > 0 & length(palmsplus_fields) &
-      length(home) > 0 & length(school) > 0 & length(home_nbh) > 0 & length(school_nbh) > 0 &
-      length(participant_basis) > 0) {
+      all(Nlocation_objects > 0) & length(participant_basis) > 0) {
     days <- hbt_build_days(data = palmsplus,
                            palmsplus_domains = palmsplus_domains,
                            palmsplus_fields = palmsplus_fields,
-                           home = home,
-                           school = school,
-                           home_nbh = home_nbh,
-                           school_nbh = school_nbh,
-                           participant_basis = participant_basis)
+                           loca = loca,
+                           participant_basis = participant_basis,
+                           verbose = verbose)
+    if (length(days) > 0) {
+      if (verbose) cat(paste0("  N rows in days object: ", nrow(days)))
+    } else {
+      if (verbose) cat(paste0("  WARNING: no days object produced."))
+    }
     write_csv(days,  file = fns[2])
     # sf::st_write(palmsplus, dsn = paste0(palmsplus_folder, "/", dataset_name, "_palmsplus.shp"), append = FALSE)
-    cat("done>>>\n")
+    if (verbose) cat(">>>\n")
   } else {
-    cat("skipped because insufficient input data>>>\n")
+    if (verbose) cat("skipped because insufficient input data>>>\n")
   }
   
   trajectory_locations = trajectory_locations[order(trajectory_locations$name),]
-  cat("\n<<< building trajectories...")
+  if (verbose) cat("\n<<< building trajectories...\n")
   if (length(palmsplus) > 0 & length(trajectory_fields) > 0) {
+    
     trajectories <- hbt_build_trajectories(data = palmsplus,
                                            trajectory_fields = trajectory_fields,
                                            trajectory_locations = trajectory_locations)
-    
-    write_csv(trajectories,  file = fns[3])
-    shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp")
-    if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
-    sf::st_write(obj = trajectories, dsn = shp_file)
-    cat("done>>>\n")
+    if (length(trajectories) > 0) {
+      write_csv(trajectories,  file = fns[3])
+      shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp")
+      if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
+      
+      sf::st_write(obj = trajectories, dsn = shp_file)
+      if (verbose) cat(paste0("  N rows in trajectories object: ", nrow(trajectories)))
+    } else {
+      if (verbose) cat(paste0("  WARNING: no trajectories object produced."))
+    }
+    if (verbose) cat(">>>\n")
   } else {
-    cat("skipped because insufficient input data>>>\n")
+    if (verbose) cat("skipped because insufficient input data>>>\n")
   }
-  cat("\n<<< building multimodal...")
+  if (verbose) cat("\n<<< building multimodal...\n")
   if (length(palmsplus) > 0 & length(multimodal_fields) > 0 & length(trajectory_locations) > 0) {
     multimodal <- hbt_build_multimodal(data = trajectories,
                                        spatial_threshold = 200,
                                        temporal_threshold = 10,
                                        palmsplus = palmsplus,
                                        multimodal_fields = multimodal_fields,
-                                       trajectory_locations = trajectory_locations)
+                                       trajectory_locations = trajectory_locations,
+                                       verbose = verbose)
+    
     if (length(multimodal) > 0) {
       write_csv(multimodal, file = fns[4])
       shp_file = paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp")
       if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
       sf::st_write(obj = multimodal, dsn = shp_file)
+      if (verbose) cat(paste0("  N rows in multimodal object: ", nrow(multimodal)))
+    } else {
+      if (verbose) cat(paste0("  WARNING: no multimodal object produced."))
     }
-    cat("done>>>\n")
+    if (verbose) cat(">>>\n")
   } else {
-    cat("skipped because insufficient input data>>>\n")
+    if (verbose) cat("skipped because insufficient input data>>>\n")
   }
-  
   return()
 }

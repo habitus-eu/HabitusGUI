@@ -9,10 +9,7 @@ hbt_build_days(
   verbose = TRUE,
   palmsplus_domains = NULL,
   palmsplus_fields = NULL,
-  home = NULL,
-  school = NULL,
-  home_nbh = NULL,
-  school_nbh = NULL,
+  loca = NULL,
   participant_basis = NULL
 )
 }
@@ -25,13 +22,7 @@ hbt_build_days(
 
 \item{palmsplus_fields}{...}
 
-\item{home}{home}
-
-\item{school}{school}
-
-\item{home_nbh}{home_nbh}
-
-\item{school_nbh}{school_nbh}
+\item{loca}{Nested list with location information}
 
 \item{participant_basis}{participant_basis}
 }

@@ -9,10 +9,9 @@ hbt_check_missing_id(
   palmsplus_folder,
   dataset_name,
   palms,
-  home,
-  school,
-  home_nbh,
-  school_nbh
+  loca,
+  groupinglocation = "school",
+  verbose = TRUE
 )
 }
 \arguments{
@@ -24,13 +23,11 @@ hbt_check_missing_id(
 
 \item{palms}{palms object as loaded inside PALMSplusRshiny}
 
-\item{home}{home}
+\item{loca}{Nested list with location information}
 
-\item{school}{school}
+\item{groupinglocation}{groupinglocation}
 
-\item{home_nbh}{home_nbh}
-
-\item{school_nbh}{school_nbh}
+\item{verbose}{verbose}
 }
 \value{
 List with participant_basis and palms object without non-matching IDs

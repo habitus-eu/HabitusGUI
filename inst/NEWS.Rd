@@ -2,11 +2,14 @@
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
-\section{Changes in version 0.1.5 (GitHub-only-release date: ??-??-2022)}{
+\section{Changes in version 0.1.5 (GitHub-only-release date: 20-12-2022)}{
   \itemize{
     \item PALMSpy now run via persistent command line call (PR #58)
     \item BrondCounts deprecated and replaced by Neishabouricounts
     \item GGIR now run via persistent command line call (issue #60)
+    \item palmsplusr integration imporved by restructuring code
+    \item palmsplusr integration of GIS files simplified by extracting locations
+    from GIS files (issue #62)
   }
 }
 \section{Changes in version 0.1.4 (GitHub-only-release date: 26-07-2022)}{

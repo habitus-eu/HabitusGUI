@@ -23,7 +23,6 @@
 hbt_build_trajectories <- function(data = NULL, trajectory_fields = NULL, trajectory_locations = NULL) {
   name = after_conversion = tripnumber = NULL
   
-  
   args <- trajectory_fields %>% filter(after_conversion == FALSE)
   args_after <- trajectory_fields %>% filter(after_conversion == TRUE)
   

@@ -25,13 +25,50 @@ library(rlang)
 library(data.table)
 library(purrr)
 library(geosphere)
+library(lwgeom)
+# palmsplusr_shiny(gisdir = "/media/vincent/projects/Habitus/palmsplusr/testdata/GIS",
+#                  palmsdir = "/media/vincent/projects/Habitus/palmsplusr/testdata/PALMS_output/",
+#                  gislinkfile = "/media/vincent/projects/Habitus/palmsplusr/testdata/Tables/participant_basis.csv",
+#                  outputdir = "~/projects/fontys",
+#                  dataset_name = "test_palmsplusr",
+#                  configfile = "/media/vincent/projects/Habitus/palmsplusr/config_palmsplusr.csv")
 palmsplusr_shiny(gisdir = "/home/vincent/projects/fontys/test_palmsplusr/GIS",
-                 palmsdir = "/home/vincent/projects/fontys/test_palmsplusr/PALMS_output",
+                 palmsdir = "/home/vincent/projects/fontys/test_palmsplusr/PALMS_output/",
                  gislinkfile = "~/projects/fontys/test_palmsplusr/Tables/participant_basis.csv",
-                 outputdir = "~/projects/fontys", 
+                 outputdir = "~/projects/fontys",
                  dataset_name = "test_palmsplusr",
                  configfile = "~/projects/fontys/config_palmsplusr.csv")
+# palmsplusr_shiny(gisdir = "/home/vincent/projects/fontys/test_palmsplusr/GIS",
+#                  palmsdir = "/home/vincent/projects/fontys/test_palmsplusr/PALMS_output/",
+#                  gislinkfile = "~/projects/fontys/test_palmsplusr/Tables/participant_basis.csv",
+#                  outputdir = "~/projects/fontys",
+#                  dataset_name = "test_palmsplusr",
+#                  configfile = "~/projects/fontys/config_palmsplusr_v2.csv")
 
+
+DROP = read.csv(file = "/media/vincent/projects/Habitus/palmsplusr/config_palmsplusr.csv")
+UBU = read.csv("~/projects/fontys/config_palmsplusr_v2.csv")
+
+for (i in names(UBU)) {
+  print("-----")
+  print(i)
+  T1 = table(UBU[,i] %in% DROP[, i])
+  T2 = table(DROP[,i] %in% UBU[, i])
+  # if (length(T1) > 1) {
+    print("t1")
+    print(T1)
+    print(UBU[which(UBU[,i] %in% DROP[, i] == FALSE), i])
+  # }
+  
+  # if (length(T2) > 1)  {
+    print("t2")
+    print(T2)
+    print(DROP[which(DROP[,i] %in% UBU[, i] == FALSE), i])
+  # }
+}
+
+# DROP$context[which(DROP$context %in% UBU$context == FALSE)]
+# 
 
 # data("palms")
 # palms_remove_tables()
