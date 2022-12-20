@@ -58,8 +58,10 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
     # only overwrite the matching fields
     for (j in 1:nrow(new_params)) {
       ind = which(rownames(params) %in% rownames(new_params)[j] == TRUE)
-      if (new_params$value[j] != params$formula[ind]) {
-        params$formula[ind] = new_params$value[j]
+      if (length(ind) > 0) {
+        if (new_params$value[j] != params$formula[ind]) {
+          params$formula[ind] = new_params$value[j]
+        }
       }
     }
     params = params[,-which(colnames(params) %in% c("argument"))]
