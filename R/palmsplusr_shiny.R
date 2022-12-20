@@ -147,6 +147,48 @@ palmsplusr_shiny <- function(gisdir = "",
   # #=============================
   # adding fields
   CONF = read.csv(config, sep = ",")
+  CONF$start_criteria = ""
+  CONF$end_criteria = ""
+  # add standard location based fields to CONF object:
+  for (i in 1:Nlocations) {
+    if (locationNames[i] == "home") {
+      CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+                                 paste0("at_", locationNames[i]), 
+                                 paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
+                                        locationNames[i],", identifier == i), identifier)"),
+                                 NA, "", "", "")
+      CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+                                 paste0("at_", locationNames[i], "_nbh"), 
+                                 paste0("palms_in_polygon(datai, polygons = dplyr::filter(",
+                                        locationNames[i], "_nbh, identifier == i), identifier)"),
+                                 NA, "", "", "")
+    } else {
+      CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+                                 paste0("at_", locationNames[i]), 
+                                 paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
+                                        locationNames[i],",", locationNames[i],
+                                        "_id == participant_basis %>% filter(identifier == i) %>% pull(",
+                                        locationNames[i], "_id)))"),
+                                 NA, "", "", "")
+      CONF[nrow(CONF) + 1, ] = c("palmsplus_field",
+                                 paste0("at_", locationNames[i], "_nbh"), 
+                                 paste0("palms_in_polygon(datai, polygons = dplyr::filter(", 
+                                        locationNames[i], "_nbh,", locationNames[i],
+                                        "_id == participant_basis %>% filter(identifier == i) %>% pull(",
+                                        locationNames[i], "_id)))"),
+                                 NA, "", "", "")
+    }
+    for (j in 1:Nlocations) {
+      CONF[nrow(CONF) + 1, ] = c("trajectory_location",
+                                 paste0(locationNames[i], "_", locationNames[i]),
+                                 paste0("at_", locationNames[i]), NA, "at_home",
+                                 paste0("at_", locationNames[i]),
+                                 paste0("at_", locationNames[j]))
+    }
+    CONF = CONF[!duplicated(CONF),]
+  }
+  
+  # browser()
   palmsplusr_field_rows = which(CONF$context == "palmsplus_field")
   palmsplus_fields = tibble(name = CONF$name[palmsplusr_field_rows],
                             formula = CONF$formula[palmsplusr_field_rows],
