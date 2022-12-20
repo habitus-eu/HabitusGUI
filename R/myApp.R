@@ -903,7 +903,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                              "Output is stored in: ", expected_palmsplusr_folder, #<br/>
                                              paste0("<br/>The table below shows the content of ", basename(csv_files_palmsplusr)[1]),
                                              "<br/>Log file: ", logfile)
-                  print(csv_files_palmsplusr)
                   Sys.sleep(3)
                   palmsplusr_file1 = read.csv(file = csv_files_palmsplusr[1])
                   if (length(palmsplusr_file1) > 0) {
