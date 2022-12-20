@@ -799,10 +799,10 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         # Basic check before running function:
         ready_to_run_palmsplusr = FALSE
         # Check for PALMSpy output (two possible sources either from this run or from a previous run)
-        if (dir.exists(paste0(global$data_out,"/PALMSpy_output"))) {
-          expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
-        } else {
+        if (dir.exists(global$palmspyout_in)) {
           expected_palmspy_results_dir = global$palmspyout_in
+        } else {
+          expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
         }
         if (dir.exists(expected_palmspy_results_dir)) {
           Nfiles_in_dir = length(dir(path = expected_palmspy_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
@@ -897,16 +897,18 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
               # Now check whether results are correctly generated:
               expected_palmsplusr_folder = paste0(isolate(global$data_out), "/palmsplusr_output")
               if (dir.exists(expected_palmsplusr_folder) == TRUE) {
-                csv_files_palmsplusr = dir(expected_palmsplusr_folder,pattern = "csv", recursive = TRUE)
+                csv_files_palmsplusr = dir(expected_palmsplusr_folder, pattern = "csv", recursive = TRUE, full.names = TRUE)
                 if (length(csv_files_palmsplusr) > 0) {
                   palmsplusr_message = paste0(#"PALMSplusR successfully completed at ", Sys.time(),
                                              "Output is stored in: ", expected_palmsplusr_folder, #<br/>
-                                             "<br/>The table below shows the content of ", basename(csv_files_palmsplusr),
+                                             paste0("<br/>The table below shows the content of ", basename(csv_files_palmsplusr)[1]),
                                              "<br/>Log file: ", logfile)
-                  # palmsplusr_file1 = read.csv(file = csv_files_palmsplusr[1])
-                  # if (length(palmsplusr_file1) > 0) {
-                  #   # output$palmsplusr_file1 <- DT::renderDataTable(palmsplusr_file1, options = list(scrollX = TRUE))
-                  # }
+                  print(csv_files_palmsplusr)
+                  Sys.sleep(3)
+                  palmsplusr_file1 = read.csv(file = csv_files_palmsplusr[1])
+                  if (length(palmsplusr_file1) > 0) {
+                    output$palmsplusr_file1 <- DT::renderDataTable(palmsplusr_file1, options = list(scrollX = TRUE))
+                  }
                 } else {
                   palmsplusr_message = paste0("palmsplusr unsuccessful",
                                              "<br/>No file found inside: ", expected_palmsplusr_folder, #<br/>
