@@ -1,16 +1,21 @@
 #' load_params
 #'
 #' @param file Character to specify location of configuration file
+#' @param homedir Character to specify location to store an automatically generated config file (if not provided correctly)
 #' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_palmsplusr
+#'
 #' @return list of parameters extract from the configuration file
 #' @importFrom jsonlite fromJSON
 #' @importFrom utils read.csv read.table
 #' @export
 
 
-load_params = function(file=c(), format="json_palmspy") {
+load_params = function(file=c(), format="json_palmspy", homedir = "") {
   expected_tsv_columns = c("value", "field", "subfield", "display", "class", "minimum",
                            "maximum",	"set", "description", "priority")
+  # intialize message which will collect potential errors from loading the GGIR config file
+  message = c()
+  
   if (format == "json_palmspy") {
     config = fromJSON(txt = file, simplifyDataFrame = TRUE)
     params_info_palmspy_file = system.file("testfiles_palmspy/params_description_palmspy.tsv", package = "HabitusGUI")[1]
@@ -44,6 +49,24 @@ load_params = function(file=c(), format="json_palmspy") {
       params = c()
     }
   } else if (format == "csv_ggir") {
+    # sanity check 1: is it a csv file? ----
+    if (!file.exists(file)) {
+      # stop("No config file found at ", path)
+      message = paste0(message, 
+                       "No config file found at ", path, "A sample GGIR config file is loaded instead.")
+      create_test_GGIRconfig(configfile = paste0(homedir, "/config.csv"))
+      file = paste0(homedir, "/config.csv")
+    } else {
+      path_unlist = unlist(strsplit(x = file, split = ".", fixed = TRUE))
+      path_ext = path_unlist[length(path_unlist)]
+      if (path_ext != "csv") {
+        message = paste0(message, 
+                         "The GGIR config file uploaded is not a csv file. A sample GGIR config file is loaded instead.")
+        create_test_GGIRconfig(configfile = paste0(homedir, "/config.csv"))
+        file = paste0(homedir, "/config.csv")
+      }
+    }
+    # read config file if it exists and it is a csv file
     params = read.csv(file = file)
     # remove duplicates, because sometimes GGIR config files have duplicates
     dups = duplicated(params)
@@ -57,6 +80,7 @@ load_params = function(file=c(), format="json_palmspy") {
     rownames(params_merged) = params_merged$parameter
     params = params_merged[, expected_tsv_columns]
     params = params[,-which(colnames(params) == "subfield")]
+    
   } else if (format == "csv_palmsplusr") {
     params = read.csv(file = file, sep = ",")
     # remove duplicates, because sometimes GGIR config files have duplicates
@@ -78,5 +102,5 @@ load_params = function(file=c(), format="json_palmspy") {
     params = params_merged[, expected_tsv_columns]
     params = params[,-which(colnames(params) %in% c("subfield", "id", "field"))]
   }
-  return(params)
+  return(list(params = params, message = message))
 }

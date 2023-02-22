@@ -51,13 +51,15 @@ modConfigServer = function(id, tool, homedir = getwd()) {
       current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
       if (length(current_config) > 0) {
         if (tool() == "PALMSpy") {
-          params = load_params(file = current_config, format = "json_palmspy") #$datapath
+          params = load_params(file = current_config, format = "json_palmspy", homedir = homedir) #$datapath
         } else if (tool() == "GGIR") {
-          params = load_params(file = current_config, format = "csv_ggir") #$datapath
+          params = load_params(file = current_config, format = "csv_ggir", homedir = homedir) #$datapath
         } else if (tool() == "palmsplusr") {
-          params = load_params(file = current_config, format = "csv_palmsplusr") #$datapath
+          params = load_params(file = current_config, format = "csv_palmsplusr", homedir = homedir) #$datapath
         }
-        params_errors = check_params(params, tool = tool())
+        message = params$message
+        params = params$params
+        params_errors = check_params(params, tool = tool(), prev_message = message)
         output$config_issues <- renderUI({
           HTML(params_errors$error_message)
         })

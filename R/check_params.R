@@ -5,20 +5,27 @@
 #' @return Data.frame with problematic parameter values and corresponding error
 #' @export
 #' 
-check_params = function(params = c(), tool = c()) {
-  N = nrow(params)
+check_params = function(params = c(), tool = c(), prev_message = c()) {
+  N = nrow(params) + 1 # +1 to include previous error message from loading the config file
   blocked_params = data.frame(name = character(N), error = character(N))
   rowNames = rownames(params)
   
+  # Check if config file was not valid (previously checked in load_params)
+  cnt = 1
+  if (length(prev_message) > 0) {
+    blocked_params$name[cnt] = "config file"
+    blocked_params$error[cnt] = prev_message
+    cnt = cnt + 1
+  }
+  
   # Check parameters which value should be numeric and inside a continues range.
   numi = which(params$class == "double" | params$class == "integer")
-  cnt = 1
   if (length(numi) > 0) {
     for (i in numi) {
       try(expr = {
         num_value = suppressWarnings(
           as.numeric(unlist(lapply(strsplit(x = as.character(params$value[i]), "[(]|[)]|[,]|c"), function(x){x[!x == ""]})))
-          )
+        )
       }, silent = TRUE)
       test_na = any(is.na(num_value))
       if (test_na == TRUE) {
@@ -57,7 +64,7 @@ check_params = function(params = c(), tool = c()) {
       }
     }
   }
-  
+   
   # Check parameters which value should be part of a set character or numeric.
   seti = which(params$class == "set")
   if (length(seti) > 0) {
@@ -87,17 +94,25 @@ check_params = function(params = c(), tool = c()) {
   if (cnt <= N) {
     blocked_params = blocked_params[-c(cnt:N),]
   }
-  block_params = blocked_params[order(blocked_params$name),]
   
+  block_params = blocked_params[order(blocked_params$name),]
+
   green_message = "Configuration file has succesfully passed all formatting checks"
   message = c()
   if (nrow(block_params) > 0) {
-    for (parError_i in 1:nrow(block_params)) {
-      # Error in parameter " idloc ": 10 is not part of expected set: 1 / 2 / 3 / 4 / 5 / 6 / 7
-      message = paste0(c(message, paste0("Error in parameter \" ", 
-                                  block_params$name[parError_i], 
-                                  " \": Value ", params$value[which(rownames(params) == block_params$name[parError_i])], " ",
-                                  block_params$error[parError_i],"<br/>")), collapse = "")
+    if ("config file" %in% block_params$name) {
+      message = paste0(c(message, paste0("Error in loading the config file: ",
+                                         block_params$error[which(block_params$name == "config file")],"<br/>")), collapse = "")
+      block_params = block_params[-which(block_params$name == "config file"),]
+    }
+    if (nrow(block_params) > 0) {
+      for (parError_i in 1:nrow(block_params)) {
+        # Error in parameter " idloc ": 10 is not part of expected set: 1 / 2 / 3 / 4 / 5 / 6 / 7
+        message = paste0(c(message, paste0("Error in parameter \" ", 
+                                           block_params$name[parError_i], 
+                                           " \": Value ", params$value[which(rownames(params) == block_params$name[parError_i])], " ",
+                                           block_params$error[parError_i],"<br/>")), collapse = "")
+      }
     }
     green_message = c()
   }
