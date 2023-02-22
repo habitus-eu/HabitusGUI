@@ -68,6 +68,15 @@ load_params = function(file=c(), format="json_palmspy", homedir = "") {
     }
     # read config file if it exists and it is a csv file
     params = read.csv(file = file)
+    # sanity check 2: colnames of config file ----
+    colnames = colnames(params)
+    if (!(colnames[1] == "argument" & colnames[2] == "value" & colnames[3] == "context")) {
+      message = paste0(message, 
+                       "The csv file uploaded is not a GGIR config file. A sample GGIR config file is loaded instead.")
+      create_test_GGIRconfig(configfile = paste0(homedir, "/config.csv"))
+      file = paste0(homedir, "/config.csv")
+      params = read.csv(file = file)
+    } 
     # remove duplicates, because sometimes GGIR config files have duplicates
     dups = duplicated(params)
     params = params[!dups,]
