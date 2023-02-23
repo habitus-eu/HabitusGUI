@@ -4,12 +4,14 @@
 \alias{load_params}
 \title{load_params}
 \usage{
-load_params(file = c(), format = "json_palmspy")
+load_params(file = c(), format = "json_palmspy", homedir = "")
 }
 \arguments{
 \item{file}{Character to specify location of configuration file}
 
 \item{format}{Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_palmsplusr}
+
+\item{homedir}{Character to specify location to store an automatically generated config file (if not provided correctly)}
 }
 \value{
 list of parameters extract from the configuration file

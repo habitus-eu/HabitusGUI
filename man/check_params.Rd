@@ -4,7 +4,7 @@
 \alias{check_params}
 \title{check_params}
 \usage{
-check_params(params = c(), tool = c())
+check_params(params = c(), tool = c(), prev_message = c())
 }
 \arguments{
 \item{params}{Parameter object to be checked}

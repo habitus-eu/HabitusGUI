@@ -54,6 +54,7 @@ modConfigServer = function(id, tool, homedir = getwd()) {
           params = load_params(file = current_config, format = "json_palmspy", homedir = homedir) #$datapath
         } else if (tool() == "GGIR") {
           params = load_params(file = current_config, format = "csv_ggir", homedir = homedir) #$datapath
+          if (length(params$message) > 0) current_config = paste0(homedir, "/config.csv")
         } else if (tool() == "palmsplusr") {
           params = load_params(file = current_config, format = "csv_palmsplusr", homedir = homedir) #$datapath
         }
