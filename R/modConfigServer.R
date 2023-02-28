@@ -12,7 +12,7 @@ modConfigServer = function(id, tool, homedir = getwd()) {
   
   moduleServer(id, function(input, output, session) {
     observeEvent(tool(), {
-    
+      
       if (tool() == "PALMSpy") {
         output$download = downloadHandler(
           filename = "palmspy-params.json",
@@ -54,72 +54,29 @@ modConfigServer = function(id, tool, homedir = getwd()) {
           params = load_params(file = current_config, format = "json_palmspy", homedir = homedir) #$datapath
         } else if (tool() == "GGIR") {
           params = load_params(file = current_config, format = "csv_ggir", homedir = homedir) #$datapath
-          if (length(params$message) > 0) current_config = paste0(homedir, "/config.csv")
         } else if (tool() == "palmsplusr") {
           params = load_params(file = current_config, format = "csv_palmsplusr", homedir = homedir) #$datapath
         }
-        message = params$message
+        
+        # unlist objects from load_params
+        PALMSPYconfig_check = params$PALMSPYconfig_check
+        PALMSPLUSRconfig_check = params$PALMSPLUSRconfig_check
+        GGIRconfig_check = params$GGIRconfig_check
         params = params$params
-        params_errors = check_params(params, tool = tool(), prev_message = message)
-        output$config_issues <- renderUI({
-          HTML(params_errors$error_message)
+        
+        # issues with the format of the config file
+        output$PALMSPYconfig_check <- renderUI({
+          HTML(PALMSPYconfig_check)
         })
-        output$config_green <- renderUI({
-          HTML(params_errors$green_message)
+        output$PALMSPLUSRconfig_check <- renderUI({
+          HTML(PALMSPLUSRconfig_check)
         })
-        v <- reactiveValues(params = params)
-        proxy = DT::dataTableProxy("mod_table", session)
-        observeEvent(input$mod_table_cell_edit, {
-          info = input$mod_table_cell_edit
-          i = info$row
-          j = info$col
-          k = info$value
-          modifiable_column = "value" # modifiable columns
-          isolate(
-            if (j %in% match(modifiable_column, colnames(v$params))) {
-              do.replace = TRUE
-              v$params[which(v$params$display == TRUE)[i], j] <<- DT::coerceValue(k, v$params[i, j])
-            } else {
-              do.replace = FALSE
-              warning("You are not supposed to change this column.") # check to stop the user from editing only few columns
-            }
-          )
-          if (do.replace == TRUE) {
-            DT::replaceData(proxy, v$params, resetPaging = FALSE)  # replaces data displayed by the updated table
-            params_errors = check_params(v$params, tool = tool())
-            output$config_issues <- renderUI({
-              HTML(params_errors$error_message)
-            })
-            output$config_green <- renderUI({
-              HTML(params_errors$green_message)
-            })
-            if (nrow(params_errors$blocked_params) != 0) {
-              v$params$display[which(rownames(v$params) %in% params_errors$blocked_params$name == TRUE)] = TRUE
-            }
-            # Auto-save after every change
-            if (tool() == "PALMSpy") {
-              update_params(new_params = v$params, file = current_config, format = "json_palmspy") #$datapath
-            } else if (tool() == "GGIR") {
-              update_params(new_params = v$params, file = current_config, format = "csv_ggir") #$datapath
-            } else if (tool() == "palmsplusr") {
-              update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
-            }
-          }
+        output$GGIRconfigfile_check <- renderUI({
+          HTML(GGIRconfig_check)
         })
-        ### Reset Table
-        observeEvent(input$reset, {
-          showNotification("Resetting values", type = "message")
-          v$params <- params # your default data
-          current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
-          # also saving to file
-          if (tool() == "PALMSpy") { 
-            update_params(new_params = v$params, file = current_config, format = "json_palmspy") #$datapath
-          } else if (tool() == "GGIR") {
-            update_params(new_params = v$params, file = current_config, format = "csv_ggir") #$datapath
-          } else if (tool() == "palmsplusr") {
-            update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
-          }
-          # update list with errors
+        
+        # if config file is loaded, then check params
+        if (length(params) > 0) {
           params_errors = check_params(params, tool = tool())
           output$config_issues <- renderUI({
             HTML(params_errors$error_message)
@@ -127,31 +84,91 @@ modConfigServer = function(id, tool, homedir = getwd()) {
           output$config_green <- renderUI({
             HTML(params_errors$green_message)
           })
-        })
-        # Prepare data to be visualised:
-        rows2show = which(v$params$display == TRUE)
-        v$params = v$params[order(v$params$priority, decreasing = TRUE),]
-        cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set", "display") == FALSE)
-        data2vis = reactive(v$params[rows2show, cols2show])
-        
-      
-        # Render table for use in UI
-        # 
-        output$mod_table <- DT::renderDT({
+          v <- reactiveValues(params = params)
+          proxy = DT::dataTableProxy("mod_table", session)
+          observeEvent(input$mod_table_cell_edit, {
+            info = input$mod_table_cell_edit
+            i = info$row
+            j = info$col
+            k = info$value
+            modifiable_column = "value" # modifiable columns
+            isolate(
+              if (j %in% match(modifiable_column, colnames(v$params))) {
+                do.replace = TRUE
+                v$params[which(v$params$display == TRUE)[i], j] <<- DT::coerceValue(k, v$params[i, j])
+              } else {
+                do.replace = FALSE
+                warning("You are not supposed to change this column.") # check to stop the user from editing only few columns
+              }
+            )
+            if (do.replace == TRUE) {
+              DT::replaceData(proxy, v$params, resetPaging = FALSE)  # replaces data displayed by the updated table
+              params_errors = check_params(v$params, tool = tool())
+              output$config_issues <- renderUI({
+                HTML(params_errors$error_message)
+              })
+              output$config_green <- renderUI({
+                HTML(params_errors$green_message)
+              })
+              if (nrow(params_errors$blocked_params) != 0) {
+                v$params$display[which(rownames(v$params) %in% params_errors$blocked_params$name == TRUE)] = TRUE
+              }
+              # Auto-save after every change
+              if (tool() == "PALMSpy") {
+                update_params(new_params = v$params, file = current_config, format = "json_palmspy") #$datapath
+              } else if (tool() == "GGIR") {
+                update_params(new_params = v$params, file = current_config, format = "csv_ggir") #$datapath
+              } else if (tool() == "palmsplusr") {
+                update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
+              }
+            }
+          })
+          ### Reset Table
+          observeEvent(input$reset, {
+            showNotification("Resetting values", type = "message")
+            v$params <- params # your default data
+            current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
+            # also saving to file
+            if (tool() == "PALMSpy") { 
+              update_params(new_params = v$params, file = current_config, format = "json_palmspy") #$datapath
+            } else if (tool() == "GGIR") {
+              update_params(new_params = v$params, file = current_config, format = "csv_ggir") #$datapath
+            } else if (tool() == "palmsplusr") {
+              update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
+            }
+            # update list with errors
+            params_errors = check_params(params, tool = tool())
+            output$config_issues <- renderUI({
+              HTML(params_errors$error_message)
+            })
+            output$config_green <- renderUI({
+              HTML(params_errors$green_message)
+            })
+          })
+          # Prepare data to be visualised:
+          rows2show = which(v$params$display == TRUE)
+          v$params = v$params[order(v$params$priority, decreasing = TRUE),]
+          cols2show = which(colnames(v$params) %in% c("class", "minimum", "maximum",	"set", "display") == FALSE)
+          data2vis = reactive(v$params[rows2show, cols2show])
+          
+          
+          # Render table for use in UI
+          # 
+          output$mod_table <- DT::renderDT({
             DT::datatable(data2vis(), editable = TRUE,
-                        options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
-                                       pageLength = 5
-                                       # , columnDefs = list(list(targets = 'priority', visible = FALSE))
-                        )) %>% DT::formatStyle(
-                          'value', 'priority',
-                          backgroundColor = DT::styleEqual(c("0", "1"), c('gray91', 'lightyellow'))
-                        )
-          # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
-        })
-        output$config_instruction <- renderText({
-          "Review the parameter values, especially the ones in yellow, and edit where needed by double clicking:"
-        })
-        
+                          options = list(lengthMenu = list(c(5, 10, -1), c('5', '10', 'All')),
+                                         pageLength = 5
+                                         # , columnDefs = list(list(targets = 'priority', visible = FALSE))
+                          )) %>% DT::formatStyle(
+                            'value', 'priority',
+                            backgroundColor = DT::styleEqual(c("0", "1"), c('gray91', 'lightyellow'))
+                          )
+            # editable = list(target = "column", disable = list(columns = c(2,3,4))), #< would be nice, but seems to disable reset option
+          })
+          output$config_instruction <- renderText({
+            "Review the parameter values, especially the ones in yellow, and edit where needed by double clicking:"
+          })
+        }
       }
     })
     output$config_instruction <- renderText({ # the default output before the configuration file is selected
