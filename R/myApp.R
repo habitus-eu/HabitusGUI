@@ -24,212 +24,214 @@ myApp <- function(homedir=getwd(), ...) {
   mylog_GGIR <- shiny::reactiveFileReader(500, NULL, stdout_GGIR_tmp, readLines, warn = FALSE)
   mylog_palmsplusr <- shiny::reactiveFileReader(500, NULL, stdout_palmsplusr_tmp, readLines, warn = FALSE)
   mylog_PALMSpy <- shiny::reactiveFileReader(500, NULL, stdout_PALMSpy_tmp, readLines, warn = FALSE)
-
-  ui <- fluidPage(
-    theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
-    # preview examples: https://bootswatch.com/
-    # “cerulean”, “cosmo”, “cyborg”, “darkly”, “flatly”, “journal”, “litera”, “lumen”, 
-    # “lux”, “materia”, “minty”, “morph”, “pulse”, “quartz”, “sandstone”, “simplex”, 
-    #     “sketchy”, “slate”, “solar”, “spacelab”, “superhero”, “united”, “vapor”, “yeti”, “zephyr” 
-    tabsetPanel(
-      id = "wizard",
-      type = "hidden",
-      tabPanel("page_1",
-               fluidRow(column(8, div(h1("Habitus"), style = "height:50px")),
-                        column(4, div(imageOutput("logo_page1"), style = "height:50px;float:right"))
-               ),
-               p("\n"),
-               checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
-                                  choiceNames = list("Raw acceleration (at least ten values per second per axis)", 
-                                                     "Counts (in ActiGraph .csv format)",
-                                                     "GPS (in .csv format)", 
-                                                     "GIS (shape files + linkage file)", 
-                                                     "PALMS(py) output previously generated",
-                                                     "Sleep Diary (in GGIR compatible .csv format)"),
-                                  choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out", "SleepDiary"), width = '100%'),
-               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ", # GGIR
-                                                   "(input.availabledata.indexOf(`ACount`) > -1 && ", # PALMSpy
-                                                   "input.availabledata.indexOf(`GPS`) > -1) || ",
-                                                   "(input.availabledata.indexOf(`ACount`) > -1 && ", # palmsplusr variant 1
-                                                   "input.availabledata.indexOf(`GPS`) > -1 && ",
-                                                   "input.availabledata.indexOf(`GIS`) > -1) || ", 
-                                                   "(input.availabledata.indexOf(`PALMSpy_out`) > -1 && ", #palmsplusr variant 2
-                                                   "input.availabledata.indexOf(`GIS`) > -1)"),
-                                hr(),
-                                # If there is enough input data then show second check box to ask user about their research goals
-                                checkboxGroupInput("researchgoals", label = "", 
-                                                   choiceNames = "", choiceValues = "", width = '100%'),
-                                # Show possible pipelines:
-                                textOutput("pipeline"),
-                                hr(),
-                                checkboxGroupInput("tools", label = "Select the tools you would like to use:",
-                                                   choiceNames = list("GGIR (R package)",
-                                                                      "Neishabouri Counts / actilifecounts (R package)",
-                                                                      "PALMSpy (Python library)",
-                                                                      "palmsplusr (R package)"),
-                                                   choiceValues = list("GGIR", "Counts", "PALMSpy", "palmsplusr"), width = '100%')
-               ), 
-               actionButton("page_12", "next")
-      ),
-      tabPanel("page_2",
-               fluidRow(column(8, div(h1("Habitus - Data selection"), style = "height:50px")),
-                        column(4, div(imageOutput("logo_page2"), style = "height:50px;float:right"))
-               ),
-               p("\n"),
-               # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
-               conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1 && ",
-                                                   "(input.tools.includes(`GGIR`) || ",
-                                                   "input.tools.includes(`Counts`))"),
-                                shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
-                                                           title = "Select raw accelerometer data directory"),
-                                verbatimTextOutput("rawaccdir", placeholder = TRUE)
-               ),
-               # Select input folder count accelerometer data if count data is available and PALMSpy is planned------------------
-               # if not then count data will have to be estimated from the raw data, but we do not bother user
-               # with questions where it should be stored
-               conditionalPanel(condition = "input.availabledata.indexOf(`ACount`) > -1 && input.tools.includes(`PALMSpy`)",
-                                shinyFiles::shinyDirButton("countaccdir", label = "Count accelerometry data directory...",
-                                                           title = "Select count accelerometer data directory"),
-                                verbatimTextOutput("countaccdir", placeholder = TRUE)
-               ),
-               # Select input folder gps data -----------------------------------
-               conditionalPanel(condition = "input.availabledata.indexOf(`GPS`) > -1 && input.tools.includes(`PALMSpy`)",
-                                shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
-                                                           title = "Select GPS data directory"),
-                                verbatimTextOutput("gpsdir", placeholder = TRUE)
-               ),
-               # Select input folder GIS data and GIS linkage file -----------------------------------
-               conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
-                                shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
-                                                           title = "Select GIS data directory"),
-                                verbatimTextOutput("gisdir", placeholder = TRUE),
-                                # strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
-                                shinyFiles::shinyFilesButton("gislinkfile", label = "GIS linkage file...",
-                                                             title = "Select GIS linkage file", multiple = FALSE),
-                                verbatimTextOutput("gislinkfile", placeholder = TRUE)
-               ),
-               # Select input folder PALMSpy output data -----------------------------------
-               conditionalPanel(condition = paste0("input.availabledata.indexOf(`PALMSpy_out`) > -1 && ",
-                                                   "input.tools.includes(`palmsplusr`) && !input.tools.includes(`PALMSpy`)"),
-                                shinyFiles::shinyDirButton("palmspyoutdir", label = "Previously generated PALMS(py) output directory...",
-                                                           title = "Select PALMS(py) output directory"),
-                                verbatimTextOutput("palmspyoutdir", placeholder = TRUE)
-               ),
-               # Upload sleep diary ----------------------------------------------------
-               conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1 && input.tools.includes(`GGIR`)",
-                                shinyFiles::shinyFilesButton("sleepdiaryfile", label = "Sleepdiary file...",
-                                                             title = "Select sleep diary file", multiple = FALSE),
-                                verbatimTextOutput("sleepdiaryfile", placeholder = TRUE)
-               ),
-               # Specify output directory ----------------------------------------------
-               fluidRow(
-                 column(12,
-                        shinyFiles::shinyDirButton("outputdir", "Output directory...",
-                                                   title = "Select directory where output should be stored"),
-                        verbatimTextOutput("outputdir", placeholder = TRUE)
-                 )
-               ),
-               # Provide dataset name (only needed when working with GIS data ---------------------------------
-               conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
-                                strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
-               ),
-               
-               hr(),
-               actionButton("page_21", "prev"),
-               actionButton("page_23", "next")
-      ),
-      tabPanel("page_3",
-               fluidRow(column(8, div(h1("Habitus - Parameter Configuration"), style = "height:50px")),
-                        column(4, div(imageOutput("logo_page3"), style = "height:50px;float:right"))
-               ),
-               p("\n"),
-               conditionalPanel(condition = "input.tools.includes('GGIR')",
-                                h2("GGIR"),
-                                modConfigUI("edit_ggir_config"),
-                                hr()
-               ),
-               conditionalPanel(condition = "input.tools.includes('Counts')",
-                                h2("Counts"),
-                                p("No parameters are needed for the Counts"),
-                                hr()
-               ),
-               conditionalPanel(condition = "input.tools.includes('PALMSpy')",
-                                h2("PALMSpy"),
-                                modConfigUI("edit_palmspy_config"),
-                                hr()
-               ),
-               conditionalPanel(condition = "input.tools.includes('palmsplusr')",
-                                h2("palmsplusr"),
-                                modConfigUI("edit_palmsplusr_config"),
-                                hr()
-               ),
-               actionButton("page_32", "prev"),
-               actionButton("page_34", "next")
-      ),
-      tabPanel("page_4",
-               # Button to start analysis ---------------------------------------------
-               fluidRow(column(8, div(h1("Habitus - Analyses"), style = "height:50px")),
-                        column(4, div(imageOutput("logo_page4"), style = "height:50px;float:right"))
-               ),
-               p("\n"),
-               p("\n"),
-               span(h4(textOutput("recommendorder")), style="color:purple"),
-               # hr(),
-               p("\n"),
-               conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
-                                                   "input.tools.includes('Counts')"),
-                                conditionalPanel(condition =
-                                                   paste0("input.tools.indexOf(`GGIR`) > -1  && ",
-                                                          "input.tools.indexOf(`Counts`) > -1"), 
-                                                 h3("GGIR and Counts:")
-                                ),
-                                conditionalPanel(condition = "input.tools.indexOf(`Counts`) == -1", 
-                                                 h3("GGIR:")
-                                ),
-                                shinyjs::useShinyjs(),
-                                actionButton("start_ggir", "Start analysis", width = '300px'),
-                                p("\n"),
-                                verbatimTextOutput("mylog_GGIR"),
-                                tags$head(tags$style("#mylog_GGIR{color:darkblue; font-size:12px; font-style:italic; 
+  
+  ui <- function() {
+    fluidPage(
+      theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
+      # preview examples: https://bootswatch.com/
+      # “cerulean”, “cosmo”, “cyborg”, “darkly”, “flatly”, “journal”, “litera”, “lumen”, 
+      # “lux”, “materia”, “minty”, “morph”, “pulse”, “quartz”, “sandstone”, “simplex”, 
+      #     “sketchy”, “slate”, “solar”, “spacelab”, “superhero”, “united”, “vapor”, “yeti”, “zephyr” 
+      tabsetPanel(
+        id = "wizard",
+        type = "hidden",
+        tabPanel("page_1",
+                 fluidRow(column(8, div(h1("Habitus"), style = "height:50px")),
+                          column(4, div(imageOutput("logo_page1"), style = "height:50px;float:right"))
+                 ),
+                 p("\n"),
+                 checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
+                                    choiceNames = list("Raw acceleration (at least ten values per second per axis)", 
+                                                       "Counts (in ActiGraph .csv format)",
+                                                       "GPS (in .csv format)", 
+                                                       "GIS (shape files + linkage file)", 
+                                                       "PALMS(py) output previously generated",
+                                                       "Sleep Diary (in GGIR compatible .csv format)"),
+                                    choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out", "SleepDiary"), width = '100%'),
+                 conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ", # GGIR
+                                                     "(input.availabledata.indexOf(`ACount`) > -1 && ", # PALMSpy
+                                                     "input.availabledata.indexOf(`GPS`) > -1) || ",
+                                                     "(input.availabledata.indexOf(`ACount`) > -1 && ", # palmsplusr variant 1
+                                                     "input.availabledata.indexOf(`GPS`) > -1 && ",
+                                                     "input.availabledata.indexOf(`GIS`) > -1) || ", 
+                                                     "(input.availabledata.indexOf(`PALMSpy_out`) > -1 && ", #palmsplusr variant 2
+                                                     "input.availabledata.indexOf(`GIS`) > -1)"),
+                                  hr(),
+                                  # If there is enough input data then show second check box to ask user about their research goals
+                                  checkboxGroupInput("researchgoals", label = "", 
+                                                     choiceNames = "", choiceValues = "", width = '100%'),
+                                  # Show possible pipelines:
+                                  textOutput("pipeline"),
+                                  hr(),
+                                  checkboxGroupInput("tools", label = "Select the tools you would like to use:",
+                                                     choiceNames = list("GGIR (R package)",
+                                                                        "Neishabouri Counts / actilifecounts (R package)",
+                                                                        "PALMSpy (Python library)",
+                                                                        "palmsplusr (R package)"),
+                                                     choiceValues = list("GGIR", "Counts", "PALMSpy", "palmsplusr"), width = '100%')
+                 ), 
+                 actionButton("page_12", "next")
+        ),
+        tabPanel("page_2",
+                 fluidRow(column(8, div(h1("Habitus - Data selection"), style = "height:50px")),
+                          column(4, div(imageOutput("logo_page2"), style = "height:50px;float:right"))
+                 ),
+                 p("\n"),
+                 # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
+                 conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1 && ",
+                                                     "(input.tools.includes(`GGIR`) || ",
+                                                     "input.tools.includes(`Counts`))"),
+                                  shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
+                                                             title = "Select raw accelerometer data directory"),
+                                  verbatimTextOutput("rawaccdir", placeholder = TRUE)
+                 ),
+                 # Select input folder count accelerometer data if count data is available and PALMSpy is planned------------------
+                 # if not then count data will have to be estimated from the raw data, but we do not bother user
+                 # with questions where it should be stored
+                 conditionalPanel(condition = "input.availabledata.indexOf(`ACount`) > -1 && input.tools.includes(`PALMSpy`)",
+                                  shinyFiles::shinyDirButton("countaccdir", label = "Count accelerometry data directory...",
+                                                             title = "Select count accelerometer data directory"),
+                                  verbatimTextOutput("countaccdir", placeholder = TRUE)
+                 ),
+                 # Select input folder gps data -----------------------------------
+                 conditionalPanel(condition = "input.availabledata.indexOf(`GPS`) > -1 && input.tools.includes(`PALMSpy`)",
+                                  shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
+                                                             title = "Select GPS data directory"),
+                                  verbatimTextOutput("gpsdir", placeholder = TRUE)
+                 ),
+                 # Select input folder GIS data and GIS linkage file -----------------------------------
+                 conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
+                                  shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
+                                                             title = "Select GIS data directory"),
+                                  verbatimTextOutput("gisdir", placeholder = TRUE),
+                                  # strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
+                                  shinyFiles::shinyFilesButton("gislinkfile", label = "GIS linkage file...",
+                                                               title = "Select GIS linkage file", multiple = FALSE),
+                                  verbatimTextOutput("gislinkfile", placeholder = TRUE)
+                 ),
+                 # Select input folder PALMSpy output data -----------------------------------
+                 conditionalPanel(condition = paste0("input.availabledata.indexOf(`PALMSpy_out`) > -1 && ",
+                                                     "input.tools.includes(`palmsplusr`) && !input.tools.includes(`PALMSpy`)"),
+                                  shinyFiles::shinyDirButton("palmspyoutdir", label = "Previously generated PALMS(py) output directory...",
+                                                             title = "Select PALMS(py) output directory"),
+                                  verbatimTextOutput("palmspyoutdir", placeholder = TRUE)
+                 ),
+                 # Upload sleep diary ----------------------------------------------------
+                 conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1 && input.tools.includes(`GGIR`)",
+                                  shinyFiles::shinyFilesButton("sleepdiaryfile", label = "Sleepdiary file...",
+                                                               title = "Select sleep diary file", multiple = FALSE),
+                                  verbatimTextOutput("sleepdiaryfile", placeholder = TRUE)
+                 ),
+                 # Specify output directory ----------------------------------------------
+                 fluidRow(
+                   column(12,
+                          shinyFiles::shinyDirButton("outputdir", "Output directory...",
+                                                     title = "Select directory where output should be stored"),
+                          verbatimTextOutput("outputdir", placeholder = TRUE)
+                   )
+                 ),
+                 # Provide dataset name (only needed when working with GIS data ---------------------------------
+                 conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
+                                  strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
+                 ),
+                 
+                 hr(),
+                 actionButton("page_21", "prev"),
+                 actionButton("page_23", "next")
+        ),
+        tabPanel("page_3",
+                 fluidRow(column(8, div(h1("Habitus - Parameter Configuration"), style = "height:50px")),
+                          column(4, div(imageOutput("logo_page3"), style = "height:50px;float:right"))
+                 ),
+                 p("\n"),
+                 conditionalPanel(condition = "input.tools.includes('GGIR')",
+                                  h2("GGIR"),
+                                  modConfigUI("edit_ggir_config"),
+                                  hr()
+                 ),
+                 conditionalPanel(condition = "input.tools.includes('Counts')",
+                                  h2("Counts"),
+                                  p("No parameters are needed for the Counts"),
+                                  hr()
+                 ),
+                 conditionalPanel(condition = "input.tools.includes('PALMSpy')",
+                                  h2("PALMSpy"),
+                                  modConfigUI("edit_palmspy_config"),
+                                  hr()
+                 ),
+                 conditionalPanel(condition = "input.tools.includes('palmsplusr')",
+                                  h2("palmsplusr"),
+                                  modConfigUI("edit_palmsplusr_config"),
+                                  hr()
+                 ),
+                 actionButton("page_32", "prev"),
+                 actionButton("page_34", "next")
+        ),
+        tabPanel("page_4",
+                 # Button to start analysis ---------------------------------------------
+                 fluidRow(column(8, div(h1("Habitus - Analyses"), style = "height:50px")),
+                          column(4, div(imageOutput("logo_page4"), style = "height:50px;float:right"))
+                 ),
+                 p("\n"),
+                 p("\n"),
+                 span(h4(textOutput("recommendorder")), style="color:purple"),
+                 # hr(),
+                 p("\n"),
+                 conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
+                                                     "input.tools.includes('Counts')"),
+                                  conditionalPanel(condition =
+                                                     paste0("input.tools.indexOf(`GGIR`) > -1  && ",
+                                                            "input.tools.indexOf(`Counts`) > -1"), 
+                                                   h3("GGIR and Counts:")
+                                  ),
+                                  conditionalPanel(condition = "input.tools.indexOf(`Counts`) == -1", 
+                                                   h3("GGIR:")
+                                  ),
+                                  shinyjs::useShinyjs(),
+                                  actionButton("start_ggir", "Start analysis", width = '300px'),
+                                  p("\n"),
+                                  verbatimTextOutput("mylog_GGIR"),
+                                  tags$head(tags$style("#mylog_GGIR{color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
-                                p("\n"),
-                                htmlOutput("ggir_end_message"),
-                                p("\n"),
-                                DT::dataTableOutput("GGIRpart2"),
-                                hr()
-               ),
-               conditionalPanel(condition = "input.tools.includes('PALMSpy')",
-                                h3("PALMSpy:"),
-                                shinyjs::useShinyjs(),
-                                actionButton("start_palmspy", "Start analysis", width = '300px'),
-                                p("\n"),
-                                verbatimTextOutput("mylog_PALMSpy"),
-                                tags$head(tags$style("#mylog_PALMSpy{color:darkblue; font-size:12px; font-style:italic; 
+                                  p("\n"),
+                                  htmlOutput("ggir_end_message"),
+                                  p("\n"),
+                                  DT::dataTableOutput("GGIRpart2"),
+                                  hr()
+                 ),
+                 conditionalPanel(condition = "input.tools.includes('PALMSpy')",
+                                  h3("PALMSpy:"),
+                                  shinyjs::useShinyjs(),
+                                  actionButton("start_palmspy", "Start analysis", width = '300px'),
+                                  p("\n"),
+                                  verbatimTextOutput("mylog_PALMSpy"),
+                                  tags$head(tags$style("#mylog_PALMSpy{color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
-                                p("\n"),
-                                htmlOutput("palmspy_end_message"),
-                                p("\n"),
-                                DT::dataTableOutput("PALMSpy_file1"),
-                                hr()
-               ),
-               conditionalPanel(condition = "input.tools.includes('palmsplusr')",
-                                h3("palmsplusr:"),
-                                shinyjs::useShinyjs(),
-                                actionButton("start_palmsplusr", "Start analysis", width = '300px'),
-                                p("\n"),
-                                verbatimTextOutput("mylog_palmsplusr"),
-                                tags$head(tags$style("#mylog_palmsplusr{color:darkblue; font-size:12px; font-style:italic; 
+                                  p("\n"),
+                                  htmlOutput("palmspy_end_message"),
+                                  p("\n"),
+                                  DT::dataTableOutput("PALMSpy_file1"),
+                                  hr()
+                 ),
+                 conditionalPanel(condition = "input.tools.includes('palmsplusr')",
+                                  h3("palmsplusr:"),
+                                  shinyjs::useShinyjs(),
+                                  actionButton("start_palmsplusr", "Start analysis", width = '300px'),
+                                  p("\n"),
+                                  verbatimTextOutput("mylog_palmsplusr"),
+                                  tags$head(tags$style("#mylog_palmsplusr{color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
-                                p("\n"),
-                                htmlOutput("palmsplusr_end_message"),
-                                p("\n"),
-                                DT::dataTableOutput("palmsplusr_file1"),
-                                hr()
-               ),
-               actionButton("page_43", "prev")
+                                  p("\n"),
+                                  htmlOutput("palmsplusr_end_message"),
+                                  p("\n"),
+                                  DT::dataTableOutput("palmsplusr_file1"),
+                                  hr()
+                 ),
+                 actionButton("page_43", "prev")
+        )
       )
     )
-  )
+  }
   
   server <- function(input, output, session) {
     getlogo = function() {
@@ -247,6 +249,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       updateTabsetPanel(inputId = "wizard",
                         selected = paste0("page_", i))
     }
+    
     observeEvent(input$page_12, {
       if (length(input$availabledata) == 0 & length(input$tools) == 0) {
         showNotification("Select data type(s) to be analysed", type = "error")
@@ -267,7 +270,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                   showNotification("palmsplusr not possible without access to GIS data", type = "error")
                 } else {
                   if ("palmsplusr" %in% input$tools == TRUE & ("PALMSpy_out" %in% input$availabledata == FALSE &
-                                                              "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
+                                                               "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
                     showNotification("palmsplusr requires either previously generated PALMS(py) output or GPS and Accelerometer data", type = "error")
                   } else {
                     if ("Counts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
@@ -307,7 +310,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                     "palmsplusr" %in% input$tools &
                     (as.character(input$gisdir)[1] == "0" |
                      length(current_gislinkfile) == 0)) {
-                    showNotification("Select GIS data directory and GIS linkage file", type = "error")
+                  showNotification("Select GIS data directory and GIS linkage file", type = "error")
                 } else {
                   if ("PALMSpy_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0") {
                     showNotification("Select previously generated PALMS(py) output directory", type = "error")
@@ -638,12 +641,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                       sleepdiary = sleepdiaryfile_local,
                       configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
                       do.Counts = do.Counts),
-                    stdout = "", #,
-                    stderr = "")
-         
+          stdout = "", #,
+          stderr = "")
+          
           # Expected location of log file
           logfile = paste0(isolate(global$data_out), "/GGIR.log")
-
+          
           observe({
             if (x_ggir$poll_io(0)[["process"]] != "ready") {
               # Copy local log file to server to update progress log
@@ -669,9 +672,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                   if (dir.exists(expected_outputdir_Counts) == TRUE) { # checks whether output dir was created
                     if (length(dir(expected_outputdir_Counts) > 0)) { # checks whether it has been filled with results
                       GGIRCounts_message = paste0(#"Counts and GGIR successfully completed at ", Sys.time(), 
-                                                      "Output is stored in ", expected_outputdir_Counts, " and ",
-                                                       expected_outputdir_ggir, 
-                                                      "<br/>The table below shows the content of part2_daysummary.csv")
+                        "Output is stored in ", expected_outputdir_Counts, " and ",
+                        expected_outputdir_ggir, 
+                        "<br/>The table below shows the content of part2_daysummary.csv")
                       GGIRpart2 = read.csv(expected_ggiroutput_file)
                       output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
                     } else {
@@ -682,9 +685,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                   }
                 } else {
                   GGIRCounts_message = paste0(#"GGIR successfully completed at ", Sys.time(), 
-                                                   "Output is stored in: ",  #<br/>
-                                                   expected_outputdir_ggir,
-                                                   "<br/>The table below shows the content of part2_daysummary.csv:")
+                    "Output is stored in: ",  #<br/>
+                    expected_outputdir_ggir,
+                    "<br/>The table below shows the content of part2_daysummary.csv:")
                   GGIRpart2 = read.csv(expected_ggiroutput_file, nrow = 100)
                   output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
                 }
@@ -768,7 +771,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
             if (dir.exists(expected_palmspy_results_dir)) {
               PALMSpy_message = paste0(#"PALMSpy completed at ", Sys.time(),
-                                       "Output is stored in: ", expected_palmspy_results_dir) #<br/>
+                "Output is stored in: ", expected_palmspy_results_dir) #<br/>
               # Now send content of 1 output file to UI
               expected_palmspyoutput_file = dir(expected_palmspy_results_dir, recursive = TRUE, full.names = TRUE, pattern = "csv")[1]
               if (length(expected_palmspyoutput_file) > 0) {
@@ -865,7 +868,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                                gislinkfile, outputdir, dataset_name,
                                                configfile){
             palmsplusr_shiny(gisdir, palmsdir, gislinkfile,
-                            outputdir, dataset_name, configfile)
+                             outputdir, dataset_name, configfile)
           },
           args = list(palmsplusr_shiny = palmsplusr_shiny,
                       gisdir = global$gis_in,
@@ -900,9 +903,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                 csv_files_palmsplusr = dir(expected_palmsplusr_folder, pattern = "csv", recursive = TRUE, full.names = TRUE)
                 if (length(csv_files_palmsplusr) > 0) {
                   palmsplusr_message = paste0(#"PALMSplusR successfully completed at ", Sys.time(),
-                                             "Output is stored in: ", expected_palmsplusr_folder, #<br/>
-                                             paste0("<br/>The table below shows the content of ", basename(csv_files_palmsplusr)[1]),
-                                             "<br/>Log file: ", logfile)
+                    "Output is stored in: ", expected_palmsplusr_folder, #<br/>
+                    paste0("<br/>The table below shows the content of ", basename(csv_files_palmsplusr)[1]),
+                    "<br/>Log file: ", logfile)
                   Sys.sleep(3)
                   palmsplusr_file1 = read.csv(file = csv_files_palmsplusr[1])
                   if (length(palmsplusr_file1) > 0) {
@@ -910,13 +913,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                   }
                 } else {
                   palmsplusr_message = paste0("palmsplusr unsuccessful",
-                                             "<br/>No file found inside: ", expected_palmsplusr_folder, #<br/>
-                                             "<br/>Log file: ", logfile)
+                                              "<br/>No file found inside: ", expected_palmsplusr_folder, #<br/>
+                                              "<br/>Log file: ", logfile)
                 }
               } else {
                 palmsplusr_message = paste0("palmsplusr unsuccessful",
-                                           "<br/>No file found inside: ", expected_palmsplusr_folder,
-                                           "<br/>Log file: ", logfile)
+                                            "<br/>No file found inside: ", expected_palmsplusr_folder,
+                                            "<br/>Log file: ", logfile)
               }
               output$palmsplusr_end_message <- renderUI({
                 HTML(paste0(palmsplusr_message))
@@ -950,7 +953,17 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     output$palmsplusr_end_message <- renderText({
       message = runpalmsplusr()
     })
+    # ---------------
+    observe({
+      # Trigger this observer every time an input changes
+      reactiveValuesToList(input)
+      session$doBookmark()
+    })
+    onBookmarked(function(url) {
+      updateQueryString(url)
+    })
+    # ---------------
   }
   # Run the application 
-  shinyApp(ui, server)
+  shinyApp(ui, server, enableBookmarking = "url")
 }
