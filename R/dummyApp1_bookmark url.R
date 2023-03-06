@@ -7,6 +7,7 @@ library(shiny)
 # App status is stored in url
 # Users can easily share the url with preselected app input
 # Users can see the changes they make in the url in real time
+# Tested: it stores buttons and paths.
 
 # CONS -------
 # urls get very long
