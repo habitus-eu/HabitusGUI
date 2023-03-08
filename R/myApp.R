@@ -414,7 +414,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                label = researchgoalsLabel,
                                choiceNames = researchgoalsNames,
                                choiceValues = reasearchgoalsValues,
-                               selected = input$researchgoals)
+                               selected = textOutput("select"))
     })
     
     # Identify pipeline with tools to be used and send to UI
@@ -962,8 +962,20 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     onBookmarked(function(url) {
       updateQueryString(url)
     })
+    
+    # Save extra values in state$values when we bookmark
+    onBookmark(function(state) {
+      state$values$currentgoals <- input$researchgoals
+      print(state$values$currentgoals)
+    })
+    
+    # Read values from state$values when we restore
+    selectedgoals <- reactiveValues(select = "")
+    onRestore(function(state) {
+      output$selectedgoals <- state$values$currentgoals
+    })
     # ---------------
   }
   # Run the application 
-  shinyApp(ui, server, enableBookmarking = "url")
+  shinyApp(ui, server, enableBookmarking = "server")
 }

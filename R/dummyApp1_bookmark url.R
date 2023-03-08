@@ -1,7 +1,7 @@
 library(shiny)
 
 
-# BOOKMARK OPTION
+# BOOKMARK OPTION: https://mastering-shiny.org/action-bookmark.html 
 
 # PROS -------
 # App status is stored in url
@@ -10,13 +10,15 @@ library(shiny)
 # Tested: it stores buttons and paths.
 
 # CONS -------
-# urls get very long
+# urls get very long --> can be solved with enableBookmarking = "server"
+# cannot store uploaded files (config, sleeplog) --> enableBookmarking = "server" -> problem, requires small storage capacity
 
 # TO INVESTIGATE -------
 # Status not stored for the research goals (conditional check group panel)
 # BUT, the selection of these buttons can be seen in the url
 # Potential reason: lines 412:418 in myApp.R
 # Investigate how to make updateCheckboxGroupInput work with bookmark
+# solution maybe here: https://shiny.rstudio.com/articles/advanced-bookmarking.html 
 
 ui = function(req) {
   fluidPage(
