@@ -12,7 +12,7 @@ load_params(file = c(), format = "json_palmspy")
 \item{format}{Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_palmsplusr}
 }
 \value{
-list of parameters extract from the configuration file and list of potential errors related to the configuration files
+list of parameters extract from the configuration file
 }
 \description{
 load_params
