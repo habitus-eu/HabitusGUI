@@ -1,7 +1,6 @@
 #' load_params
 #'
 #' @param file Character to specify location of configuration file
-#' @param homedir Character to specify location to store an automatically generated config file (if not provided correctly)
 #' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_palmsplusr
 #'
 #' @return list of parameters extract from the configuration file and list of potential errors related to the configuration files
@@ -10,7 +9,7 @@
 #' @export
 
 
-load_params = function(file=c(), format="json_palmspy", homedir = "") {
+load_params = function(file=c(), format="json_palmspy") {
   expected_tsv_columns = c("value", "field", "subfield", "display", "class", "minimum",
                            "maximum",	"set", "description", "priority")
   # intialize objects to be returned by the function
@@ -68,10 +67,11 @@ load_params = function(file=c(), format="json_palmspy", homedir = "") {
         if (!(colnames[1] == "argument" & colnames[2] == "value" & colnames[3] == "context")) {
           GGIRconfig_check = paste0(GGIRconfig_check, 
                                     "The csv file uploaded is not a GGIR config file")
+          params = c()
         } 
       }
     } 
-    
+
     # if sanity checks have passed, then load params
     if (is.null(GGIRconfig_check)) {
       # remove duplicates, because sometimes GGIR config files have duplicates

@@ -51,11 +51,11 @@ modConfigServer = function(id, tool, homedir = getwd()) {
       current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
       if (length(current_config) > 0) {
         if (tool() == "PALMSpy") {
-          params = load_params(file = current_config, format = "json_palmspy", homedir = homedir) #$datapath
+          params = load_params(file = current_config, format = "json_palmspy") #$datapath
         } else if (tool() == "GGIR") {
-          params = load_params(file = current_config, format = "csv_ggir", homedir = homedir) #$datapath
+          params = load_params(file = current_config, format = "csv_ggir") #$datapath
         } else if (tool() == "palmsplusr") {
-          params = load_params(file = current_config, format = "csv_palmsplusr", homedir = homedir) #$datapath
+          params = load_params(file = current_config, format = "csv_palmsplusr") #$datapath
         }
         
         # unlist objects from load_params
