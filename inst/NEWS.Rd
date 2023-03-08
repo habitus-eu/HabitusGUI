@@ -4,7 +4,7 @@
 
 \section{Changes in version 0.1.6 (GitHub-only-release date: ?-?-2023)}{
   \itemize{
-    \item GGIR config file is not checked when it is loaded
+    \item GGIR config file is now checked when it is loaded
   }
 }
 \section{Changes in version 0.1.5 (GitHub-only-release date: 20-12-2022)}{
