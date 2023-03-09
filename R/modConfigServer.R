@@ -47,18 +47,13 @@ modConfigServer = function(id, tool, homedir = getwd()) {
     # output$test_shinytable1 <- renderDataTable(data.frame(a = 1:3, b = rep("shinytable", 3), c = 3:1))
     
     observeEvent(input$configfile, {
-      print(configfile())
       # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
       current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
-      print(paste("length", length(current_config)))
-      print(paste("current_config", current_config))
-      
+
       if (length(current_config) > 0) {
-        print(tool())
         # check config file
         check = checkFile(file = current_config, tool = tool())
-        print(check)
-        
+
         if (check != "ok") {
           # Show notification and keep waiting for correct config file
           showNotification(check, type = "error")
@@ -73,7 +68,6 @@ modConfigServer = function(id, tool, homedir = getwd()) {
           output$mod_table <- DT::renderDT({})
           
         } else if (check == "ok") {
-          print("ok 1")
           if (tool() == "PALMSpy") {
             params = load_params(file = current_config, format = "json_palmspy") #$datapath
           } else if (tool() == "GGIR") {
@@ -90,7 +84,6 @@ modConfigServer = function(id, tool, homedir = getwd()) {
             HTML(params_errors$green_message)
           })
           
-          print("ok 2")
           v <- reactiveValues(params = params)
           proxy = DT::dataTableProxy("mod_table", session)
           observeEvent(input$mod_table_cell_edit, {
