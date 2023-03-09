@@ -26,7 +26,6 @@ modConfigUI <- function(id) {
            DT::DTOutput(NS(id, "mod_table")),
            # This line has no function locally, but seems critical for the app to work on UCloud:
            shiny::dataTableOutput(NS(id, 'test_shinytable1')),
-           span(h5(htmlOutput(NS(id, "config_check")), style="color:red")),
            span(htmlOutput(NS(id, "config_issues")), style="color:red"),
            span(htmlOutput(NS(id, "config_green")), style="color:green"),
     )
