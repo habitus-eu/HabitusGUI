@@ -3,6 +3,7 @@
 export(Counts2csv)
 export(GGIRshiny)
 export(PALMSpyshiny)
+export(checkFile)
 export(check_and_clean_palms_data)
 export(check_params)
 export(create_test_GGIRconfig)
