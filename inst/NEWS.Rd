@@ -2,9 +2,10 @@
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
-\section{Changes in version 0.1.6 (GitHub-only-release date: ?-?-2023)}{
+\section{Changes in version 0.1.6 (GitHub-only-release date: 15-03-2023)}{
   \itemize{
     \item GGIR config file is now checked when it is loaded
+    \item Removing references to Docker from documentation
   }
 }
 \section{Changes in version 0.1.5 (GitHub-only-release date: 20-12-2022)}{
