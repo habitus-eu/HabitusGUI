@@ -45,4 +45,4 @@ inst/testfiles_palmspy/palmspy-params.json
 inst/testfiles_ggir/config.csv
 
 # server state files
-/shiny_bookmarks/
+/previous_config/
