@@ -18,7 +18,7 @@ check_params = function(params = c(), tool = c()) {
       try(expr = {
         num_value = suppressWarnings(
           as.numeric(unlist(lapply(strsplit(x = as.character(params$value[i]), "[(]|[)]|[,]|c"), function(x){x[!x == ""]})))
-          )
+        )
       }, silent = TRUE)
       test_na = any(is.na(num_value))
       if (test_na == TRUE) {
@@ -95,9 +95,9 @@ check_params = function(params = c(), tool = c()) {
     for (parError_i in 1:nrow(block_params)) {
       # Error in parameter " idloc ": 10 is not part of expected set: 1 / 2 / 3 / 4 / 5 / 6 / 7
       message = paste0(c(message, paste0("Error in parameter \" ", 
-                                  block_params$name[parError_i], 
-                                  " \": Value ", params$value[which(rownames(params) == block_params$name[parError_i])], " ",
-                                  block_params$error[parError_i],"<br/>")), collapse = "")
+                                         block_params$name[parError_i], 
+                                         " \": Value ", params$value[which(rownames(params) == block_params$name[parError_i])], " ",
+                                         block_params$error[parError_i],"<br/>")), collapse = "")
     }
     green_message = c()
   }
