@@ -83,7 +83,9 @@ myApp <- function(homedir=getwd(), ...) {
                                                      "input.tools.includes(`Counts`))"),
                                   shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
                                                              title = "Select raw accelerometer data directory"),
-                                  verbatimTextOutput("rawaccdir", placeholder = TRUE)
+                                  verbatimTextOutput("rawaccdir", placeholder = TRUE),
+                                  uiOutput("uiSelectedRawaccdir"),
+                                  hr()
                  ),
                  # Select input folder count accelerometer data if count data is available and PALMSpy is planned------------------
                  # if not then count data will have to be estimated from the raw data, but we do not bother user
@@ -250,7 +252,33 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                         selected = paste0("page_", i))
     }
     
+    # load previous values if available
+    values = c()
+    if (file.exists("bookmark.RData")) load("bookmark.RData")
+    if (length(values) > 0) {
+      values$wizard = "page_1"
+      lapply(names(values),
+             function(x) session$sendInputMessage(x, list(value = values[[x]]))
+      )
+    }
+    
+    # previously selected directory
+    if (length(values$rawaccdir) < 2) selectedRawaccdir = c() else selectedRawaccdir = paste(values$rawaccdir$path, collapse = "/")
+    output$uiSelectedRawaccdir <- renderUI({
+      renderText(paste("Current selected directory:", 
+                       ifelse(test = is.null(selectedRawaccdir), yes = "none", 
+                              no = paste0(homedir, selectedRawaccdir))))
+    })
+    
     observeEvent(input$page_12, {
+      values_tmp = lapply(reactiveValuesToList(input), unclass)
+      if(exists("values") & length(values) > 10) {
+        # in order to not overwrite previous definition of directories
+        values[-grep("dir", names(values))] = values_tmp[-grep("dir", names(values_tmp))]
+      } else {
+        values = values_tmp
+      }
+      save(values, file = "bookmark.RData")
       if (length(input$availabledata) == 0 & length(input$tools) == 0) {
         showNotification("Select data type(s) to be analysed", type = "error")
       } else {
@@ -288,7 +316,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     })
     observeEvent(input$page_21, switch_page(1))
     observeEvent(input$page_23, {
-      if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0") {
+      values = lapply(reactiveValuesToList(input), unclass)
+      save(values, file = "bookmark.RData")
+      if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
         showNotification("Select raw accelerometer data directory", type = "error")
       } else {
         if ("AccRaw" %in% input$availabledata & "Counts" %in% input$tools & as.character(input$rawaccdir)[1] == "0") {
@@ -390,7 +420,10 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       x <- input$availabledata
       # Can use character(0) to remove all choices
       if (is.null(x)) x <- character(0)
-      researchgoals = c()
+      
+      if (exists("values")) researchgoals = values$researchgoals
+      if (!exists("values")) researchgoals = c()
+      
       if ("GPS" %in% x & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
       if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
       if (all(c("PALMSpy_out", "GIS") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
@@ -407,14 +440,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       } else {
         researchgoalsNames =  reasearchgoalsNames[which(reasearchgoalsValues %in% researchgoals == TRUE)]
         reasearchgoalsValues =  reasearchgoalsValues[which(reasearchgoalsValues %in% researchgoals == TRUE)]
-        researchgoalsLabel = "What is you research interest?"
+        researchgoalsLabel = "What is your research interest?"
       }
       # Update checkbox
       updateCheckboxGroupInput(session, "researchgoals",
                                label = researchgoalsLabel,
                                choiceNames = researchgoalsNames,
-                               choiceValues = reasearchgoalsValues,
-                               selected = textOutput("select"))
+                               choiceValues = reasearchgoalsValues)
     })
     
     # Identify pipeline with tools to be used and send to UI
@@ -953,28 +985,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     output$palmsplusr_end_message <- renderText({
       message = runpalmsplusr()
     })
-    # ---------------
-    observe({
-      # Trigger this observer every time an input changes
-      reactiveValuesToList(input)
-      session$doBookmark()
-    })
-    onBookmarked(function(url) {
-      updateQueryString(url)
-    })
-    
-    # Save extra values in state$values when we bookmark
-    onBookmark(function(state) {
-      state$values$currentgoals <- input$researchgoals
-      print(state$values$currentgoals)
-    })
-    
-    # Read values from state$values when we restore
-    selectedgoals <- reactiveValues(select = "")
-    onRestore(function(state) {
-      output$selectedgoals <- state$values$currentgoals
-    })
-    # ---------------
   }
   # Run the application 
   shinyApp(ui, server, enableBookmarking = "server")
