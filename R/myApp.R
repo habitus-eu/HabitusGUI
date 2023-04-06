@@ -265,14 +265,14 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     # previously selected directory
     if (length(values$rawaccdir) < 2) selectedRawaccdir = c() else selectedRawaccdir = paste(values$rawaccdir$path, collapse = "/")
     output$uiSelectedRawaccdir <- renderUI({
-      renderText(paste("Current selected directory:", 
+      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
                        ifelse(test = is.null(selectedRawaccdir), yes = "none", 
                               no = paste0(homedir, selectedRawaccdir))))
     })
     
     observeEvent(input$page_12, {
       values_tmp = lapply(reactiveValuesToList(input), unclass)
-      if(exists("values") & length(values) > 10) {
+      if (exists("values") & length(values) > 10) {
         # in order to not overwrite previous definition of directories
         values[-grep("dir", names(values))] = values_tmp[-grep("dir", names(values_tmp))]
       } else {
