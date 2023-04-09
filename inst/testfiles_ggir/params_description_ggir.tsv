@@ -1,6 +1,7 @@
 parameter	field	subfield	display	class	minimum	maximum	set	priority	description
 overwrite	general		TRUE	set			TRUE;FALSE	1	Logical (default = FALSE) to indicate if the existent analysis of milestone data should be overwritten or not.
 mode	general		TRUE	integer	1	5	1;2;3;4;5	1	Numeric (default = 1:5). Specify which of the five parts of the GGIR pipeline need to be run.
+acc.metric	general		TRUE	set			ENMO;ENMOa;MAD;NeishabouriCount_x;NeishabouriCount_y;NeishabouriCount_z;NeishabouriCount_vm;LFENMO	0	Character to define the acceleration metric to use for description and analysis of physical activity.
 windowsizes	general		TRUE	integer	1	3600		0	"Numeric vector of three values (default = c(5, 900, 3600)) to indicate the lengths of the windows in seconds for epoch, non-wear detection resolution, and non-wear detection window, respectively."
 desiredtz	general		TRUE	timezone				1	Timezone in which device was configured and experiments took place according to the timezone database (https://en.wikipedia.org/wiki/Zone.tab)
 configtz	general		TRUE	timezone				0	Timezone in which device was configured in the case that it is different from the timezone in which the experiment took place (see desiredtz) according to the timezone database (https://en.wikipedia.org/wiki/Zone.tab)
