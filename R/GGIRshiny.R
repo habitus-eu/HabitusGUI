@@ -14,17 +14,6 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
   if (length(sleepdiary) == 0) sleepdiary = c()
   if (length(configfile) == 0) configfile = c()
   
-  # set do.Counts to TRUE if different from configfile
-  if (length(configfile) > 0) {
-    config = read.csv(configfile)
-    if ("do.neishabouricounts" %in% config$argument) {
-      configCounts = config$value[which(config$argument == "do.neishabouricounts")]
-      if (do.Counts != as.logical(configCounts)) {
-        do.Counts = TRUE
-      }
-    }
-  }
-
   # create R script with the code to run the data analysis via a command line call
   # in this way turning off or restarting the app will not kill the data analysis
   fileConn <- file(paste0(outputdir, "/ggir_cmdline.R"))
@@ -35,7 +24,7 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
                "}",
                "if (length(args) == 5) {",
                "GGIR::GGIR(datadir = args[1], outputdir = args[2], ",
-               " do.neishabouricounts = args[3],",
+               " do.neishabouricounts = as.logical(args[3]),",
                "configfile = args[4], loglocation = args[5],",
                "do.parallel = TRUE)",
                "} else {",
@@ -46,8 +35,8 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
                "HabitusGUI::Counts2csv(outputdir = paste0(args[2], \"/output_\", basename(args[1])), configfile = args[4])"),
              fileConn)
   close(fileConn)
-   
-   basecommand = paste0("cd ", outputdir, " ; nohup Rscript ggir_cmdline.R ",
+  
+  basecommand = paste0("cd ", outputdir, " ; nohup Rscript ggir_cmdline.R ",
                        rawaccdir, " ",
                        outputdir, " ",
                        do.Counts, " ",
@@ -56,5 +45,5 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
   
   system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
           stdout = "", stderr = "", wait = TRUE)
- 
+  
 }
