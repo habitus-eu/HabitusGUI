@@ -14,6 +14,17 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
   if (length(sleepdiary) == 0) sleepdiary = c()
   if (length(configfile) == 0) configfile = c()
   
+  # set do.Counts to TRUE if different from configfile
+  if (length(configfile) > 0) {
+    config = read.csv(configfile)
+    if ("do.neishabouricounts" %in% config$argument) {
+      configCounts = config$value[which(config$argument == "do.neishabouricounts")]
+      if (do.Counts != as.logical(configCounts)) {
+        do.Counts = TRUE
+      }
+    }
+  }
+
   # create R script with the code to run the data analysis via a command line call
   # in this way turning off or restarting the app will not kill the data analysis
   fileConn <- file(paste0(outputdir, "/ggir_cmdline.R"))
