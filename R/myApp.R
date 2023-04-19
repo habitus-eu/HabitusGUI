@@ -273,12 +273,14 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     observeEvent(input$page_12, {
       values_tmp = lapply(reactiveValuesToList(input), unclass)
       if (exists("values") & length(values) > 10) {
-        # make sure lengths are equal (config path is generated separately)
-        if (length(values) > length(values_tmp)) {
-          values_tmp$configfileGGIR = ""
-        }
         # in order not to overwrite previous definition of directories
-        values[-grep("dir", names(values))] = values_tmp[-grep("dir", names(values_tmp))]
+        overwrite = which(names(values) %in% names(values_tmp))
+        not_overwrite = grep("dir", names(values))
+        overwrite = overwrite[-which(overwrite %in% not_overwrite)]
+        for (i in 1:length(values[overwrite])) {
+          values[overwrite[i]] = values_tmp[grep(names(values[overwrite[i]]),
+                                                 names(values_tmp))]
+        }
       } else {
         values = values_tmp
       }
