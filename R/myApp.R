@@ -58,7 +58,7 @@ myApp <- function(homedir=getwd(), ...) {
                                                      "input.availabledata.indexOf(`GIS`) > -1)"),
                                   hr(),
                                   # If there is enough input data then show second check box to ask user about their research goals
-                                  checkboxGroupInput("researchgoals", label = "", 
+                                  checkboxGroupInput("researchgoals", label = "",
                                                      choiceNames = "", choiceValues = "", width = '100%'),
                                   # Show possible pipelines:
                                   textOutput("pipeline"),
@@ -270,10 +270,11 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                               no = paste0(homedir, selectedRawaccdir))))
     })
     
+    
     observeEvent(input$page_12, {
       values_tmp = lapply(reactiveValuesToList(input), unclass)
       if (exists("values") & length(values) > 10) {
-        # in order to not overwrite previous definition of directories
+        # in order not to overwrite previous definition of directories
         values[-grep("dir", names(values))] = values_tmp[-grep("dir", names(values_tmp))]
       } else {
         values = values_tmp
@@ -420,9 +421,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       x <- input$availabledata
       # Can use character(0) to remove all choices
       if (is.null(x)) x <- character(0)
-      
-      if (exists("values")) researchgoals = values$researchgoals
-      if (!exists("values")) researchgoals = c()
+      researchgoals = c()
       
       if ("GPS" %in% x & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
       if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
@@ -433,7 +432,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       reasearchgoalsNames = c("Data quality assessment", "Physical activity, sedentary behaviour & sleep",
                               "Trips (displacements)", "Relation between behaviour and environment")
       reasearchgoalsValues = c("QC", "PB", "Trips", "Environment")
-      
+
       if (length(researchgoals) == 0) {
         researchgoalsLabel = ""
         reasearchgoalsValues = researchgoalsNames = c()
@@ -442,18 +441,30 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         reasearchgoalsValues =  reasearchgoalsValues[which(reasearchgoalsValues %in% researchgoals == TRUE)]
         researchgoalsLabel = "What is your research interest?"
       }
+      
+      # check previously selected
+      researchgoalsSelected = c()
+      if (exists("values")) {
+        researchgoals = values$researchgoals
+        researchgoalsSelected = researchgoals[which(researchgoals %in% reasearchgoalsValues)]
+        print(researchgoalsSelected)
+      }
+      
       # Update checkbox
       updateCheckboxGroupInput(session, "researchgoals",
                                label = researchgoalsLabel,
                                choiceNames = researchgoalsNames,
-                               choiceValues = reasearchgoalsValues)
+                               choiceValues = reasearchgoalsValues,
+                               selected = researchgoalsSelected)
     })
     
     # Identify pipeline with tools to be used and send to UI
     proposed_pipeline <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
     output$pipeline <- renderText({
-      message = paste0("Proposed software pipeline: ",paste0(proposed_pipeline(), collapse = " + "))
-      ifelse(length(proposed_pipeline()) == 0, yes = "--> Tick boxes above according to the analysis you would like to do", no = message)
+      message = paste0("Proposed software pipeline: ", paste0(proposed_pipeline(), collapse = " + "))
+      ifelse(length(proposed_pipeline()) == 0,
+             yes = "--> Tick boxes above according to the analysis you would like to do",
+             no = message)
     })
     
     # check whether GGIR is in the pipeline, and send to UI,
