@@ -262,18 +262,21 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       )
     }
     
-    # previously selected directory
-    if (length(values$rawaccdir) < 2) selectedRawaccdir = c() else selectedRawaccdir = paste(values$rawaccdir$path, collapse = "/")
+    # previously selected directories -----
+    if (length(values$rawaccdir) < 2) selectedRawaccdir = c() else selectedRawaccdir = paste(values$rawaccdir$path, collapse = .Platform$file.sep)
     output$uiSelectedRawaccdir <- renderUI({
       renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
                        ifelse(test = is.null(selectedRawaccdir), yes = "none", 
                               no = paste0(homedir, selectedRawaccdir))))
     })
     
-    
     observeEvent(input$page_12, {
       values_tmp = lapply(reactiveValuesToList(input), unclass)
       if (exists("values") & length(values) > 10) {
+        # make sure lengths are equal (config path is generated separately)
+        if (length(values) > length(values_tmp)) {
+          values_tmp$configfileGGIR = ""
+        }
         # in order not to overwrite previous definition of directories
         values[-grep("dir", names(values))] = values_tmp[-grep("dir", names(values_tmp))]
       } else {
@@ -317,8 +320,18 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     })
     observeEvent(input$page_21, switch_page(1))
     observeEvent(input$page_23, {
-      values = lapply(reactiveValuesToList(input), unclass)
+      # Previous selection of rawaccdir
+      prev_rawaccdir = values$rawaccdir
+      values_tmp = lapply(reactiveValuesToList(input), unclass)
+      values_tmp$configfileGGIR = values$configfileGGIR
+      if (length(values_tmp$rawaccdir) == 1) {
+        if (values_tmp$rawaccdir == 0) {
+          values_tmp$rawaccdir = prev_rawaccdir
+        }
+      }
+      values = values_tmp
       save(values, file = "bookmark.RData")
+      # -----
       if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
         showNotification("Select raw accelerometer data directory", type = "error")
       } else {
@@ -358,6 +371,18 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     })
     observeEvent(input$page_32, switch_page(2))
     observeEvent(input$page_34, {
+      # Previous selection of rawaccdir
+      prev_rawaccdir = values$rawaccdir
+      values = lapply(reactiveValuesToList(input), unclass)
+      if (length(values$rawaccdir) == 1) {
+        if (values$rawaccdir == 0) {
+          values$rawaccdir = prev_rawaccdir
+        }
+      }
+      # save also configfile path
+      values$configfileGGIR = configfileGGIR()
+      save(values, file = "bookmark.RData")
+      # -----
       configs_ready = TRUE
       if ("PALMSpy" %in% input$tools) {
         if (length(paste0(configfilePALMSpy())) == 0) {
@@ -447,7 +472,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       if (exists("values")) {
         researchgoals = values$researchgoals
         researchgoalsSelected = researchgoals[which(researchgoals %in% reasearchgoalsValues)]
-        print(researchgoalsSelected)
       }
       
       # Update checkbox
