@@ -25,7 +25,7 @@ Install the tools you plan to use:
 HabitusGUI can be installed as R package with the following commands in the RStudio console:
 
 ```
-install.package(remotes); library("remotes"); remotes::install_github("habitus-eu/HabitusGUI", dependencies=TRUE)
+install.packages(remotes); library("remotes"); remotes::install_github("habitus-eu/HabitusGUI", dependencies=TRUE)
 ```
 
 #### 2.4 Using HabitusGUI
