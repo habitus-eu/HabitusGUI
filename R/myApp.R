@@ -93,15 +93,17 @@ myApp <- function(homedir=getwd(), ...) {
                  conditionalPanel(condition = "input.availabledata.indexOf(`ACount`) > -1 && input.tools.includes(`PALMSpy`)",
                                   shinyFiles::shinyDirButton("countaccdir", label = "Count accelerometry data directory...",
                                                              title = "Select count accelerometer data directory"),
+                                  verbatimTextOutput("countaccdir", placeholder = TRUE),
                                   uiOutput("uiSelectedCountaccdir"),
-                                  verbatimTextOutput("countaccdir", placeholder = TRUE)
+                                  hr()
                  ),
                  # Select input folder gps data -----------------------------------
                  conditionalPanel(condition = "input.availabledata.indexOf(`GPS`) > -1 && input.tools.includes(`PALMSpy`)",
                                   shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
                                                              title = "Select GPS data directory"),
+                                  verbatimTextOutput("gpsdir", placeholder = TRUE),
                                   uiOutput("uiSelectedGpsdir"),
-                                  verbatimTextOutput("gpsdir", placeholder = TRUE)
+                                  hr()
                  ),
                  # Select input folder GIS data and GIS linkage file -----------------------------------
                  conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
@@ -112,23 +114,26 @@ myApp <- function(homedir=getwd(), ...) {
                                   # strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
                                   shinyFiles::shinyFilesButton("gislinkfile", label = "GIS linkage file...",
                                                                title = "Select GIS linkage file", multiple = FALSE),
+                                  verbatimTextOutput("gislinkfile", placeholder = TRUE),
                                   uiOutput("uiSelectedGislinkfile "),
-                                  verbatimTextOutput("gislinkfile", placeholder = TRUE)
+                                  hr()
                  ),
                  # Select input folder PALMSpy output data -----------------------------------
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`PALMSpy_out`) > -1 && ",
                                                      "input.tools.includes(`palmsplusr`) && !input.tools.includes(`PALMSpy`)"),
                                   shinyFiles::shinyDirButton("palmspyoutdir", label = "Previously generated PALMS(py) output directory...",
                                                              title = "Select PALMS(py) output directory"),
+                                  verbatimTextOutput("palmspyoutdir", placeholder = TRUE),
                                   uiOutput("uiSelectedPalmspyoutdir"),
-                                  verbatimTextOutput("palmspyoutdir", placeholder = TRUE)
+                                  hr()
                  ),
                  # Upload sleep diary ----------------------------------------------------
                  conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1 && input.tools.includes(`GGIR`)",
                                   shinyFiles::shinyFilesButton("sleepdiaryfile", label = "Sleepdiary file...",
                                                                title = "Select sleep diary file", multiple = FALSE),
+                                  verbatimTextOutput("sleepdiaryfile", placeholder = TRUE),
                                   uiOutput("uiSelectedSleepdiaryfile"),
-                                  verbatimTextOutput("sleepdiaryfile", placeholder = TRUE)
+                                  hr()
                  ),
                  # Specify output directory ----------------------------------------------
                  fluidRow(
