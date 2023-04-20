@@ -309,6 +309,14 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                               no = paste0(homedir, selectedGislinkfile))))
     })
     
+    # palmspyoutdir
+    if (length(values$palmspyoutdir) < 2) selectedPalmspyoutdir = c() else selectedPalmspyoutdir = paste(values$palmspyoutdir$path, collapse = .Platform$file.sep)
+    output$uiSelectedPalmspyoutdir <- renderUI({
+      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
+                       ifelse(test = is.null(selectedPalmspyoutdir), yes = "none", 
+                              no = paste0(homedir, selectedPalmspyoutdir))))
+    })
+    
     # sleepdiaryfile
     if (length(values$sleepdiaryfile) < 2) selectedSleepdiaryfile = c() else selectedSleepdiaryfile = paste(values$sleepdiaryfile$path, collapse = .Platform$file.sep)
     output$uiSelectedSleepdiaryfile <- renderUI({
@@ -369,7 +377,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     })
     observeEvent(input$page_21, switch_page(1))
     observeEvent(input$page_23, {
-      # Previous selection of rawaccdir
+      # Previous selection of directories
       prev_rawaccdir = values$rawaccdir
       values_tmp = lapply(reactiveValuesToList(input), unclass)
       values_tmp$configfileGGIR = values$configfileGGIR
@@ -378,6 +386,11 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           values_tmp$rawaccdir = prev_rawaccdir
         }
       }
+      
+      # prev_directories = grep("dir", names(values), value = TRUE)
+      
+      
+      
       values = values_tmp
       save(values, file = "bookmark.RData")
       # -----
