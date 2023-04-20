@@ -6,7 +6,6 @@
 #' @return message with the result of the check (either ok or the description of a problem)
 #' @export
 checkFile = function(file=c(), tool=c()) {
-  
   # intialize check object, ok by default, it would be overwritten if 
   # any problem is identified in the config file.
   check = "ok"
@@ -39,7 +38,7 @@ checkFile = function(file=c(), tool=c()) {
         } 
       }
     } 
-  } else if (format == "palmsplusr") {
+  } else if (tool == "palmsplusr") {
     # sanity check 1: is it a csv file? ----
     if (!file.exists(file)) {
       # stop("No config file found at ", path)
