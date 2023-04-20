@@ -93,22 +93,26 @@ myApp <- function(homedir=getwd(), ...) {
                  conditionalPanel(condition = "input.availabledata.indexOf(`ACount`) > -1 && input.tools.includes(`PALMSpy`)",
                                   shinyFiles::shinyDirButton("countaccdir", label = "Count accelerometry data directory...",
                                                              title = "Select count accelerometer data directory"),
+                                  uiOutput("uiSelectedCountaccdir"),
                                   verbatimTextOutput("countaccdir", placeholder = TRUE)
                  ),
                  # Select input folder gps data -----------------------------------
                  conditionalPanel(condition = "input.availabledata.indexOf(`GPS`) > -1 && input.tools.includes(`PALMSpy`)",
                                   shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
                                                              title = "Select GPS data directory"),
+                                  uiOutput("uiSelectedGpsdir"),
                                   verbatimTextOutput("gpsdir", placeholder = TRUE)
                  ),
                  # Select input folder GIS data and GIS linkage file -----------------------------------
                  conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
                                   shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
                                                              title = "Select GIS data directory"),
+                                  uiOutput("uiSelectedGisdir"),
                                   verbatimTextOutput("gisdir", placeholder = TRUE),
                                   # strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
                                   shinyFiles::shinyFilesButton("gislinkfile", label = "GIS linkage file...",
                                                                title = "Select GIS linkage file", multiple = FALSE),
+                                  uiOutput("uiSelectedGislinkfile "),
                                   verbatimTextOutput("gislinkfile", placeholder = TRUE)
                  ),
                  # Select input folder PALMSpy output data -----------------------------------
@@ -116,12 +120,14 @@ myApp <- function(homedir=getwd(), ...) {
                                                      "input.tools.includes(`palmsplusr`) && !input.tools.includes(`PALMSpy`)"),
                                   shinyFiles::shinyDirButton("palmspyoutdir", label = "Previously generated PALMS(py) output directory...",
                                                              title = "Select PALMS(py) output directory"),
+                                  uiOutput("uiSelectedPalmspyoutdir"),
                                   verbatimTextOutput("palmspyoutdir", placeholder = TRUE)
                  ),
                  # Upload sleep diary ----------------------------------------------------
                  conditionalPanel(condition = "input.availabledata.indexOf(`SleepDiary`) > -1 && input.tools.includes(`GGIR`)",
                                   shinyFiles::shinyFilesButton("sleepdiaryfile", label = "Sleepdiary file...",
                                                                title = "Select sleep diary file", multiple = FALSE),
+                                  uiOutput("uiSelectedSleepdiaryfile"),
                                   verbatimTextOutput("sleepdiaryfile", placeholder = TRUE)
                  ),
                  # Specify output directory ----------------------------------------------
@@ -263,11 +269,52 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     }
     
     # previously selected directories -----
+    # rawaccdir
     if (length(values$rawaccdir) < 2) selectedRawaccdir = c() else selectedRawaccdir = paste(values$rawaccdir$path, collapse = .Platform$file.sep)
     output$uiSelectedRawaccdir <- renderUI({
       renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
                        ifelse(test = is.null(selectedRawaccdir), yes = "none", 
                               no = paste0(homedir, selectedRawaccdir))))
+    })
+    
+    # countaccdir
+    if (length(values$countaccdir) < 2) selectedCountaccdir = c() else selectedCountaccdir = paste(values$countaccdir$path, collapse = .Platform$file.sep)
+    output$uiSelectedCountaccdir <- renderUI({
+      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
+                       ifelse(test = is.null(selectedCountaccdir), yes = "none", 
+                              no = paste0(homedir, selectedCountaccdir))))
+    })
+    
+    # gpsdir
+    if (length(values$gpsdir) < 2) selectedGpsdir = c() else selectedGpsdir = paste(values$gpsdir$path, collapse = .Platform$file.sep)
+    output$uiSelectedGpsdir <- renderUI({
+      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
+                       ifelse(test = is.null(selectedGpsdir), yes = "none", 
+                              no = paste0(homedir, selectedGpsdir))))
+    })
+    
+    # gisdir
+    if (length(values$gisdir) < 2) selectedGisdir = c() else selectedGisdir = paste(values$gisdir$path, collapse = .Platform$file.sep)
+    output$uiSelectedGisdir <- renderUI({
+      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
+                       ifelse(test = is.null(selectedGisdir), yes = "none", 
+                              no = paste0(homedir, selectedGisdir))))
+    })
+    
+    # gislinkfile
+    if (length(values$gislinkfile) < 2) selectedGislinkfile = c() else selectedGislinkfile = paste(values$gislinkfile$path, collapse = .Platform$file.sep)
+    output$uiSelectedGislinkfile <- renderUI({
+      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
+                       ifelse(test = is.null(selectedGislinkfile), yes = "none", 
+                              no = paste0(homedir, selectedGislinkfile))))
+    })
+    
+    # sleepdiaryfile
+    if (length(values$sleepdiaryfile) < 2) selectedSleepdiaryfile = c() else selectedSleepdiaryfile = paste(values$sleepdiaryfile$path, collapse = .Platform$file.sep)
+    output$uiSelectedSleepdiaryfile <- renderUI({
+      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
+                       ifelse(test = is.null(selectedSleepdiaryfile), yes = "none", 
+                              no = paste0(homedir, selectedSleepdiaryfile))))
     })
     
     observeEvent(input$page_12, {
