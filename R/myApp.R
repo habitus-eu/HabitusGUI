@@ -187,7 +187,7 @@ myApp <- function(homedir=getwd(), ...) {
                  ),
                  p("\n"),
                  p("\n"),
-                 span(h4(textOutput("recommendorder")), style="color:purple"),
+                 span(h4(textOutput("recommendorder")), style = "color:purple"),
                  # hr(),
                  p("\n"),
                  conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
@@ -383,19 +383,20 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     observeEvent(input$page_21, switch_page(1))
     observeEvent(input$page_23, {
       # Previous selection of directories
-      prev_rawaccdir = values$rawaccdir
+      prevPathNames = c("rawaccdir", "countaccdir", "sleepdiaryfile", "configfileGGIR",
+                        "gpsdir", "gisdir", "gislinkfile", "palmspyoutdir", "outputdir")
+      prevPathNames = prevPathNames[which(prevPathNames %in% names(values))]
+      prevPaths = values[prevPathNames]
       values_tmp = lapply(reactiveValuesToList(input), unclass)
-      values_tmp$configfileGGIR = values$configfileGGIR
-      if (length(values_tmp$rawaccdir) == 1) {
-        if (values_tmp$rawaccdir == 0) {
-          values_tmp$rawaccdir = prev_rawaccdir
+      if (!is.null(prevPaths)) { # if first run, skip this part of the code
+        for (i in 1:length(prevPaths)) {
+          if (length(values_tmp[[prevPathNames[i]]]) == 1) {
+            if (values_tmp[[prevPathNames[i]]] == 0) {
+              values_tmp[[prevPathNames[i]]] = prevPaths[[i]]
+            }
+          }
         }
       }
-      
-      # prev_directories = grep("dir", names(values), value = TRUE)
-      
-      
-      
       values = values_tmp
       save(values, file = "bookmark.RData")
       # -----
@@ -405,31 +406,30 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         if ("AccRaw" %in% input$availabledata & "Counts" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
           showNotification("Select raw accelerometer data directory", type = "error")
         } else {
-          if ("ACount" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$countaccdir)[1] == "0") {
+          if ("ACount" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$countaccdir)[1] == "0" & is.null(selectedCountaccdir)) {
             showNotification("Select count accelerometer data directory", type = "error")
           } else {
-            if ("GPS" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$gpsdir)[1] == "0") {
+            if ("GPS" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$gpsdir)[1] == "0" & is.null(selectedGpsdir)) {
               showNotification("Select GPS data directory", type = "error")
             } else {
               current_sleepdiary = as.character(parseFilePaths(c(home = homedir), input$sleepdiaryfile)$datapath)
               if ("SleepDiary" %in% input$availabledata & "GGIR" %in% input$tools &
-                  length(current_sleepdiary) == 0) { 
+                  length(current_sleepdiary) == 0 & is.null(selectedSleepdiaryfile)) { 
                 showNotification("Select sleepdiary file", type = "error")
               } else {
                 current_gislinkfile = as.character(parseFilePaths(c(home = homedir), input$gislinkfile)$datapath)
                 if ("GIS" %in% input$availabledata &
                     "palmsplusr" %in% input$tools &
                     (as.character(input$gisdir)[1] == "0" |
-                     length(current_gislinkfile) == 0)) {
+                     length(current_gislinkfile) == 0) & is.null(selectedGisdir)) {
                   showNotification("Select GIS data directory and GIS linkage file", type = "error")
                 } else {
-                  if ("PALMSpy_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0") {
+                  if ("PALMSpy_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0" & is.null(selectedPalmspyoutdir)) {
                     showNotification("Select previously generated PALMS(py) output directory", type = "error")
                   } else {
                     switch_page(3)
                   }
                 }
-                
               }
             }
           }
@@ -438,16 +438,22 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     })
     observeEvent(input$page_32, switch_page(2))
     observeEvent(input$page_34, {
-      # Previous selection of rawaccdir
-      prev_rawaccdir = values$rawaccdir
-      values = lapply(reactiveValuesToList(input), unclass)
-      if (length(values$rawaccdir) == 1) {
-        if (values$rawaccdir == 0) {
-          values$rawaccdir = prev_rawaccdir
+      # Previous selection of directories
+      prevPathNames = c("rawaccdir", "countaccdir", "sleepdiaryfile", "configfileGGIR",
+                        "gpsdir", "gisdir", "gislinkfile", "palmspyoutdir", "outputdir")
+      prevPathNames = prevPathNames[which(prevPathNames %in% names(values))]
+      prevPaths = values[prevPathNames]
+      values_tmp = lapply(reactiveValuesToList(input), unclass)
+      if (!is.null(prevPaths)) { # if first run, skip this part of the code
+        for (i in 1:length(prevPaths)) {
+          if (length(values_tmp[[prevPathNames[i]]]) == 1) {
+            if (values_tmp[[prevPathNames[i]]] == 0) {
+              values_tmp[[prevPathNames[i]]] = prevPaths[[i]]
+            }
+          }
         }
       }
-      # save also configfile path
-      values$configfileGGIR = configfileGGIR()
+      values = values_tmp
       save(values, file = "bookmark.RData")
       # -----
       configs_ready = TRUE
@@ -524,7 +530,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       reasearchgoalsNames = c("Data quality assessment", "Physical activity, sedentary behaviour & sleep",
                               "Trips (displacements)", "Relation between behaviour and environment")
       reasearchgoalsValues = c("QC", "PB", "Trips", "Environment")
-
+      
       if (length(researchgoals) == 0) {
         researchgoalsLabel = ""
         reasearchgoalsValues = researchgoalsNames = c()
@@ -756,7 +762,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             sleepdiaryfile_local = c()
           }
           # on.exit(file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE))
-          # on.exit(file.copy(from = logfile, to = stdout_GGIR_tmp, overwrite = TRUE))
           
           write.table(x = NULL, file = stdout_GGIR_tmp) # initialise empty file
           output$mylog_GGIR <- renderText({
