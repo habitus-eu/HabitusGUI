@@ -109,13 +109,13 @@ myApp <- function(homedir=getwd(), ...) {
                  conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
                                   shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
                                                              title = "Select GIS data directory"),
-                                  uiOutput("uiSelectedGisdir"),
                                   verbatimTextOutput("gisdir", placeholder = TRUE),
-                                  # strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
+                                  uiOutput("uiSelectedGisdir"),
+                                  hr(),
                                   shinyFiles::shinyFilesButton("gislinkfile", label = "GIS linkage file...",
                                                                title = "Select GIS linkage file", multiple = FALSE),
                                   verbatimTextOutput("gislinkfile", placeholder = TRUE),
-                                  uiOutput("uiSelectedGislinkfile "),
+                                  uiOutput("uiSelectedGislinkfile"),
                                   hr()
                  ),
                  # Select input folder PALMSpy output data -----------------------------------
