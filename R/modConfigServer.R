@@ -2,13 +2,15 @@
 #'
 #' @param id ...
 #' @param tool ...
+#' @param prevConfig character to specify path to config file selected in previous run 
 #' @param homedir character to specify home directory
+#'
 #' @return No object returned, this is a shiny module
 #' @import shinyFiles
 #' @importFrom magrittr %>%
 #' @export
 
-modConfigServer = function(id, tool, homedir = getwd()) {
+modConfigServer = function(id, tool, homedir = getwd(), prevConfig = c()) {
   
   moduleServer(id, function(input, output, session) {
     observeEvent(tool(), {
@@ -49,6 +51,7 @@ modConfigServer = function(id, tool, homedir = getwd()) {
     observeEvent(input$configfile, {
       # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
       current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
+      if (is.null(current_config)) current_config = prevConfig
 
       if (length(current_config) > 0) {
         # check config file

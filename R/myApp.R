@@ -478,12 +478,16 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           if (configfileGGIR() != paste0(global$data_out, "/config.csv")) {
             file.copy(from = configfileGGIR(), to = paste0(global$data_out, "/config.csv"), 
                       overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+            values$configfileGGIR = paste0(global$data_out, "/config.csv")
+            save(values, file = "bookmark.RData")
           }
           current_sleepdiaryfile = as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
           if (length(current_sleepdiaryfile) > 0) {
             if (current_sleepdiaryfile != paste0(global$data_out, "/sleepdiary.csv")) {
               file.copy(from = current_sleepdiaryfile, to = paste0(global$data_out, "/sleepdiary.csv"), 
                         overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+              values$sleepdiaryfile = paste0(global$data_out, "/sleepdiary.csv")
+              save(values, file = "bookmark.RData")
             }
             sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
           } else  {
@@ -494,12 +498,16 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           if (configfilePALMSpy() != paste0(global$data_out, "/config.json")) {
             file.copy(from = configfilePALMSpy(), to = paste0(global$data_out, "/config.json"), 
                       overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+            values$configfilePALMSpy = paste0(global$data_out, "/config.json")
+            save(values, file = "bookmark.RData")
           }
         }
         if ("palmsplusr" %in% input$tools) {
           if (configfilepalmsplusr() != paste0(global$data_out, "/config_palmsplusr.csv")) {
             file.copy(from = configfilepalmsplusr(), to = paste0(global$data_out, "/config_palmsplusr.csv"), 
                       overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
+            values$configfilepalmsplusr = paste0(global$data_out, "/config_palmsplusr.csv")
+            save(values, file = "bookmark.RData")
           }
         }
         switch_page(4)
@@ -722,9 +730,21 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     
     
     # Check and Edit config files ---------------------------------------
-    configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir)
-    configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir)
-    configfilepalmsplusr <- modConfigServer("edit_palmsplusr_config", tool = reactive("palmsplusr"), homedir = homedir)
+    prevConfigPALMSpy = prevConfigGGIR = prevConfigPalmsplusr = c()
+    if (exists("values")) {
+      if (!is.null(values$configfilePALMSpy)) {
+        prevConfigPALMSpy = values$configfilePALMSpy
+      }
+      if (!is.null(values$configfileGGIR)) {
+        prevConfigGGIR = values$configfilePALMSpy
+      }
+      if (!is.null(values$configfilepalmsplusr)) {
+        prevConfigPalmsplusr = values$configfilepalmsplusr
+      }
+    }
+    configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir, prevConfig = prevConfigPALMSpy)
+    configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir, prevConfig = prevConfigGGIR)
+    configfilepalmsplusr <- modConfigServer("edit_palmsplusr_config", tool = reactive("palmsplusr"), homedir = homedir, prevConfig = prevConfigPalmsplusr)
     
     #========================================================================
     # Apply GGIR / Counts after button is pressed
