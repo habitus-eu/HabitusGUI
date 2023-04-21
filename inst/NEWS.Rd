@@ -2,6 +2,11 @@
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
+\section{Changes in version 0.1.7 (GitHub-only-release date: ?-?-2023)}{
+  \itemize{
+    \item Shiny state is saved and used if available when refreshing the app
+  }
+}
 \section{Changes in version 0.1.6 (GitHub-only-release date: 15-03-2023)}{
   \itemize{
     \item GGIR config file is now checked when it is loaded
