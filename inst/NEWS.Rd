@@ -4,7 +4,7 @@
 
 \section{Changes in version 0.1.7 (GitHub-only-release date: ?-?-2023)}{
   \itemize{
-    \item Shiny state is saved and used if available when refreshing the app
+    \item Shiny state is saved and used if available when refreshing the app.
   }
 }
 \section{Changes in version 0.1.6 (GitHub-only-release date: 15-03-2023)}{
