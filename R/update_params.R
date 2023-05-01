@@ -47,6 +47,26 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
       ind = which(rownames(params) %in% rownames(new_params)[j] == TRUE)
       params$value[ind] = new_params$value[j]
     }
+    # match acc.metric with do.metric arguments
+    do_metrics = c("do.zcx", "do.zcy", "do.zcz", 
+                   "do.en", "do.enmo", "do.enmoa",
+                   "do.lfen", "do.lfenmo",
+                   "do.bfen", "do.hfen", "do.hfenplus",
+                   "do.mad", "do.brondcounts", "do.neishabouricounts",
+                   "do.roll_med_acc_x", "do.roll_med_acc_y", "do.roll_med_acc_z", 
+                   "do.dev_roll_med_acc_x", "do.dev_roll_med_acc_y", "do.dev_roll_med_acc_z",
+                   "do.lfx", "do.lfy", "do.lfz", "do.hfx", "do.hfy", "do.hfz",
+                   "do.bfx", "do.bfy", "do.bfz")
+    acc.metric = params["acc.metric", "value"]
+    # if neishabouri counts, remove reference to axis
+    if (grepl("Neishabouri", acc.metric)) acc.metric = gsub("_x|_y|_z|_vm", "", acc.metric)
+    do_argument = grep(acc.metric, rownames(params), value = TRUE, ignore.case = TRUE)
+    # to avoid detecting also enmoa and lfenmo when selecting enmo 
+    # (this does not occur with any other metric):
+    if (acc.metric == "ENMO") do_argument = "do.enmo"
+    # set metric of interest to TRUE and rest to FALSE
+    params[do_argument, "value"] = TRUE
+    params[do_metrics[-which(do_metrics == do_argument)], "value"] = FALSE 
     write.csv(x = params, file = file, row.names = FALSE)
   } else if (format == "csv_palmsplusr") {
     params = read.csv(file = file, sep = ",")

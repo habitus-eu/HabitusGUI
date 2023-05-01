@@ -2,6 +2,13 @@
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
 
+\section{Changes in version 0.1.6 (GitHub-only-release date: ?-?-2023)}{
+  \itemize{
+    \item Revised tsv file for GGIR configuration
+    \item Now able to handle acc.metric in GGIR
+    \item tsv GGIR file revised and testfile for config GGIR is updated
+  }
+}
 \section{Changes in version 0.1.6 (GitHub-only-release date: 15-03-2023)}{
   \itemize{
     \item GGIR config file is now checked when it is loaded
