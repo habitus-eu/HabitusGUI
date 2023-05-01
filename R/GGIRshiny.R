@@ -42,10 +42,10 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
                          outputdir, " ",
                          do.Counts, " ",
                          configfile, " ",
-                         sleepdiary)
+                         sleepdiary, " *>> ", outputdir, "/GGIR.log")
     system2(command = "Rscript", args = basecommand,
-            stdout = paste0(outputdir, "/GGIR.log"),
-            stderr = paste0(outputdir, "/errorGGIR.log"), wait = FALSE)
+            stdout = "",
+            stderr = "", wait = TRUE)
   } else {
     basecommand = paste0("cd ", outputdir, " ; nohup Rscript ggir_cmdline.R ",
                          rawaccdir, " ",
