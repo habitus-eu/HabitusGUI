@@ -37,13 +37,13 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
              fileConn)
   close(fileConn)
   if (.Platform$OS.type == "windows") {
-    basecommand = paste0(outputdir, "/ggir_cmdline.R ",
+    basecommand = paste0("/B Rscript ", outputdir, "/ggir_cmdline.R ",
                          rawaccdir, " ",
                          outputdir, " ",
                          do.Counts, " ",
                          configfile, " ",
                          sleepdiary)
-    system2(command = "Rscript", args = basecommand,
+    system2(command = "start", args = basecommand,
             stdout = paste0(outputdir, "/GGIR.log"),
             stderr = paste0(outputdir, "/errorGGIR.log"), wait = TRUE)
   } else {
