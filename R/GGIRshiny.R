@@ -36,16 +36,23 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
                "}"),
              fileConn)
   close(fileConn)
+  
   if (.Platform$OS.type == "windows") {
+    write.table(x = paste0("In your RStudio console you should now see live progress.\n",
+                           " In Unix-like systems the progress would be shown here inside the Shiny app,\n",
+                           " but that is currently not faciliated for Windows."),
+                file = paste0(outputdir, "/GGIR.log"))
     basecommand = paste0(outputdir, "/ggir_cmdline.R ",
                          rawaccdir, " ",
                          outputdir, " ",
                          do.Counts, " ",
                          configfile, " ",
-                         sleepdiary, " > ", outputdir, "/GGIR.log 2>&1 &")
+                         sleepdiary)
     system2(command = "Rscript", args = basecommand,
             stdout = "",
             stderr = "", wait = TRUE)
+    write.table(x = paste0(""),
+                file = paste0(outputdir, "/GGIR.log"))
   } else {
     basecommand = paste0("cd ", outputdir, " ; nohup Rscript ggir_cmdline.R ",
                          rawaccdir, " ",
