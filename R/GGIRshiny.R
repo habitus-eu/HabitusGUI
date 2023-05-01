@@ -36,15 +36,24 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
                "}"),
              fileConn)
   close(fileConn)
-  basecommand = paste0("cd ", outputdir, " ; ",
-                       ifelse(.Platform$OS.type != "windows", yes = "nohup", no = ""),
-                       " Rscript ggir_cmdline.R ",
-                       rawaccdir, " ",
-                       outputdir, " ",
-                       do.Counts, " ",
-                       configfile, " ",
-                       sleepdiary, " > ", outputdir, "/GGIR.log 2>&1 &")
-  system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
-          stdout = "", stderr = "", wait = TRUE)
+  if (.Platform$OS.type == "windows") {
+    basecommand = paste0(outputdir, "/ggir_cmdline.R ",
+                         rawaccdir, " ",
+                         outputdir, " ",
+                         do.Counts, " ",
+                         configfile, " ",
+                         sleepdiary, " > ", outputdir, "/GGIR.log 2>&1 &")
+    system2(command = "Rscript", args = basecommand,
+            stdout = "", stderr = "", wait = TRUE)
+  } else {
+    basecommand = paste0("cd ", outputdir, " ; nohup Rscript ggir_cmdline.R ",
+                         rawaccdir, " ",
+                         outputdir, " ",
+                         do.Counts, " ",
+                         configfile, " ",
+                         sleepdiary, " > ", outputdir, "/GGIR.log 2>&1 &")
+    system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
+            stdout = "", stderr = "", wait = TRUE)
+  }
   
 }
