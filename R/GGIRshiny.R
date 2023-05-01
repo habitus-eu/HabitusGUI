@@ -43,7 +43,7 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
                          do.Counts, " ",
                          configfile, " ",
                          sleepdiary)
-    system2(command = "start", args = basecommand,
+    system2(command = " start ", args = basecommand,
             stdout = paste0(outputdir, "/GGIR.log"),
             stderr = paste0(outputdir, "/errorGGIR.log"), wait = TRUE)
   } else {
