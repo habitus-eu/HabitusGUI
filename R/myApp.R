@@ -12,7 +12,6 @@
 # HabitusGUI::myApp(homedir="~/projects")
 # pkgload::load_all("."); myApp(homedir="~/projects/fontys")
 # roxygen2::roxygenise()
-#/Member Files: LineMatthiesen#8897
 
 
 # create temp log file
@@ -798,8 +797,17 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             id_ggir = showNotification("GGIR and Counts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
             do.Counts = TRUE
           } else {
-            id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-            do.Counts = FALSE
+            config = read.csv(configfileGGIR())
+            config.Counts = config$value[which(config$argument == "do.neishabouricounts")]
+            if (as.logical(config.Counts) == TRUE) {
+              # if counts was not selected as a tool, but acc.metric was defined as 
+              # NeishabouriCount, then turn do.Counts to TRUE
+              id_ggir = showNotification("GGIR and Counts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+              do.Counts = TRUE
+            } else {
+              id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+              do.Counts = FALSE
+            }
           }
           if (file.exists(paste0(global$data_out, "/sleepdiary.csv"))) { # because this is not a global variable
             sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
@@ -812,7 +820,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           output$mylog_GGIR <- renderText({
             paste(mylog_GGIR(), collapse = '\n')
           })
-          
+          print
           # Start GGIR
           x_ggir <- r_bg(func = function(GGIRshiny, rawaccdir, outputdir, 
                                          sleepdiary, configfile, do.Counts){
