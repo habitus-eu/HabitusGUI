@@ -1,7 +1,11 @@
 \name{NEWS}
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-
+\section{Changes in version 0.1.8 (GitHub-only-release date: ??-??-2023)}{
+  \itemize{
+    \item Allowing package user to specify the local conda environment location needed for PALMSpy
+  }
+}
 \section{Changes in version 0.1.7 (GitHub-only-release date: 01-05-2023)}{
   \itemize{
     \item Revised tsv file for GGIR configuration
