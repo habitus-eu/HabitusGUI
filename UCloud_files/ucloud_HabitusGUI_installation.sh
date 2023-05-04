@@ -51,7 +51,7 @@ R -e 'install.packages(c("sf", "readr", "tidyr", "stringr", "sp", "raster", "lwg
 # palmsplusr itself
 R -e 'remotes::install_github("vincentvanhees/palmsplusr", dependencies = TRUE)'
 # The HabitusGUI itself
-R -e 'remotes::install_github("habitus-eu/HabitusGUI", dependencies = TRUE)'
+R -e 'remotes::install_github("habitus-eu/HabitusGUI", ref = "issue66_replace_hardcodedpath", dependencies = TRUE)'
 
 
 # Assuming that app.R is in the same folder as this script
