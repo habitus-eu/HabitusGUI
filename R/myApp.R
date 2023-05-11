@@ -744,10 +744,10 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                    input$sleepdiaryfile # every time input$sleepdiaryfile updates ...
                  },
                  handlerExpr = { # ... we re-assign global$sleepdiaryfile
-                   if (!"files" %in% names(sleepdiaryfile())) return()
+                   if (!"files" %in% names(sleepdiaryfile)) return()
                    home <- normalizePath(homedir)
                    global$sleepdiaryfile <-
-                     as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
+                     as.character(parseFilePaths(c(home = homedir), sleepdiaryfile)$datapath)
                  })
     
     
