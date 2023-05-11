@@ -801,7 +801,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         ready_to_run_ggirCounts = FALSE
         if (dir.exists(global$raw_acc_in)) {
           acc_files_available = length(dir(path = global$raw_acc_in, pattern = "csv|bin|gt3x|bin|cwa|wav", recursive = FALSE, full.names = FALSE)) > 0
-          # print(acc_files_available)
           if (acc_files_available == TRUE) {
             ready_to_run_ggirCounts = TRUE
           } else {
@@ -817,7 +816,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             id_ggir = showNotification("GGIR and Counts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
             do.Counts = TRUE
           } else {
-            print(configfileGGIR())
+            # this line makes that if user is trying to use a config defined in a previous
+            # run, the data path is correctly defined
+            if (length(configfileGGIR()) == 0) configfileGGIR = reactive(prevConfigGGIR)
             config = read.csv(configfileGGIR())
             config.Counts = config$value[which(config$argument == "do.neishabouricounts")]
             if (as.logical(config.Counts) == TRUE) {

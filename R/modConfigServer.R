@@ -44,6 +44,7 @@ modConfigServer = function(id, tool, homedir = getwd(), prevConfig = c()) {
       # Previously selected config file
       if (!is.null(prevConfig)) {
         current_config = prevConfig
+        configfile <- reactive(current_config)
         
         if (tool() == "PALMSpy") {
           params = load_params(file = current_config, format = "json_palmspy") #$datapath
@@ -99,9 +100,8 @@ modConfigServer = function(id, tool, homedir = getwd(), prevConfig = c()) {
               update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
             }
           }
-          configfile <- reactive(current_config)
         })
-        
+
         ### Reset Table
         observeEvent(input$reset, {
           showNotification("Resetting values", type = "message")
@@ -150,16 +150,17 @@ modConfigServer = function(id, tool, homedir = getwd(), prevConfig = c()) {
     })
     
     
-    
     # Selected config file
     shinyFileChoose(input, "configfile",  roots = c(home = homedir))
     configfile <- reactive(input$configfile)
     
+    
+    
     # This line has no function locally, but seems critical for the app to work on UCloud
     # output$test_shinytable1 <- renderDataTable(data.frame(a = 1:3, b = rep("shinytable", 3), c = 3:1))
     
-    observeEvent(input$configfile,
-                 suspended = TRUE, {
+    observeEvent(input$configfile, {
+      
       # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
       current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
       
