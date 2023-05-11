@@ -158,7 +158,8 @@ modConfigServer = function(id, tool, homedir = getwd(), prevConfig = c()) {
     # This line has no function locally, but seems critical for the app to work on UCloud
     # output$test_shinytable1 <- renderDataTable(data.frame(a = 1:3, b = rep("shinytable", 3), c = 3:1))
     
-    observeEvent(input$configfile, {
+    observeEvent(input$configfile,
+                 suspended = TRUE, {
       # inspired on https://community.rstudio.com/t/saving-editable-dt-table-values-to-reactivevalue-in-shiny/48825
       current_config = as.character(parseFilePaths(c(home = homedir), configfile())$datapath)
       

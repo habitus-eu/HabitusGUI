@@ -633,7 +633,26 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     sleepdiaryfile <- reactive(input$sleepdiaryfile) #$datapath
     
     # Create global with directories and give it default values -------
-    global <- reactiveValues(data_out = homedir) #, pipeline = NULL)
+    if (exists("values")) {
+      # outputdir (globla$data_out)
+      if (length(values$outputdir) == 1) {
+        data_out = homedir
+      } else {
+        data_out_tmp = paste(values$outputdir$path, collapse = .Platform$file.sep)
+        data_out = paste(homedir, data_out_tmp, sep = .Platform$file.sep)
+      }
+      # datadir (globla$raw_acc_in)
+      if (length(values$rawaccdir) == 1) {
+        raw_acc_in = NULL
+      } else {
+        raw_acc_tmp = paste(values$rawaccdir$path, collapse = .Platform$file.sep)
+        raw_acc_in = paste(homedir, raw_acc_tmp, sep = .Platform$file.sep)
+      }
+    } else {
+      data_out = homedir; raw_acc_in = NULL
+    }
+    global <- reactiveValues(data_out = data_out,
+                             raw_acc_in = raw_acc_in) #, pipeline = NULL)
     
     
     
@@ -782,6 +801,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         ready_to_run_ggirCounts = FALSE
         if (dir.exists(global$raw_acc_in)) {
           acc_files_available = length(dir(path = global$raw_acc_in, pattern = "csv|bin|gt3x|bin|cwa|wav", recursive = FALSE, full.names = FALSE)) > 0
+          # print(acc_files_available)
           if (acc_files_available == TRUE) {
             ready_to_run_ggirCounts = TRUE
           } else {
@@ -797,6 +817,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             id_ggir = showNotification("GGIR and Counts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
             do.Counts = TRUE
           } else {
+            print(configfileGGIR())
             config = read.csv(configfileGGIR())
             config.Counts = config$value[which(config$argument == "do.neishabouricounts")]
             if (as.logical(config.Counts) == TRUE) {
