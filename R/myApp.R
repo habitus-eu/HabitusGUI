@@ -473,8 +473,8 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             values$configfileGGIR = paste0(global$data_out, "/config.csv")
           } 
           # ---
-          if (length(sleepdiaryfile()) > 0) {
-            current_sleepdiaryfile = as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
+          if (length(sleepdiaryfile) > 0) {
+            current_sleepdiaryfile = as.character(parseFilePaths(c(home = homedir), sleepdiaryfile)$datapath)
             if (length(current_sleepdiaryfile) > 0) {
               if (current_sleepdiaryfile != paste0(global$data_out, "/sleepdiary.csv")) {
                 file.copy(from = current_sleepdiaryfile, to = paste0(global$data_out, "/sleepdiary.csv"), 
