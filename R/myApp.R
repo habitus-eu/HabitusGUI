@@ -282,61 +282,14 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     }
     
     # previously selected directories -----
-    # rawaccdir
     if (length(values$rawaccdir) < 2) selectedRawaccdir = c() else selectedRawaccdir = paste(values$rawaccdir$path, collapse = .Platform$file.sep)
-    output$uiSelectedRawaccdir <- renderUI({
-      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
-                       ifelse(test = is.null(selectedRawaccdir), yes = "none", 
-                              no = paste0(homedir, selectedRawaccdir))))
-    })
-    
-    # countaccdir
     if (length(values$countaccdir) < 2) selectedCountaccdir = c() else selectedCountaccdir = paste(values$countaccdir$path, collapse = .Platform$file.sep)
-    output$uiSelectedCountaccdir <- renderUI({
-      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
-                       ifelse(test = is.null(selectedCountaccdir), yes = "none", 
-                              no = paste0(homedir, selectedCountaccdir))))
-    })
-    
-    # gpsdir
     if (length(values$gpsdir) < 2) selectedGpsdir = c() else selectedGpsdir = paste(values$gpsdir$path, collapse = .Platform$file.sep)
-    output$uiSelectedGpsdir <- renderUI({
-      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
-                       ifelse(test = is.null(selectedGpsdir), yes = "none", 
-                              no = paste0(homedir, selectedGpsdir))))
-    })
-    
-    # gisdir
     if (length(values$gisdir) < 2) selectedGisdir = c() else selectedGisdir = paste(values$gisdir$path, collapse = .Platform$file.sep)
-    output$uiSelectedGisdir <- renderUI({
-      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
-                       ifelse(test = is.null(selectedGisdir), yes = "none", 
-                              no = paste0(homedir, selectedGisdir))))
-    })
-    
-    # gislinkfile
     if (length(values$gislinkfile) < 2) selectedGislinkfile = c() else selectedGislinkfile = paste(values$gislinkfile$path, collapse = .Platform$file.sep)
-    output$uiSelectedGislinkfile <- renderUI({
-      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
-                       ifelse(test = is.null(selectedGislinkfile), yes = "none", 
-                              no = paste0(homedir, selectedGislinkfile))))
-    })
-    
-    # palmspyoutdir
     if (length(values$palmspyoutdir) < 2) selectedPalmspyoutdir = c() else selectedPalmspyoutdir = paste(values$palmspyoutdir$path, collapse = .Platform$file.sep)
-    output$uiSelectedPalmspyoutdir <- renderUI({
-      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
-                       ifelse(test = is.null(selectedPalmspyoutdir), yes = "none", 
-                              no = paste0(homedir, selectedPalmspyoutdir))))
-    })
-    
-    # sleepdiaryfile
     if (length(values$sleepdiaryfile) < 2) selectedSleepdiaryfile = c() else selectedSleepdiaryfile = paste(values$sleepdiaryfile$path, collapse = .Platform$file.sep)
-    output$uiSelectedSleepdiaryfile <- renderUI({
-      renderText(paste("Directory selected in previous run (to be used if no directory is displayed above):", 
-                       ifelse(test = is.null(selectedSleepdiaryfile), yes = "none", 
-                              no = paste0(homedir, selectedSleepdiaryfile))))
-    })
+    if (length(values$outputdir) < 2) selectedOutputdir = c() else selectedOutputdir = paste(values$outputdir$path, collapse = .Platform$file.sep)
     
     # previous config files
     prevConfigPALMSpy = prevConfigGGIR = prevConfigPalmsplusr = c()
@@ -668,25 +621,34 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     
     # Create global with directories and give it default values -------
     if (exists("values")) {
-      # outputdir (globla$data_out)
-      if (length(values$outputdir) == 1) {
-        data_out = homedir
-      } else {
-        data_out_tmp = paste(values$outputdir$path, collapse = .Platform$file.sep)
-        data_out = paste(homedir, data_out_tmp, sep = .Platform$file.sep)
+      getPrevPath = function(dirname, ifEmpty = NULL, homedir) {
+        if (length(values[[dirname]]) == 1) {
+          if (is.null(ifEmpty)) out = NULL else out = homedir
+        } else {
+          out_tmp = paste(values[[dirname]]$path, collapse = .Platform$file.sep)
+          out = paste(homedir, out_tmp, sep = .Platform$file.sep)
+        }
       }
-      # datadir (globla$raw_acc_in)
-      if (length(values$rawaccdir) == 1) {
-        raw_acc_in = NULL
-      } else {
-        raw_acc_tmp = paste(values$rawaccdir$path, collapse = .Platform$file.sep)
-        raw_acc_in = paste(homedir, raw_acc_tmp, sep = .Platform$file.sep)
-      }
+      # get previous directories if exist
+      data_out = getPrevPath(dirname = "outputdir", ifEmpty = "homedir", homedir = homedir)
+      raw_acc_in = getPrevPath(dirname = "rawaccdir", ifEmpty = NULL, homedir = homedir)
+      count_acc_in = getPrevPath(dirname = "countaccdir", ifEmpty = NULL, homedir = homedir)
+      gps_in = getPrevPath(dirname = "gpsdir", ifEmpty = NULL, homedir = homedir)
+      gis_in = getPrevPath(dirname = "gisdir", ifEmpty = NULL, homedir = homedir)
+      gislinkfile_in = getPrevPath(dirname = "gislinkfile", ifEmpty = NULL, homedir = homedir)
+      palmspyout_in = getPrevPath(dirname = "palmspyoutdir", ifEmpty = NULL, homedir = homedir)
+      sleepdiaryfile = getPrevPath(dirname = "sleepdiaryfile", ifEmpty = NULL, homedir = homedir)
     } else {
       data_out = homedir; raw_acc_in = NULL
     }
     global <- reactiveValues(data_out = data_out,
-                             raw_acc_in = raw_acc_in) #, pipeline = NULL)
+                             raw_acc_in = raw_acc_in,
+                             count_acc_in = count_acc_in,
+                             gps_in = gps_in,
+                             gis_in = gis_in,
+                             gislinkfile_in = gislinkfile_in,
+                             palmspyout_in = palmspyout_in,
+                             sleepdiaryfile = sleepdiaryfile) #, pipeline = NULL)
     
     
     
