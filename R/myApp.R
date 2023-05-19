@@ -86,7 +86,6 @@ myApp <- function(homedir=getwd(), ...) {
                                   shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
                                                              title = "Select raw accelerometer data directory"),
                                   verbatimTextOutput("rawaccdir", placeholder = TRUE),
-                                  uiOutput("uiSelectedRawaccdir"),
                                   hr()
                  ),
                  # Select input folder count accelerometer data if count data is available and PALMSpy is planned------------------
@@ -96,7 +95,6 @@ myApp <- function(homedir=getwd(), ...) {
                                   shinyFiles::shinyDirButton("countaccdir", label = "Count accelerometry data directory...",
                                                              title = "Select count accelerometer data directory"),
                                   verbatimTextOutput("countaccdir", placeholder = TRUE),
-                                  uiOutput("uiSelectedCountaccdir"),
                                   hr()
                  ),
                  # Select input folder gps data -----------------------------------
@@ -104,7 +102,6 @@ myApp <- function(homedir=getwd(), ...) {
                                   shinyFiles::shinyDirButton("gpsdir", label = "GPS data directory...",
                                                              title = "Select GPS data directory"),
                                   verbatimTextOutput("gpsdir", placeholder = TRUE),
-                                  uiOutput("uiSelectedGpsdir"),
                                   hr()
                  ),
                  # Select input folder GIS data and GIS linkage file -----------------------------------
@@ -117,7 +114,6 @@ myApp <- function(homedir=getwd(), ...) {
                                   shinyFiles::shinyFilesButton("gislinkfile", label = "GIS linkage file...",
                                                                title = "Select GIS linkage file", multiple = FALSE),
                                   verbatimTextOutput("gislinkfile", placeholder = TRUE),
-                                  uiOutput("uiSelectedGislinkfile"),
                                   hr()
                  ),
                  # Select input folder PALMSpy output data -----------------------------------
@@ -126,7 +122,6 @@ myApp <- function(homedir=getwd(), ...) {
                                   shinyFiles::shinyDirButton("palmspyoutdir", label = "Previously generated PALMS(py) output directory...",
                                                              title = "Select PALMS(py) output directory"),
                                   verbatimTextOutput("palmspyoutdir", placeholder = TRUE),
-                                  uiOutput("uiSelectedPalmspyoutdir"),
                                   hr()
                  ),
                  # Upload sleep diary ----------------------------------------------------
@@ -134,7 +129,6 @@ myApp <- function(homedir=getwd(), ...) {
                                   shinyFiles::shinyFilesButton("sleepdiaryfile", label = "Sleepdiary file...",
                                                                title = "Select sleep diary file", multiple = FALSE),
                                   verbatimTextOutput("sleepdiaryfile", placeholder = TRUE),
-                                  uiOutput("uiSelectedSleepdiaryfile"),
                                   hr()
                  ),
                  # Specify output directory ----------------------------------------------
