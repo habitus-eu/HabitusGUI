@@ -471,7 +471,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             current_sleepdiaryfile = as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
             if (length(current_sleepdiaryfile) > 0) {
               if (current_sleepdiaryfile != paste0(global$data_out, "/sleepdiary.csv")) {
-                file.copy(from = current_sleepdiaryfile, to = paste0(global$data_out, "/sleepdiary.csv"), 
+                file.copy(from = current_sleepdiaryfile, to = paste0(global$data_out, "/sleepdiary.csv"),
                           overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
               }
               sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
@@ -618,8 +618,11 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       getPrevPath = function(dirname, ifEmpty = NULL, homedir) {
         if (length(values[[dirname]]) == 1) {
           if (is.null(ifEmpty)) out = NULL else out = homedir
-        } else {
+        } else if ("path" %in% names(values[[dirname]])) {
           out_tmp = paste(values[[dirname]]$path, collapse = .Platform$file.sep)
+          out = paste(homedir, out_tmp, sep = .Platform$file.sep)
+        } else if ("files" %in% names(values[[dirname]])) {
+          out_tmp = paste(unlist(values[[dirname]]$files), collapse = .Platform$file.sep)
           out = paste(homedir, out_tmp, sep = .Platform$file.sep)
         }
       }
@@ -631,9 +634,10 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       gis_in = getPrevPath(dirname = "gisdir", ifEmpty = NULL, homedir = homedir)
       gislinkfile_in = getPrevPath(dirname = "gislinkfile", ifEmpty = NULL, homedir = homedir)
       palmspyout_in = getPrevPath(dirname = "palmspyoutdir", ifEmpty = NULL, homedir = homedir)
-      sleepdiaryfile = getPrevPath(dirname = "sleepdiaryfile", ifEmpty = NULL, homedir = homedir)
+      sleepdiary_file = getPrevPath(dirname = "sleepdiaryfile", ifEmpty = NULL, homedir = homedir)
     } else {
-      data_out = homedir; raw_acc_in = NULL
+      data_out = homedir
+      raw_acc_in = count_acc_in = gps_in = gis_in = gislinkfile_in = palmspyout_in = sleepdiary_file = NULL
     }
     global <- reactiveValues(data_out = data_out,
                              raw_acc_in = raw_acc_in,
@@ -642,7 +646,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                              gis_in = gis_in,
                              gislinkfile_in = gislinkfile_in,
                              palmspyout_in = palmspyout_in,
-                             sleepdiaryfile = sleepdiaryfile) #, pipeline = NULL)
+                             sleepdiaryfile = sleepdiary_file) #, pipeline = NULL)
     
     
     
@@ -743,7 +747,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                    global$sleepdiaryfile <-
                      as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
                  })
-    
+
     
     # Send directories to UI --------------------------------------------
     output$rawaccdir <- renderText({
