@@ -75,9 +75,9 @@ check_params = function(params = c(), tool = c()) {
   seti = which(params$class == "timezone")
   if (length(seti) > 0) {
     for (i in seti) {
-      if (params$value[i] %in% OlsonNames() ==  FALSE) {
+      if (params$value[i] %in% c(OlsonNames(), "") ==  FALSE) {
         blocked_params$name[cnt] = rowNames[i]
-        blocked_params$error[cnt] = "is not an expected (Olson) timezone name. You may want to check spelling."
+        blocked_params$error[cnt] = "is not an expected (Olson) timezone name. You may want to check spelling. If you want to use your local timezone leave the value empty."
         cnt = cnt + 1
       }
     }

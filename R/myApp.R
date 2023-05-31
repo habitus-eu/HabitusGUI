@@ -267,7 +267,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     
     # load previous values if available
     values = c()
-    if (file.exists("inst/bookmark.RData")) load("inst/bookmark.RData")
+    if (file.exists("./HabitusGUIbookmark.RData")) load("./HabitusGUIbookmark.RData")
     if (length(values) > 0) {
       values$wizard = "page_1"
       lapply(names(values),
@@ -313,7 +313,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       } else {
         values = values_tmp
       }
-      save(values, file = "inst/bookmark.RData")
+      save(values, file = "./HabitusGUIbookmark.RData")
       if (length(input$availabledata) == 0 & length(input$tools) == 0) {
         showNotification("Select data type(s) to be analysed", type = "error")
       } else {
@@ -375,7 +375,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         }
       }
       values = values_tmp
-      save(values, file = "inst/bookmark.RData")
+      save(values, file = "./HabitusGUIbookmark.RData")
       # -----
       if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
         showNotification("Select raw accelerometer data directory", type = "error")
@@ -501,7 +501,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             values$configfilepalmsplusr = paste0(global$data_out, "/config_palmsplusr.csv")
           }
         }
-        save(values, file = "inst/bookmark.RData")
+        save(values, file = "./HabitusGUIbookmark.RData")
         switch_page(4)
       } else {
         showNotification("Select configuration file(s)", type = "error")
@@ -512,25 +512,25 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     # restart app ----------------
     observeEvent(input$restart_1, {
       switch_page(1)
-      if (file.exists("inst/bookmark.RData")) file.remove("inst/bookmark.RData")
+      if (file.exists("./HabitusGUIbookmark.RData")) file.remove("./HabitusGUIbookmark.RData")
       session$reload()
     })
     observeEvent(input$restart_2, {
       switch_page(1)
       values = c()
-      if (file.exists("inst/bookmark.RData")) file.remove("inst/bookmark.RData")
+      if (file.exists("./HabitusGUIbookmark.RData")) file.remove("./HabitusGUIbookmark.RData")
       session$reload()
     })
     observeEvent(input$restart_3, {
       switch_page(1)
       values = c()
-      if (file.exists("inst/bookmark.RData")) file.remove("inst/bookmark.RData")
+      if (file.exists("./HabitusGUIbookmark.RData")) file.remove("./HabitusGUIbookmark.RData")
       session$reload()
     })
     observeEvent(input$restart_4, {
       switch_page(1)
       values = c()
-      if (file.exists("inst/bookmark.RData")) file.remove("inst/bookmark.RData")
+      if (file.exists("./HabitusGUIbookmark.RData")) file.remove("./HabitusGUIbookmark.RData")
       session$reload()
     })
     
@@ -836,7 +836,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           output$mylog_GGIR <- renderText({
             paste(mylog_GGIR(), collapse = '\n')
           })
-          print
           # Start GGIR
           x_ggir <- r_bg(func = function(GGIRshiny, rawaccdir, outputdir, 
                                          sleepdiary, configfile, do.Counts){

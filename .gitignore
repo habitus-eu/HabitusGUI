@@ -46,4 +46,4 @@ inst/testfiles_ggir/config.csv
 
 # server state files
 /previous_config/
-bookmark.RData
+HabitusGUIbookmark.RData
