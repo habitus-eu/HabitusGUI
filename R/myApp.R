@@ -645,14 +645,14 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       data_out = homedir
       raw_acc_in = count_acc_in = gps_in = gis_in = gislinkfile_in = palmspyout_in = sleepdiary_file = NULL
     }
-    global <- reactiveValues(data_out = data_out,
-                             raw_acc_in = raw_acc_in,
-                             count_acc_in = count_acc_in,
-                             gps_in = gps_in,
-                             gis_in = gis_in,
-                             gislinkfile_in = gislinkfile_in,
-                             palmspyout_in = palmspyout_in,
-                             sleepdiaryfile = sleepdiary_file) #, pipeline = NULL)
+    global <- reactiveValues(data_out = cleanPath(data_out),
+                             raw_acc_in = cleanPath(raw_acc_in),
+                             count_acc_in = cleanPath(count_acc_in),
+                             gps_in = cleanPath(gps_in),
+                             gis_in = cleanPath(gis_in),
+                             gislinkfile_in = cleanPath(gislinkfile_in),
+                             palmspyout_in = cleanPath(palmspyout_in),
+                             sleepdiaryfile = cleanPath(sleepdiary_file)) #, pipeline = NULL)
     
     
     

@@ -7,6 +7,7 @@
 #'
 #' @examples cleanPath("C:/myfolder///myfile.csv")
 cleanPath = function(path) {
+  if (!is.character(path)) return(path)
   split_tmp = unlist(strsplit(path, .Platform$file.sep))
   empty = which(split_tmp == "")
   if (length(empty) > 0) split_tmp = split_tmp[-empty]
