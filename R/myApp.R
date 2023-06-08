@@ -267,7 +267,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     
     # load previous values if available
     values = c()
-    if (file.exists("inst/bookmark.RData")) load("inst/bookmark.RData")
+    if (file.exists("./HabitusGUIbookmark.RData")) load("./HabitusGUIbookmark.RData")
     if (length(values) > 0) {
       values$wizard = "page_1"
       lapply(names(values),
@@ -313,7 +313,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       } else {
         values = values_tmp
       }
-      save(values, file = "inst/bookmark.RData")
+      save(values, file = "./HabitusGUIbookmark.RData")
       if (length(input$availabledata) == 0 & length(input$tools) == 0) {
         showNotification("Select data type(s) to be analysed", type = "error")
       } else {
@@ -375,7 +375,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         }
       }
       values = values_tmp
-      save(values, file = "inst/bookmark.RData")
+      save(values, file = "./HabitusGUIbookmark.RData")
       # -----
       if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
         showNotification("Select raw accelerometer data directory", type = "error")
@@ -501,7 +501,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             values$configfilepalmsplusr = paste0(global$data_out, "/config_palmsplusr.csv")
           }
         }
-        save(values, file = "inst/bookmark.RData")
+        save(values, file = "./HabitusGUIbookmark.RData")
         switch_page(4)
       } else {
         showNotification("Select configuration file(s)", type = "error")
@@ -512,25 +512,25 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     # restart app ----------------
     observeEvent(input$restart_1, {
       switch_page(1)
-      if (file.exists("inst/bookmark.RData")) file.remove("inst/bookmark.RData")
+      if (file.exists("./HabitusGUIbookmark.RData")) file.remove("./HabitusGUIbookmark.RData")
       session$reload()
     })
     observeEvent(input$restart_2, {
       switch_page(1)
       values = c()
-      if (file.exists("inst/bookmark.RData")) file.remove("inst/bookmark.RData")
+      if (file.exists("./HabitusGUIbookmark.RData")) file.remove("./HabitusGUIbookmark.RData")
       session$reload()
     })
     observeEvent(input$restart_3, {
       switch_page(1)
       values = c()
-      if (file.exists("inst/bookmark.RData")) file.remove("inst/bookmark.RData")
+      if (file.exists("./HabitusGUIbookmark.RData")) file.remove("./HabitusGUIbookmark.RData")
       session$reload()
     })
     observeEvent(input$restart_4, {
       switch_page(1)
       values = c()
-      if (file.exists("inst/bookmark.RData")) file.remove("inst/bookmark.RData")
+      if (file.exists("./HabitusGUIbookmark.RData")) file.remove("./HabitusGUIbookmark.RData")
       session$reload()
     })
     
@@ -615,9 +615,14 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     
     # Create global with directories and give it default values -------
     if (exists("values")) {
-      getPrevPath = function(dirname, ifEmpty = NULL, homedir) {
+      getPrevPath = function(dirname, ifEmpty = NULL, homedir, values) {
+        out = NULL
         if (length(values[[dirname]]) == 1) {
-          if (is.null(ifEmpty)) out = NULL else out = homedir
+          if (is.null(ifEmpty)) {
+            out = NULL
+          } else {
+            out = homedir
+          }
         } else if ("path" %in% names(values[[dirname]])) {
           out_tmp = paste(values[[dirname]]$path, collapse = .Platform$file.sep)
           out = paste(homedir, out_tmp, sep = .Platform$file.sep)
@@ -625,16 +630,17 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           out_tmp = paste(unlist(values[[dirname]]$files), collapse = .Platform$file.sep)
           out = paste(homedir, out_tmp, sep = .Platform$file.sep)
         }
+        return(out)
       }
       # get previous directories if exist
-      data_out = getPrevPath(dirname = "outputdir", ifEmpty = "homedir", homedir = homedir)
-      raw_acc_in = getPrevPath(dirname = "rawaccdir", ifEmpty = NULL, homedir = homedir)
-      count_acc_in = getPrevPath(dirname = "countaccdir", ifEmpty = NULL, homedir = homedir)
-      gps_in = getPrevPath(dirname = "gpsdir", ifEmpty = NULL, homedir = homedir)
-      gis_in = getPrevPath(dirname = "gisdir", ifEmpty = NULL, homedir = homedir)
-      gislinkfile_in = getPrevPath(dirname = "gislinkfile", ifEmpty = NULL, homedir = homedir)
-      palmspyout_in = getPrevPath(dirname = "palmspyoutdir", ifEmpty = NULL, homedir = homedir)
-      sleepdiary_file = getPrevPath(dirname = "sleepdiaryfile", ifEmpty = NULL, homedir = homedir)
+      data_out = getPrevPath(dirname = "outputdir", ifEmpty = "homedir", homedir = homedir, values)
+      raw_acc_in = getPrevPath(dirname = "rawaccdir", ifEmpty = NULL, homedir = homedir, values)
+      count_acc_in = getPrevPath(dirname = "countaccdir", ifEmpty = NULL, homedir = homedir, values)
+      gps_in = getPrevPath(dirname = "gpsdir", ifEmpty = NULL, homedir = homedir, values)
+      gis_in = getPrevPath(dirname = "gisdir", ifEmpty = NULL, homedir = homedir, values)
+      gislinkfile_in = getPrevPath(dirname = "gislinkfile", ifEmpty = NULL, homedir = homedir, values)
+      palmspyout_in = getPrevPath(dirname = "palmspyoutdir", ifEmpty = NULL, homedir = homedir, values)
+      sleepdiary_file = getPrevPath(dirname = "sleepdiaryfile", ifEmpty = NULL, homedir = homedir, values)
     } else {
       data_out = homedir
       raw_acc_in = count_acc_in = gps_in = gis_in = gislinkfile_in = palmspyout_in = sleepdiary_file = NULL
@@ -836,7 +842,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           output$mylog_GGIR <- renderText({
             paste(mylog_GGIR(), collapse = '\n')
           })
-          print
           # Start GGIR
           x_ggir <- r_bg(func = function(GGIRshiny, rawaccdir, outputdir, 
                                          sleepdiary, configfile, do.Counts){
