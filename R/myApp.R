@@ -460,7 +460,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         showNotification("Saving configuration file(s) to output folder", type = "message", duration = 2)
         if ("GGIR" %in% input$tools) {
           if (length(configfileGGIR()) > 0) {
-            if (configfileGGIR() != paste0(global$data_out, "/config.csv")) {
+            if (cleanPath(configfileGGIR()) != cleanPath(paste0(global$data_out, "/config.csv"))) {
               file.copy(from = configfileGGIR(), to = paste0(global$data_out, "/config.csv"), 
                         overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
             }
@@ -787,7 +787,8 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     # Apply GGIR / Counts after button is pressed
     #========================================================================
     runGGIR <- eventReactive(input$start_ggir, {
-      GIRCounts_message = ""
+
+      GGIRCounts_message = ""
       
       if ("GGIR" %in% input$tools | "Counts" %in% input$tools) {
         GGIRCounts_message = ""
@@ -813,7 +814,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             # this line makes that if user is trying to use a config defined in a previous
             # run, the data path is correctly defined
             if (length(configfileGGIR()) == 0) configfileGGIR = reactive(prevConfigGGIR)
-            config = read.csv(configfileGGIR())
+            config = read.csv(as.character(configfileGGIR()))
             config.Counts = config$value[which(config$argument == "do.neishabouricounts")]
             if (as.logical(config.Counts) == TRUE) {
               # if counts was not selected as a tool, but acc.metric was defined as 
