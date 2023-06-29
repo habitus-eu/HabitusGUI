@@ -12,5 +12,16 @@ cleanPath = function(path) {
   empty = which(split_tmp == "")
   if (length(empty) > 0) split_tmp = split_tmp[-empty]
   newPath = paste(split_tmp, collapse = .Platform$file.sep)
+  # In Linux the first character of the path can be a forward
+  # slash, which needs to be kept
+  firstChar = substring(path, 1, 1)
+  if (firstChar == "/") {
+    newPath = paste0("/", newPath)
+  }
+  # In both Linux and Windows ~ signs may be used as shortcut to the users home
+  # directory. To avoid inconsistencies we replace them by the full path.
+  # If we do not do this myApp may copy ~/config.csv to /home/user/config.csv which
+  # essentially is the same file and would then result in an empty file.
+  newPath = normalizePath(newPath)
   return(newPath)
 }
