@@ -1,6 +1,7 @@
 #' myApp
 #'
-#' @param homedir character to specify home directory
+#' @param homedir character to specify path to home directory
+#' @param envConda character to specify path conda environment used for PALMSpy
 #' @param ... No input needed, function runs the app
 #' @return no object is returned, just an app
 #' @import shiny
@@ -16,7 +17,7 @@
 
 # create temp log file
 
-myApp <- function(homedir=getwd(), ...) {
+myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
   stdout_GGIR_tmp <- tempfile(fileext = ".log")
   stdout_palmsplusr_tmp <- tempfile(fileext = ".log")
   stdout_PALMSpy_tmp <- tempfile(fileext = ".log")
@@ -965,13 +966,14 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         
         
         # # Start PALMSpy
-        x_palmspy <- r_bg(func = function(PALMSpyshiny, outputdir, gpsdir, count_file_location) {
-          PALMSpyshiny(outputdir, gpsdir, count_file_location)
+        x_palmspy <- r_bg(func = function(PALMSpyshiny, outputdir, gpsdir, count_file_location, envConda) {
+          PALMSpyshiny(outputdir, gpsdir, count_file_location, envConda)
         },
         args = list(PALMSpyshiny = PALMSpyshiny,
                     outputdir = global$data_out,
                     gpsdir = global$gps_in,
-                    count_file_location = count_file_location),
+                    count_file_location = count_file_location,
+                    envConda = envConda),
         stdout = "",
         stderr = "")
         

@@ -4,10 +4,12 @@
 \alias{myApp}
 \title{myApp}
 \usage{
-myApp(homedir = getwd(), ...)
+myApp(homedir = getwd(), envConda = "~/miniconda3/bin/conda", ...)
 }
 \arguments{
-\item{homedir}{character to specify home directory}
+\item{homedir}{character to specify path to home directory}
+
+\item{envConda}{character to specify path conda environment used for PALMSpy}
 
 \item{...}{No input needed, function runs the app}
 }
