@@ -458,23 +458,31 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       }
       if (configs_ready == TRUE) {
         showNotification("Saving configuration file(s) to output folder", type = "message", duration = 2)
-        if ("GGIR" %in% input$tools) {
-          if (length(configfileGGIR()) > 0) {
-            if (cleanPath(configfileGGIR()) != cleanPath(paste0(global$data_out, "/config.csv"))) {
-              file.copy(from = configfileGGIR(), to = paste0(global$data_out, "/config.csv"), 
+        
+        copyFile = function(from, to) {
+          # Copies configuration file to output folder if:
+          # - from and to are not the same path
+          # - filesize of from is larger than 0
+          if (from != to) {
+            fileSize = file.info(from)$size
+            if (fileSize > 0) { # only copy if filesize is more than 0
+              file.copy(from = from, to = to, 
                         overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
             }
-            values$configfileGGIR = paste0(global$data_out, "/config.csv")
+          }
+          return(to)
+        }
+        if ("GGIR" %in% input$tools) {
+          config_from = cleanPath(configfileGGIR())
+          config_to = cleanPath(paste0(global$data_out, "/config.csv"))
+          if (length(config_from) > 0) {
+            values$configfileGGIR = copyFile(from = config_form, to = config_to)
           } 
-          # ---
           if (length(sleepdiaryfile()) > 0) {
-            current_sleepdiaryfile = as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
-            if (length(current_sleepdiaryfile) > 0) {
-              if (current_sleepdiaryfile != paste0(global$data_out, "/sleepdiary.csv")) {
-                file.copy(from = current_sleepdiaryfile, to = paste0(global$data_out, "/sleepdiary.csv"),
-                          overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
-              }
-              sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
+            diary_from = cleanPath(as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath))
+            diary_to = cleanPath(paste0(global$data_out, "/sleepdiary.csv"))
+            if (length(config_from) > 0) {
+              sleepdiaryfile_local = copyFile(from = diary_form, to = diary_to)
             } else  {
               sleepdiaryfile_local = c()
             }
@@ -484,21 +492,17 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           }
         }
         if ("PALMSpy" %in% input$tools) {
-          if (length(configfilePALMSpy()) > 0) {
-            if (configfilePALMSpy() != paste0(global$data_out, "/config.json")) {
-              file.copy(from = configfilePALMSpy(), to = paste0(global$data_out, "/config.json"), 
-                        overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
-            }
-            values$configfilePALMSpy = paste0(global$data_out, "/config.json")
+          config_from = cleanPath(configfilePALMSpy())
+          config_to = cleanPath(paste0(global$data_out, "/config.json"))
+          if (length(config_from) > 0) {
+            values$configfilePALMSpy =  copyFile(from = config_from, to = config_to)
           }
         }
         if ("palmsplusr" %in% input$tools) {
-          if (length(configfilepalmsplusr()) > 0) {
-            if (configfilepalmsplusr() != paste0(global$data_out, "/config_palmsplusr.csv")) {
-              file.copy(from = configfilepalmsplusr(), to = paste0(global$data_out, "/config_palmsplusr.csv"), 
-                        overwrite = TRUE, recursive = FALSE, copy.mode = TRUE)
-            }
-            values$configfilepalmsplusr = paste0(global$data_out, "/config_palmsplusr.csv")
+          config_from = cleanPath(configfilepalmsplusr())
+          config_to = cleanPath(paste0(global$data_out, "/config.json"))
+          if (length(config_from) > 0) {
+            values$configfilepalmsplusr = copyFile(from = config_from, to = config_to)
           }
         }
         save(values, file = "./HabitusGUIbookmark.RData")
@@ -788,6 +792,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir, prevConfig = prevConfigPALMSpy)
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir, prevConfig = prevConfigGGIR)
     configfilepalmsplusr <- modConfigServer("edit_palmsplusr_config", tool = reactive("palmsplusr"), homedir = homedir, prevConfig = prevConfigPalmsplusr)
+
     
     #========================================================================
     # Apply GGIR / Counts after button is pressed
@@ -853,9 +858,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                       rawaccdir = isolate(global$raw_acc_in),
                       outputdir = global$data_out, 
                       sleepdiary = sleepdiaryfile_local,
-                      configfile = paste0(global$data_out, "/config.csv"), #isolate(configfileGGIR()),
+                      configfile = cleanPath(paste0(global$data_out, "/config.csv")),
                       do.Counts = do.Counts),
-          stdout = "", #,
+          stdout = "",
           stderr = "")
           
           # Expected location of log file
