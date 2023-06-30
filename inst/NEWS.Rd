@@ -1,9 +1,10 @@
 \name{NEWS}
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-\section{Changes in version 0.1.8 (GitHub-only-release date: ??-??-2023)}{
+\section{Changes in version 0.1.8 (GitHub-only-release date: 30-06-2023)}{
   \itemize{
     \item Allowing package user to specify the local conda environment location needed for PALMSpy
+    \item Shiny state is saved and used if available when refreshing the app.
   }
 }
 \section{Changes in version 0.1.7 (GitHub-only-release date: 01-05-2023)}{
@@ -12,7 +13,6 @@
     \item Testfile for config GGIR updated
     \item Now able to handle acc.metric in GGIR
     \item HabitusGUI and use-case GGIR can now run again in Windows, this was broken ince 0.1.5 release
-    \item Shiny state is saved and used if available when refreshing the app.
   }
 }
 \section{Changes in version 0.1.6 (GitHub-only-release date: 15-03-2023)}{
