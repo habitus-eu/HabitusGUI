@@ -53,8 +53,8 @@ maxNcores,c(),params_general
 print.filename,FALSE,params_general
 do.parallel,TRUE,params_general
 windowsizes,"c(5,900,3600)",params_general
-desiredtz,c(),params_general
-configtz,c(),params_general
+desiredtz,,params_general
+configtz,,params_general
 idloc,1,params_general
 dayborder,0,params_general
 part5_agg2_60seconds,FALSE,params_general
