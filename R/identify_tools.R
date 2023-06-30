@@ -23,13 +23,13 @@ identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", "PALMS
                                output = c("PALMSpy_out"),
                                usecases = c("Trips", "QC", "Environment")),
                  palmsplusr = new("toolio",
-                                 input = c("PALMSpy_out", "GIS"),
-                                 output = c("palmsplusr_out"),
-                                 usecases = c("Environment", "QC")),
+                                  input = c("PALMSpy_out", "GIS"),
+                                  output = c("palmsplusr_out"),
+                                  usecases = c("Environment", "QC")),
                  Counts = new("toolio",
-                                   input = "AccRaw",
-                                   output = c("Counts_out"),
-                                   usecases = c("PA", "Trips", "QC", "Environment")))
+                              input = "AccRaw",
+                              output = c("Counts_out"),
+                              usecases = c("PA", "Trips", "QC", "Environment")))
   iotools = iotools[which(names(iotools) %in% available_tools)] # only look at available tools
   allgoals = tools_needed = outputs = c()
   # loop over tools and select the ones that generate the output users needs and is able to generate
