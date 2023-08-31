@@ -41,7 +41,8 @@ hbt_build_trajectories <- function(data = NULL, trajectory_fields = NULL, trajec
   data <- data %>%
     filter(tripnumber > 0) %>%
     group_by(identifier, tripnumber) %>%
-    summarise(!!!args, do_union = FALSE) %>%
+    reframe(!!!args, do_union = FALSE) %>%
+    group_by(identifier, tripnumber) %>% # regroup the dataframe
     st_cast("LINESTRING") %>%
     mutate(!!!args_after) %>%
     ungroup() %>%
