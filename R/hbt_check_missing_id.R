@@ -14,8 +14,6 @@
 hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_name, palms,
                                 loca, groupinglocation = "school", verbose = TRUE) {
   
-  
-  
   # Check whether id is found in all objects
   check_N = function(loca, participant_basis, palms, groupinglocation, verbose) {
     # Check loca
@@ -43,7 +41,6 @@ hbt_check_missing_id = function(participant_basis, palmsplus_folder, dataset_nam
       if (length(unique(participant_basis[[paste0(groupinglocation, "_id")]])) == 0) {
         cat(paste0("\nNo ", groupinglocation, "_id found in participant_basis$", groupinglocation, "_id"))
       }
-      
       
       # NOT CHANGED:
       Npbi = length(unique(participant_basis$identifier))

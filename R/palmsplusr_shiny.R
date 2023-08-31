@@ -80,7 +80,7 @@ palmsplusr_shiny <- function(gisdir = "",
     tripNumber = readr::col_integer(),
     tripType = readr::col_integer(),
     tripMOT = readr::col_integer(),
-    activity = readr::col_integer()
+    activity = readr::col_double()
   ))
   PALMS_combined <- bind_rows(csv_palms)
   # Data cleaning:
