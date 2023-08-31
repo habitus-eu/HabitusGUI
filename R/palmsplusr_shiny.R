@@ -29,7 +29,7 @@ palmsplusr_shiny <- function(gisdir = "",
   # create list structure to house the location objects
   shapefilenames = dir(path = gisdir, full.names = FALSE, pattern = "[.]shp")
   locationNames = unique(gsub(pattern = "table|_|buffers|[.]|xml|shp|loc", replacement = "", x = shapefilenames))
-
+  
   Nlocations = length(locationNames)
   loca = vector("list", Nlocations)
   names(loca) = locationNames
@@ -69,7 +69,7 @@ palmsplusr_shiny <- function(gisdir = "",
   sf::sf_use_s2(FALSE)
   # identify palms csv output files in palmsdir:
   palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
-  # read and combine the palms csv output files
+  # read and combine palms csv output files 
   csv_palms <- lapply(palms_country_files, FUN = readr::read_csv, col_types = list(
     identifier = readr::col_character(),
     dow = readr::col_integer(),
@@ -89,6 +89,8 @@ palmsplusr_shiny <- function(gisdir = "",
   palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, dataset_name)
   if (verbose) cat("\ncleaning completed\n")
   
+  PALMS_reduced$dateTime = as.POSIXct(PALMS_reduced$dateTime, format = "%d/%m/%Y %H:%M:%S", tz = "")
+  
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
   PALMS_reduced_file = normalizePath(paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv")))
   if (verbose) cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
@@ -103,8 +105,6 @@ palmsplusr_shiny <- function(gisdir = "",
   }
   if (verbose) cat("\nreading basis file\n")
   participant_basis = read_csv(gislinkfile)
-  unique_ids_in_palms <- unique(palms$identifier)
-  unique_ids_in_participant_basis <- unique(participant_basis$identifier)
   # Load all shape files ----------------------------------------------------
   #----------------
   # NEW CODE
@@ -148,7 +148,6 @@ palmsplusr_shiny <- function(gisdir = "",
   
   #===========================================================================================  
   # Create field tables
-
   # #=============================
   # adding fields
   CONF = read.csv(config, sep = ",")

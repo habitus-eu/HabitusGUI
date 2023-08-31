@@ -33,7 +33,7 @@ palmsplusr_shiny(gisdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessi
                  outputdir = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata",
                  dataset_name = "BEtestdata",
                  configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata/config_palmsplusr.csv")
-
+kkk
 # palmsplusr_shiny(gisdir = "/media/vincent/projects/Habitus/palmsplusr/testdata/GIS",
 #                  palmsdir = "/media/vincent/projects/Habitus/palmsplusr/testdata/PALMS_output/",
 #                  gislinkfile = "/media/vincent/projects/Habitus/palmsplusr/testdata/Tables/participant_basis.csv",
