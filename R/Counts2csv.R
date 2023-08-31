@@ -30,7 +30,7 @@ Counts2csv = function(outputdir = c(), configfile = c()) {
       ws3 = as.numeric(difftime(tmp[2], tmp[1], units = "secs"))
       # Create file header for the Actigraph file
       start = as.POSIXlt(M$metashort$timestamp[1], format = "%Y-%m-%dT%H:%M:%S%z", desiredtz)
-      starttime = unlist(strsplit(as.character(start), " "))[2]
+      starttime = strftime(start, format="%H:%M:%S")
       startdate = paste0(start$mday, "/", start$mon + 1, "/", start$year + 1900) #day month year 
       SN = which(rownames(I$header) == "Serial Number:")
       DT = which(rownames(I$header) == "Download Date")
