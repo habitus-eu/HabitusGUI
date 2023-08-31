@@ -4,7 +4,7 @@
 \alias{modConfigServer}
 \title{modConfigServer}
 \usage{
-modConfigServer(id, tool, homedir = getwd(), prevConfig = c())
+modConfigServer(id, tool, homedir = getwd())
 }
 \arguments{
 \item{id}{...}
@@ -12,8 +12,6 @@ modConfigServer(id, tool, homedir = getwd(), prevConfig = c())
 \item{tool}{...}
 
 \item{homedir}{character to specify home directory}
-
-\item{prevConfig}{character to specify path to config file selected in previous run}
 }
 \value{
 No object returned, this is a shiny module
