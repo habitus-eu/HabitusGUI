@@ -7,6 +7,7 @@
     was not working well (e.g. it did not allow for overwriting previous configfile)
     and to reduce code complexity #83
     \item Create error when expected GIS file cannot be found #87.
+    \item Improved compatibility of palmsplusr functions with hbGPS output
   }
 }
 \section{Changes in version 0.1.8 (GitHub-only-release date: 30-06-2023)}{
