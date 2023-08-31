@@ -1,6 +1,13 @@
 \name{NEWS}
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
+\section{Changes in version 0.1.9 (GitHub-only-release date: ??-??-2023)}{
+  \itemize{
+    \item Deprecate saving configfile in Shiny state as currently functionality
+    was not working well (e.g. it did not allow for overwriting previous configfile)
+    and to reduce code complexity #83
+  }
+}
 \section{Changes in version 0.1.8 (GitHub-only-release date: 30-06-2023)}{
   \itemize{
     \item Allowing package user to specify the local conda environment location needed for PALMSpy
