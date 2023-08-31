@@ -157,13 +157,12 @@ hbt_build_multimodal <- function(data = NULL,
                 mot_order = paste0(mot, collapse = "-"),
                 start = first(start),
                 end = last(end),
-                do_union = FALSE) %>%
+                do_union = FALSE, .groups = 'keep') %>%
       rowwise() %>%
       mutate(!!!args_locations) %>%
       ungroup() %>%
       dplyr::select(!any_of(c(start_trip, end_trip))) %>%
       mutate_if(is.logical, as.integer)
-    
     if (exists("df_fields")) {
       df <- reduce(list(df_other, df_fields), left_join, by = c("identifier" = "identifier", "mmt_number" = "mmt_number"))
     } else {

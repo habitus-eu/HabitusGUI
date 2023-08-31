@@ -471,7 +471,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
               diary_from = cleanPath(as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath))
               diary_to = cleanPath(paste0(global$data_out, "/sleepdiary.csv"))
               if (length(config_from) > 0) {
-                sleepdiaryfile_local = copyFile(from = diary_form, to = diary_to)
+                sleepdiaryfile_local = copyFile(from = diary_from, to = diary_to)
               } else  {
                 sleepdiaryfile_local = c()
               }
@@ -492,7 +492,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         }
         if ("palmsplusr" %in% input$tools) {
           config_from = cleanPath(configfilepalmsplusr())
-          config_to = cleanPath(paste0(global$data_out, "/config_params.csv"))
+          config_to = cleanPath(paste0(global$data_out, "/config_palmsplusr.csv"))
           if (length(config_from) > 0) {
             values$configfilepalmsplusr = copyFile(from = config_from, to = config_to)
           }

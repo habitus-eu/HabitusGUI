@@ -13,7 +13,7 @@ Authors@R:
 License: Apache License version 2.0 | file LICENSE
 Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, 
     dplyr, magrittr, shinyjs, sf, readr, tidyr, stringr, callr, palmsplusr,
-    data.table, rlang, purrr, geosphere, lwgeom
+    data.table, rlang, purrr, geosphere
 Remotes: vincentvanhees/palmsplusr
 LazyData: true
 Suggests: testthat, covr, rmarkdown

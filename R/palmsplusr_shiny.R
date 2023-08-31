@@ -29,7 +29,7 @@ palmsplusr_shiny <- function(gisdir = "",
   # create list structure to house the location objects
   shapefilenames = dir(path = gisdir, full.names = FALSE, pattern = "[.]shp")
   locationNames = unique(gsub(pattern = "table|_|buffers|[.]|xml|shp|loc", replacement = "", x = shapefilenames))
-
+  
   Nlocations = length(locationNames)
   loca = vector("list", Nlocations)
   names(loca) = locationNames
@@ -69,7 +69,7 @@ palmsplusr_shiny <- function(gisdir = "",
   sf::sf_use_s2(FALSE)
   # identify palms csv output files in palmsdir:
   palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
-  # read and combine the palms csv output files
+  # read and combine palms csv output files 
   csv_palms <- lapply(palms_country_files, FUN = readr::read_csv, col_types = list(
     identifier = readr::col_character(),
     dow = readr::col_integer(),
@@ -80,7 +80,7 @@ palmsplusr_shiny <- function(gisdir = "",
     tripNumber = readr::col_integer(),
     tripType = readr::col_integer(),
     tripMOT = readr::col_integer(),
-    activity = readr::col_integer()
+    activity = readr::col_double()
   ))
   PALMS_combined <- bind_rows(csv_palms)
   # Data cleaning:
@@ -89,8 +89,10 @@ palmsplusr_shiny <- function(gisdir = "",
   palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, dataset_name)
   if (verbose) cat("\ncleaning completed\n")
   
+  PALMS_reduced$dateTime = as.POSIXct(PALMS_reduced$dateTime, format = "%d/%m/%Y %H:%M:%S", tz = "")
+  
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
-  PALMS_reduced_file = paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv"))
+  PALMS_reduced_file = normalizePath(paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv")))
   if (verbose) cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
   palms = palmsplusr::read_palms(PALMS_reduced_file)
@@ -103,19 +105,25 @@ palmsplusr_shiny <- function(gisdir = "",
   }
   if (verbose) cat("\nreading basis file\n")
   participant_basis = read_csv(gislinkfile)
-  unique_ids_in_palms <- unique(palms$identifier)
-  unique_ids_in_participant_basis <- unique(participant_basis$identifier)
-  
   # Load all shape files ----------------------------------------------------
   #----------------
   # NEW CODE
   for (jj in 1:Nlocations) {
-    loca[[jj]][3] =  find_file(path = gisdir, namelowercase = paste0(locationNames[jj], "_table.shp"))
-    loca[[jj]][4] =  find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], "buffers.shp"))
+    findfile3 = find_file(path = gisdir, namelowercase = paste0(locationNames[jj], "_table.shp"))
+    if (!is.null(findfile3)) {
+      loca[[jj]][3] = findfile3
+    } else {
+      stop(paste0("unable to find ", findfile3))
+    }
+    findfile4 = find_file(path = gisdir, namelowercase = paste0("loc_", locationNames[jj], "buffers.shp"))
+    if (!is.null(findfile3)) {
+      loca[[jj]][4] = findfile4
+    } else {
+      stop(paste0("unable to find ", findfile4))
+    }
     loca[[jj]][[1]] = sf::read_sf(loca[[jj]][3]) #home_nbh
     loca[[jj]][[2]] = sf::read_sf(loca[[jj]][4]) #school_nbh
   }
-  
   # Force id numbers to be characrer(
   locationNames = names(loca)
   for (i in 1:length(loca)) {
@@ -128,7 +136,6 @@ palmsplusr_shiny <- function(gisdir = "",
       loca[[i]][j][[1]][[loc_id]] = as.character(loca[[i]][j][[1]][[loc_id]])
     }
   }
-  
   # Check for missing IDs -------------------------------------------------------------------------
   withoutMissingId = hbt_check_missing_id(participant_basis, palmsplus_folder, dataset_name, palms,
                                           loca, groupinglocation = groupinglocation,
@@ -136,14 +143,11 @@ palmsplusr_shiny <- function(gisdir = "",
   palms = withoutMissingId$palms
   participant_basis = withoutMissingId$participant_basis
   loca = withoutMissingId$loca
-  
-  
   write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
   
   
   #===========================================================================================  
   # Create field tables
-
   # #=============================
   # adding fields
   CONF = read.csv(config, sep = ",")
@@ -187,8 +191,6 @@ palmsplusr_shiny <- function(gisdir = "",
     }
     CONF = CONF[!duplicated(CONF),]
   }
-  
-  # browser()
   palmsplusr_field_rows = which(CONF$context == "palmsplus_field")
   palmsplus_fields = tibble(name = CONF$name[palmsplusr_field_rows],
                             formula = CONF$formula[palmsplusr_field_rows],
@@ -225,8 +227,6 @@ palmsplusr_shiny <- function(gisdir = "",
     if (file.exists(fn)) file.remove(fn)
   }
   
-  
-
   Nlocation_objects = NULL
   for (i in 1:Nlocations) {
     Nlocation_objects = c(Nlocation_objects, length(loca[[i]][[1]]), length(loca[[i]][[2]]))
