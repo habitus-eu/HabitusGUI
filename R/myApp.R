@@ -11,7 +11,7 @@
 
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") 
 # HabitusGUI::myApp(homedir="~/projects")
-# pkgload::load_all("."); myApp(homedir="~/projects/fontys")
+# pkgload::load_all("."); myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus")
 # roxygen2::roxygenise()
 
 
@@ -285,21 +285,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     if (length(values$palmspyoutdir) < 2) selectedPalmspyoutdir = c() else selectedPalmspyoutdir = paste(values$palmspyoutdir$path, collapse = .Platform$file.sep)
     if (length(values$sleepdiaryfile) < 2) selectedSleepdiaryfile = c() else selectedSleepdiaryfile = paste(values$sleepdiaryfile$path, collapse = .Platform$file.sep)
     if (length(values$outputdir) < 2) selectedOutputdir = c() else selectedOutputdir = paste(values$outputdir$path, collapse = .Platform$file.sep)
-    
-    # previous config files
-    prevConfigPALMSpy = prevConfigGGIR = prevConfigPalmsplusr = c()
-    if (exists("values")) {
-      if (!is.null(values$configfilePALMSpy)) {
-        prevConfigPALMSpy = values$configfilePALMSpy
-      }
-      if (!is.null(values$configfileGGIR)) {
-        prevConfigGGIR = values$configfileGGIR
-      }
-      if (!is.null(values$configfilepalmsplusr)) {
-        prevConfigPalmsplusr = values$configfilepalmsplusr
-      }
-    }
-    
+
     observeEvent(input$page_12, {
       values_tmp = lapply(reactiveValuesToList(input), unclass)
       if (exists("values") & length(values) > 10) {
@@ -442,17 +428,18 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       values = values_tmp
       # -----
       configs_ready = TRUE
-      if ("PALMSpy" %in% input$tools & !exists("prevConfigPALMSpy")) {
+      config_from = config_to = NULL
+      if ("PALMSpy" %in% input$tools) {
         if (length(paste0(configfilePALMSpy())) == 0) {
           configs_ready = FALSE
         }
       }
-      if ("GGIR" %in% input$tools & !exists("prevConfigGGIR")) {
+      if ("GGIR" %in% input$tools) {
         if (length(paste0(configfileGGIR())) == 0) {
           configs_ready = FALSE
         }
       }
-      if ("palmsplusr" %in% input$tools & !exists("prevConfigPalmsplusr")) {
+      if ("palmsplusr" %in% input$tools) {
         if (length(paste0(configfilepalmsplusr())) == 0) {
           configs_ready = FALSE
         }
@@ -477,15 +464,19 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           config_from = cleanPath(configfileGGIR())
           config_to = cleanPath(paste0(global$data_out, "/config.csv"))
           if (length(config_from) > 0) {
-            values$configfileGGIR = copyFile(from = config_form, to = config_to)
+            values$configfileGGIR = copyFile(from = config_from, to = config_to)
           } 
           if (length(sleepdiaryfile()) > 0) {
-            diary_from = cleanPath(as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath))
-            diary_to = cleanPath(paste0(global$data_out, "/sleepdiary.csv"))
-            if (length(config_from) > 0) {
-              sleepdiaryfile_local = copyFile(from = diary_form, to = diary_to)
-            } else  {
-              sleepdiaryfile_local = c()
+            if (sleepdiaryfile() != 0) {
+              diary_from = cleanPath(as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath))
+              diary_to = cleanPath(paste0(global$data_out, "/sleepdiary.csv"))
+              if (length(config_from) > 0) {
+                sleepdiaryfile_local = copyFile(from = diary_form, to = diary_to)
+              } else  {
+                sleepdiaryfile_local = c()
+              }
+            } else {
+              sleepdiaryfile_local = NULL
             }
             if (!is.null(sleepdiaryfile_local)) {
               values$sleepdiaryfile = paste0(global$data_out, "/sleepdiary.csv")
@@ -501,7 +492,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         }
         if ("palmsplusr" %in% input$tools) {
           config_from = cleanPath(configfilepalmsplusr())
-          config_to = cleanPath(paste0(global$data_out, "/config.json"))
+          config_to = cleanPath(paste0(global$data_out, "/config_params.csv"))
           if (length(config_from) > 0) {
             values$configfilepalmsplusr = copyFile(from = config_from, to = config_to)
           }
@@ -787,13 +778,11 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     })
     
     
-    
-    
     # Check and Edit config files ---------------------------------------
-    configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir, prevConfig = prevConfigPALMSpy)
-    configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir, prevConfig = prevConfigGGIR)
-    configfilepalmsplusr <- modConfigServer("edit_palmsplusr_config", tool = reactive("palmsplusr"), homedir = homedir, prevConfig = prevConfigPalmsplusr)
-
+    configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir)
+    configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir)
+    configfilepalmsplusr <- modConfigServer("edit_palmsplusr_config", tool = reactive("palmsplusr"), homedir = homedir)
+    
     
     #========================================================================
     # Apply GGIR / Counts after button is pressed
@@ -825,7 +814,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           } else {
             # this line makes that if user is trying to use a config defined in a previous
             # run, the data path is correctly defined
-            if (length(configfileGGIR()) == 0) configfileGGIR = reactive(prevConfigGGIR)
             config = read.csv(as.character(configfileGGIR()))
             config.Counts = config$value[which(config$argument == "do.neishabouricounts")]
             if (as.logical(config.Counts) == TRUE) {
