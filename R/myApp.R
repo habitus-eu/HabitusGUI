@@ -69,11 +69,11 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   hr(),
                                   checkboxGroupInput("tools", label = "Select the tools you would like to use:",
                                                      choiceNames = list("GGIR (R package)",
-                                                                        "Neishabouri Counts / actilifecounts (R package)",
+                                                                        "CountConverter (R package GGIR + actilifecounts)",
                                                                         "PALMSpy (Python library)",
                                                                         "hbGPS (R package)",
                                                                         "palmsplusr (R package)"),
-                                                     choiceValues = list("GGIR", "Counts", "PALMSpy", "hbGPS", "palmsplusr"), width = '100%')
+                                                     choiceValues = list("GGIR", "CountConverter", "PALMSpy", "hbGPS", "palmsplusr"), width = '100%')
                  ), 
                  actionButton("page_12", "next"),
                  actionButton("restart_1", "restart", 
@@ -88,7 +88,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1 && ",
                                                      "(input.tools.includes(`GGIR`) || ",
-                                                     "input.tools.includes(`Counts`))"),
+                                                     "input.tools.includes(`CountConverter`))"),
                                   shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
                                                              title = "Select raw accelerometer data directory"),
                                   verbatimTextOutput("rawaccdir", placeholder = TRUE),
@@ -166,9 +166,9 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   modConfigUI("edit_ggir_config"),
                                   hr()
                  ),
-                 conditionalPanel(condition = "input.tools.includes('Counts')",
-                                  h2("Counts"),
-                                  p("No parameters are needed for the Counts"),
+                 conditionalPanel(condition = "input.tools.includes('CountConverter')",
+                                  h2("CountConverter"),
+                                  p("No parameters are needed for the CountConverter"),
                                   hr()
                  ),
                  conditionalPanel(condition = "input.tools.includes('PALMSpy')",
@@ -197,13 +197,13 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  # hr(),
                  p("\n"),
                  conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
-                                                     "input.tools.includes('Counts')"),
+                                                     "input.tools.includes('CountConverter')"),
                                   conditionalPanel(condition =
                                                      paste0("input.tools.indexOf(`GGIR`) > -1  && ",
-                                                            "input.tools.indexOf(`Counts`) > -1"), 
-                                                   h3("GGIR and Counts:")
+                                                            "input.tools.indexOf(`CountConverter`) > -1"), 
+                                                   h3("GGIR and CountConverter:")
                                   ),
-                                  conditionalPanel(condition = "input.tools.indexOf(`Counts`) == -1", 
+                                  conditionalPanel(condition = "input.tools.indexOf(`CountConverter`) == -1", 
                                                    h3("GGIR:")
                                   ),
                                   shinyjs::useShinyjs(),
@@ -328,8 +328,8 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                                                "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
                     showNotification("palmsplusr requires either previously generated PALMS(py) output or GPS and Accelerometer data", type = "error")
                   } else {
-                    if ("Counts" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
-                      showNotification("Counts not possible without access to raw accelerometer data", type = "error")
+                    if ("CountConverter" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
+                      showNotification("CountConverter not possible without access to raw accelerometer data", type = "error")
                     } else {
                       switch_page(2)
                     }
@@ -373,7 +373,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
         showNotification("Select raw accelerometer data directory", type = "error")
       } else {
-        if ("AccRaw" %in% input$availabledata & "Counts" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
+        if ("AccRaw" %in% input$availabledata & "CountConverter" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
           showNotification("Select raw accelerometer data directory", type = "error")
         } else {
           if ("ACount" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$countaccdir)[1] == "0" & is.null(selectedCountaccdir)) {
@@ -586,7 +586,14 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     # Identify pipeline with tools to be used and send to UI
     proposed_pipeline <- reactive(identify_tools(datatypes = input$availabledata, goals = input$researchgoals)$tools_needed)
     output$pipeline <- renderText({
-      message = paste0("Proposed software pipeline: ", paste0(proposed_pipeline(), collapse = " + "))
+      if (all(c("hbGPS", "PALMSpy") %in% proposed_pipeline()) == TRUE) {
+        message = paste0("Proposed software pipeline: ",
+                         paste0(grep(pattern = "PALMSpy|CountConverter", x = proposed_pipeline(), invert = TRUE, value = TRUE), collapse = " + "),
+                         " OR replace hbGPS by ", 
+                         paste0(grep(pattern = "PALMSpy|CountConverter", x = proposed_pipeline(), invert = FALSE, value = TRUE), collapse = " + "))
+      } else {
+        message = paste0("Proposed software pipeline: ", paste0(proposed_pipeline(), collapse = " + "))
+      }
       ifelse(length(proposed_pipeline()) == 0,
              yes = "--> Tick boxes above according to the analysis you would like to do",
              no = message)
@@ -792,13 +799,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     
     
     #========================================================================
-    # Apply GGIR / Counts after button is pressed
+    # Apply GGIR / CountConverter after button is pressed
     #========================================================================
     runGGIR <- eventReactive(input$start_ggir, {
 
       GGIRCounts_message = ""
       
-      if ("GGIR" %in% input$tools | "Counts" %in% input$tools) {
+      if ("GGIR" %in% input$tools | "CountConverter" %in% input$tools) {
         GGIRCounts_message = ""
         # Basic check before running function:
         ready_to_run_ggirCounts = FALSE
@@ -815,8 +822,8 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         # Only run function when checks are met:
         if (ready_to_run_ggirCounts == TRUE) {
           shinyjs::hide(id = "start_ggir")
-          if ("Counts" %in% input$tools) {
-            id_ggir = showNotification("GGIR and Counts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+          if ("CountConverter" %in% input$tools) {
+            id_ggir = showNotification("GGIR and CountConverter in progress ...", type = "message", duration = NULL, closeButton = FALSE)
             do.Counts = TRUE
           } else {
             # this line makes that if user is trying to use a config defined in a previous
@@ -826,7 +833,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             if (as.logical(config.Counts) == TRUE) {
               # if counts was not selected as a tool, but acc.metric was defined as 
               # NeishabouriCount, then turn do.Counts to TRUE
-              id_ggir = showNotification("GGIR and Counts in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+              id_ggir = showNotification("GGIR and CountConverter in progress ...", type = "message", duration = NULL, closeButton = FALSE)
               do.Counts = TRUE
             } else {
               id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
@@ -882,21 +889,21 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
               expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
               expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
               if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
-                if ("Counts" %in% input$tools) { # if Counts was suppoed to run
+                if ("CountConverter" %in% input$tools) { # if CountConverter was suppoed to run
                   expected_outputdir_Counts = paste0(global$data_out, "/actigraph")
                   if (dir.exists(expected_outputdir_Counts) == TRUE) { # checks whether output dir was created
                     if (length(dir(expected_outputdir_Counts) > 0)) { # checks whether it has been filled with results
-                      GGIRCounts_message = paste0(#"Counts and GGIR successfully completed at ", Sys.time(), 
+                      GGIRCounts_message = paste0(#"CountConverter and GGIR successfully completed at ", Sys.time(), 
                         "Output is stored in ", expected_outputdir_Counts, " and ",
                         expected_outputdir_ggir, 
                         "<br/>The table below shows the content of part2_daysummary.csv")
                       GGIRpart2 = read.csv(expected_ggiroutput_file)
                       output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
                     } else {
-                      GGIRCounts_message = paste0("Counts unsuccessful. No file found inside ", expected_outputdir_Counts)
+                      GGIRCounts_message = paste0("CountConverter unsuccessful. No file found inside ", expected_outputdir_Counts)
                     }
                   } else {
-                    GGIRCounts_message = paste0("Counts unsuccessful. Dir ",expected_outputdir_Counts, " not found")
+                    GGIRCounts_message = paste0("CountConverter unsuccessful. Dir ",expected_outputdir_Counts, " not found")
                   }
                 } else {
                   GGIRCounts_message = paste0(#"GGIR successfully completed at ", Sys.time(), 
@@ -946,7 +953,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           }
         } else {
           PALMSpy_message = paste0("Folder that is supposed to hold count files does not exist: ", 
-                                   count_file_location, " First run GGIR and Counts.")
+                                   count_file_location, " First run GGIR and CountConverter.")
         }
       }
       if (ready_to_run_palsmpy == TRUE) {
@@ -1148,9 +1155,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     })
     output$recommendorder <- renderText({
       pipeline = proposed_pipeline()
-      if ("GGIR" %in% pipeline & "Counts" %in% pipeline) {
-        pipeline = pipeline[-which(pipeline %in% c("GGIR", "Counts"))]
-        pipeline = c("GGIR & Counts", pipeline)
+      if ("GGIR" %in% pipeline & "CountConverter" %in% pipeline) {
+        pipeline = pipeline[-which(pipeline %in% c("GGIR", "CountConverter"))]
+        pipeline = c("GGIR & CountConverter", pipeline)
       }
       if (length(pipeline) > 1) {
         message = paste0("Recommended order of analyses: ", paste0(pipeline, collapse = " -> "))

@@ -1,7 +1,7 @@
 library(HabitusGUI)
 context("Identify tools needed to process data")
 test_that("Correct tools are proposed by test_identify_tools", {
-  available_tools = c("GGIR", "PALMSpy", "hbGPS", "palmsplusr", "Counts")
+  available_tools = c("GGIR", "PALMSpy", "hbGPS", "palmsplusr", "CountConverter")
   # Scenario 1: All tools needed
   sce1 = identify_tools(datatypes = c("AccRaw", "ACount", "GPS", "GIS", "GGIR_out"),
                             goals = c("PA", "Sleep", "QC", "Trips", "Environment"),
@@ -34,7 +34,7 @@ test_that("Correct tools are proposed by test_identify_tools", {
                         goals = c("PA", "Sleep", "QC", "Trips", "Environment"),
                         available_tools = available_tools)
   expect_equal(length(sce4$tools_needed), 5) 
-  expect_equal(sce4$tools_needed, c("GGIR", "PALMSpy", "palmsplusr", "Counts", "hbGPS"))
+  expect_equal(sce4$tools_needed, c("GGIR", "PALMSpy", "palmsplusr", "CountConverter", "hbGPS"))
   expect_equal(sce4$iotools[[2]]@output, "PALMSpy_out")
   expect_equal(sce4$iotools[[2]]@usecases, c("Trips", "QC", "Environment"))
   expect_equal(sce4$iotools[[4]]@output, "Counts_out")
