@@ -46,10 +46,14 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                                        "GPS (in .csv format)", 
                                                        "GIS (shape files + linkage file)", 
                                                        "PALMS(py) output previously generated",
+                                                       "GGIR time series output previously generated",
                                                        "Sleep Diary (in GGIR compatible .csv format)"),
-                                    choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out", "SleepDiary"), width = '100%'),
+                                    choiceValues = list("AccRaw", "ACount", "GPS", "GIS",
+                                                        "PALMSpy_out", "GGIR_out", "SleepDiary"), width = '100%'),
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ", # GGIR
                                                      "(input.availabledata.indexOf(`ACount`) > -1 && ", # PALMSpy
+                                                     "input.availabledata.indexOf(`GPS`) > -1) || ",
+                                                     "(input.availabledata.indexOf(`GGIR_out`) > -1 && ", # hbGPS
                                                      "input.availabledata.indexOf(`GPS`) > -1) || ",
                                                      "(input.availabledata.indexOf(`ACount`) > -1 && ", # palmsplusr variant 1
                                                      "input.availabledata.indexOf(`GPS`) > -1 && ",
@@ -67,8 +71,9 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                                      choiceNames = list("GGIR (R package)",
                                                                         "Neishabouri Counts / actilifecounts (R package)",
                                                                         "PALMSpy (Python library)",
+                                                                        "hbGPS (R package)",
                                                                         "palmsplusr (R package)"),
-                                                     choiceValues = list("GGIR", "Counts", "PALMSpy", "palmsplusr"), width = '100%')
+                                                     choiceValues = list("GGIR", "Counts", "PALMSpy", "hbGPS", "palmsplusr"), width = '100%')
                  ), 
                  actionButton("page_12", "next"),
                  actionButton("restart_1", "restart", 
@@ -310,11 +315,11 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           if ("GGIR" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
             showNotification("GGIR not possible without access to raw accelerometer data", type = "error")
           } else {
-            if ("PALMSpy" %in% input$tools == TRUE & "GPS" %in% input$availabledata == FALSE) {
-              showNotification("PALMSpy not possible without access to GPS data", type = "error")
+            if ("PALMSpy" %in% input$tools == TRUE & all(c("AccRaw", "ACount", "GPS") %in% input$availabledata == FALSE)) {
+              showNotification("PALMSpy not possible without access to Accelerometer and GPS data", type = "error")
             } else {
-              if ("PALMSpy" %in% input$tools == TRUE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE)) {
-                showNotification("PALMSpy not possible without access to Accelerometer data", type = "error")
+              if ("hbGPS" %in% input$tools == TRUE & all(c("GPS", "GGIR_out") %in% input$availabledata == FALSE)) {
+                showNotification("hbGPS not possible without access to GPS data and GGIR times series output", type = "error")
               } else {
                 if ("palmsplusr" %in% input$tools == TRUE & "GIS" %in% input$availabledata == FALSE) {
                   showNotification("palmsplusr not possible without access to GIS data", type = "error")
@@ -332,6 +337,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                 }
               }
             }
+            
           }
         }
       }
@@ -542,9 +548,10 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       if (is.null(x)) x <- character(0)
       researchgoals = c()
       
-      if ("GPS" %in% x & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
+      if ("GPS" %in% x & any(c("AccRaw", "ACount", "GGIR_out") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
       if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
       if (all(c("PALMSpy_out", "GIS") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
+      if (all(c("GGIR_out", "GIS") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
       if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PB", "QC")
       if ("AccRaw" %in% x) researchgoals = c(researchgoals, "QC")
       if ("ACount" %in% x == TRUE & "GPS" %in% x == FALSE & "AccRaw" %in% x == FALSE) researchgoals = c()

@@ -11,9 +11,9 @@
 # S4 class needs to be defined outside function
 setClass(Class = "toolio", slots = list(input = "character", output = "character", usecases = "character"))
 
-identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out"),
+identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out", "GGIR_out"),
                           goals = c("PA", "QC", "Trips", "Environment"),
-                          available_tools = c("GGIR", "PALMSpy", "palmsplusr", "Counts")) {
+                          available_tools = c("GGIR", "PALMSpy", "palmsplusr", "Counts", "hbGPS")) {
   iotools = list(GGIR = new("toolio",
                             input = "AccRaw",
                             output = c("GGIR_out", "ACount"),
@@ -29,9 +29,13 @@ identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", "PALMS
                  Counts = new("toolio",
                               input = "AccRaw",
                               output = c("Counts_out"),
-                              usecases = c("PA", "Trips", "QC", "Environment")))
+                              usecases = c("PA", "Trips", "QC", "Environment")),
+                 hbGPS = new("toolio",
+                               input = c("GGIR_out","GPS"),
+                               output = c("hbGPS_out"),
+                               usecases = c("Trips", "QC", "Environment")))
   iotools = iotools[which(names(iotools) %in% available_tools)] # only look at available tools
-  allgoals = tools_needed = outputs = c()
+  tools_needed = outputs = c()
   # loop over tools and select the ones that generate the output users needs and is able to generate
   for (j in 1:length(available_tools)) { # assumption is that pipeline is never longer then number of tools
     for (i in 1:length(iotools)) {
