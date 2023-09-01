@@ -11,7 +11,8 @@
 # S4 class needs to be defined outside function
 setClass(Class = "toolio", slots = list(input = "character", output = "character", usecases = "character"))
 
-identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out", "GGIR_out"),
+identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", 
+                                        "PALMSpy_out", "GGIR_out", "hbGPS_out"),
                           goals = c("PA", "QC", "Trips", "Environment"),
                           available_tools = c("GGIR", "PALMSpy", "palmsplusr", "CountConverter", "hbGPS")) {
   iotools = list(GGIR = new("toolio",
@@ -19,21 +20,25 @@ identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", "PALMS
                             output = c("GGIR_out", "ACount"),
                             usecases = c("PA", "QC", "Trips", "Environment")), 
                  PALMSpy = new("toolio",
-                               input = c("ACount","GPS"),
+                               input = c("ACount", "GPS"),
                                output = c("PALMSpy_out"),
                                usecases = c("Trips", "QC", "Environment")),
-                 palmsplusr = new("toolio",
-                                  input = c("PALMSpy_out", "GIS"),
-                                  output = c("palmsplusr_out"),
-                                  usecases = c("Environment", "QC")),
+                 palmsplusr = new("toolio", # palmsplusr based on PALMSpy output
+                                   input = c("PALMSpy_out", "GIS"),
+                                   output = c("palmsplusr_out"),
+                                   usecases = c("Environment", "QC")),
+                 palmsplusr = new("toolio", # palmsplusr based on hbGPS output
+                                   input = c("hbGPS_out", "GIS"),
+                                   output = c("palmsplusr_out"),
+                                   usecases = c("Environment", "QC")),
                  CountConverter = new("toolio",
-                              input = "AccRaw",
-                              output = c("Counts_out"),
-                              usecases = c("PA", "Trips", "QC", "Environment")),
+                                      input = "AccRaw",
+                                      output = c("Counts_out"),
+                                      usecases = c("PA", "Trips", "QC", "Environment")),
                  hbGPS = new("toolio",
-                               input = c("GGIR_out","GPS"),
-                               output = c("hbGPS_out"),
-                               usecases = c("Trips", "QC", "Environment")))
+                             input = c("GGIR_out","GPS"),
+                             output = c("hbGPS_out"),
+                             usecases = c("Trips", "QC", "Environment")))
   iotools = iotools[which(names(iotools) %in% available_tools)] # only look at available tools
   tools_needed = outputs = c()
   # loop over tools and select the ones that generate the output users needs and is able to generate

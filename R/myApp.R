@@ -45,11 +45,13 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                                        "Counts (in ActiGraph .csv format)",
                                                        "GPS (in .csv format)", 
                                                        "GIS (shape files + linkage file)", 
-                                                       "PALMS(py) output previously generated",
-                                                       "GGIR time series output previously generated",
-                                                       "Sleep Diary (in GGIR compatible .csv format)"),
-                                    choiceValues = list("AccRaw", "ACount", "GPS", "GIS",
-                                                        "PALMSpy_out", "GGIR_out", "SleepDiary"), width = '100%'),
+                                                       "Sleep Diary (in GGIR compatible .csv format)",
+                                                       "previously generated PALMS(py) output",
+                                                       "previously generated GGIR time series output",
+                                                       "previously generated hbGPS output"),
+                                    choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "SleepDiary",
+                                                        "PALMSpy_out", "GGIR_out", "hbGPS_out"), width = '100%'),
+                 # Only show more check boxs if user specified available data sufficient for any of the tools
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ", # GGIR
                                                      "(input.availabledata.indexOf(`ACount`) > -1 && ", # PALMSpy
                                                      "input.availabledata.indexOf(`GPS`) > -1) || ",
@@ -58,7 +60,11 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                                      "(input.availabledata.indexOf(`ACount`) > -1 && ", # palmsplusr variant 1
                                                      "input.availabledata.indexOf(`GPS`) > -1 && ",
                                                      "input.availabledata.indexOf(`GIS`) > -1) || ", 
-                                                     "(input.availabledata.indexOf(`PALMSpy_out`) > -1 && ", #palmsplusr variant 2
+                                                     "(input.availabledata.indexOf(`AccRaw`) > -1 && ", # palmsplusr variant 2
+                                                     "input.availabledata.indexOf(`GPS`) > -1 && ",
+                                                     "input.availabledata.indexOf(`GIS`) > -1) || ", 
+                                                     "((input.availabledata.indexOf(`hbGPS_out`) > -1 || ", #palmsplusr variant 3
+                                                     "input.availabledata.indexOf(`PALMSpy_out`) > -1)  && ", 
                                                      "input.availabledata.indexOf(`GIS`) > -1)"),
                                   hr(),
                                   # If there is enough input data then show second check box to ask user about their research goals
@@ -325,8 +331,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                   showNotification("palmsplusr not possible without access to GIS data", type = "error")
                 } else {
                   if ("palmsplusr" %in% input$tools == TRUE & ("PALMSpy_out" %in% input$availabledata == FALSE &
+                                                               "hbGPS_out" %in% input$availabledata == FALSE &
                                                                "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
-                    showNotification("palmsplusr requires either previously generated PALMS(py) output or GPS and Accelerometer data", type = "error")
+                    showNotification(paste0("palmsplusr requires either previously",
+                                            " generated PALMS(py) or hbGPS output,",
+                                            " or GPS and Accelerometer data such",
+                                            " that either PALMSpyor hbGPS can be",
+                                            " run"), type = "error")
                   } else {
                     if ("CountConverter" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
                       showNotification("CountConverter not possible without access to raw accelerometer data", type = "error")
@@ -551,6 +562,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       if ("GPS" %in% x & any(c("AccRaw", "ACount", "GGIR_out") %in% x)) researchgoals = c(researchgoals, "Trips", "QC")
       if (all(c("GPS", "GIS") %in% x) & any(c("AccRaw", "ACount") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
       if (all(c("PALMSpy_out", "GIS") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
+      if (all(c("hbGPS_out", "GIS") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
       if (all(c("GGIR_out", "GIS") %in% x)) researchgoals = c(researchgoals, "Environment", "QC")
       if ("AccRaw" %in% x | all(c("AccCount", "GPS")  %in% x)) researchgoals = c(researchgoals, "PB", "QC")
       if ("AccRaw" %in% x) researchgoals = c(researchgoals, "QC")
