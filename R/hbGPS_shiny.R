@@ -30,7 +30,7 @@ hbGPS_shiny = function(ggiroutdir = NULL, gpsdir = NULL, outputdir = NULL,
   if (.Platform$OS.type == "windows") {
     logFile = paste0(outputdir, "/hbGPS.log")
     fileConn = file(logFile)
-    writeLines(c("Hello, this Shiny app is primarily designed for Linux.",
+    writeLines(c("Hello, this Shiny app is primarily designed for Unix.",
                  "In Windows OS live progress of the analysis can be followed in the RStudio console.",
                  "In Unix-like systems the progress would be shown here inside this window in the Shiny app."), fileConn)
     close(fileConn)
