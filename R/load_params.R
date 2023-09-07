@@ -1,7 +1,7 @@
 #' load_params
 #'
 #' @param file Character to specify location of configuration file
-#' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_palmsplusr
+#' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_palmsplusr, csv_hbGPS
 #' @return list of parameters extract from the configuration file
 #' @importFrom jsonlite fromJSON
 #' @importFrom utils read.csv read.table
@@ -52,6 +52,20 @@ load_params = function(file=c(), format="json_palmspy") {
     params_info_ggir_file = system.file("testfiles_ggir/params_description_ggir.tsv", package = "HabitusGUI")[1]
     params_info_ggir = read.table(file = params_info_ggir_file, sep = "\t", header = TRUE)
     params_merged = merge(params_info_ggir, params, by.x = "parameter", by.y = "argument")
+    dups = duplicated(params_merged)
+    params_merged = params_merged[!dups,]
+    rownames(params_merged) = params_merged$parameter
+    params = params_merged[, expected_tsv_columns]
+    params = params[,-which(colnames(params) == "subfield")]
+  } else if (format == "csv_hbGPS") {
+    params = read.csv(file = file)
+    # remove duplicates, in case hbGPS config files have duplicates
+    dups = duplicated(params)
+    params = params[!dups,]
+    # Keep only parameters with a matching description in the description file
+    params_info_hbGPS_file = system.file("testfiles_hbGPS/params_description_hbGPS.tsv", package = "HabitusGUI")[1]
+    params_info_hbGPS = read.table(file = params_info_hbGPS_file, sep = "\t", header = TRUE)
+    params_merged = merge(params_info_hbGPS, params, by.x = "parameter", by.y = "argument")
     dups = duplicated(params_merged)
     params_merged = params_merged[!dups,]
     rownames(params_merged) = params_merged$parameter

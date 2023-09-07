@@ -27,4 +27,25 @@ test_that("Parameters are checked", {
                                                 " numeric<br/>Error in parameter \" i \": Value 1,2,3 numeric",
                                                 " vector needs to start with c( and end with ), with values",
                                                 " separated by a comma<br/>", collapse = ""))
+  #===================================
+  # Check timeformat seperately
+  params = data.frame(value = c("%Y-%m-%d %H:%M:%S", "%Y-typo-%d %H:%M:%S"),
+                      topic = rep("topic", 2),
+                      description = rep("description", 2),
+                      class = c("timeformat", "timeformat"),
+                      minimum = rep(NA, 2),
+                      maximum = rep(NA, 2),
+                      set = c(NA, NA))
+  rownames(params) = c("j", "k")
+  paramcheck = check_params(params, tool = "hbGPS")
+  
+  # Check that values are as expected
+  expect_equal(nrow(paramcheck$blocked_params), 1)
+  expect_equal(paramcheck$blocked_params$name, c("k"))
+  expect_equal(paramcheck$blocked_params$error, "is not a valid R time format specification.")
+  expect_equal(paramcheck$error_message, paste0("Error in parameter \" k \": Value",
+                                                " %Y-typo-%d %H:%M:%S is not a",
+                                                " valid R time format ",
+                                                "specification.<br/>", collapse = ""))
+  
 })
