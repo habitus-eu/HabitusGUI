@@ -309,7 +309,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                  p("\n"),
                  fluidRow(
                    column(1, offset = 0,
-                          actionButton("restart_4", "restart", class = "btn-danger")  
+                          actionButton("restart_4", "restart app", class = "btn-danger")  
                    )
                  )
                  
