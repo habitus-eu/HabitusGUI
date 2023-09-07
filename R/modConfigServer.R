@@ -38,6 +38,14 @@ modConfigServer = function(id, tool, homedir = getwd()) {
             if (config_default != file) file.copy(config_default, file)
           },
           contentType = "text/csv")
+      } else if (tool() == "hbGPS") {
+        output$download = downloadHandler(
+          filename = "config_hbGPS.csv",
+          content <- function(file) {
+            config_default = system.file("testfiles_palmsplusr/config_hbGPS.csv", package = "HabitusGUI")[1]
+            if (config_default != file) file.copy(config_default, file)
+          },
+          contentType = "text/csv")
       }
     })
     
@@ -80,6 +88,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
             params = load_params(file = current_config, format = "csv_ggir") #$datapath
           } else if (tool() == "palmsplusr") {
             params = load_params(file = current_config, format = "csv_palmsplusr") #$datapath
+          } else if (tool() == "hbGPS") {
+            params = load_params(file = current_config, format = "csv_hbGPS") #$datapath
           }
           # if config file is loaded, then check params
           params_errors = check_params(params, tool = tool())
@@ -126,6 +136,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
                 update_params(new_params = v$params, file = current_config, format = "csv_ggir") #$datapath
               } else if (tool() == "palmsplusr") {
                 update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
+              } else if (tool() == "hbGPS") {
+                update_params(new_params = v$params, file = current_config, format = "csv_hbGPS") #$datapath
               }
             }
           })
@@ -142,6 +154,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
               update_params(new_params = v$params, file = current_config, format = "csv_ggir") #$datapath
             } else if (tool() == "palmsplusr") {
               update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
+            } else if (tool() == "hbGPS") {
+              update_params(new_params = v$params, file = current_config, format = "csv_hbGPS") #$datapath
             }
             # update list with errors
             params_errors = check_params(params, tool = tool())
@@ -193,6 +207,9 @@ modConfigServer = function(id, tool, homedir = getwd()) {
       } else if (tool() == "palmsplusr") {
         explanation = paste0("palmsplusr takes as input PALMSpy output, GIS shape, and a GISlinkage file ",
                              "and uses these to describe behaviour per domain.")
+      } else if (tool() == "hbGPS") {
+        explanation = paste0("hbGPS takes as input GGIR output and GPS data and uses them to estimate",
+                             " trips.")
       }
       explanation
     })
@@ -204,6 +221,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         config_explanation2 = "PALMSpy configuration files are in .json. If you do not have one Download a template below."
       } else if (tool() == "palmsplusr") {
         config_explanation2 = "palmsplusr configuration files are in .csv. If you do not have one Download a template below."
+      } else if (tool() == "hbGPS") {
+        config_explanation2 = "hbGPS configuration files are in .csv. If you do not have one Download a template below."
       }
       config_explanation2
     })
