@@ -66,7 +66,7 @@ modConfigServer = function(id, tool, homedir = getwd()) {
       
       if (length(current_config) > 0) {
         # check config file
-        check = checkFile(file = current_config, tool = tool())
+        check = checkConfigFile(file = current_config, tool = tool())
         
         if (check != "ok") {
           # Show notification and keep waiting for correct config file
