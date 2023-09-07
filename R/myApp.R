@@ -277,6 +277,20 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                   DT::dataTableOutput("PALMSpy_file1"),
                                   hr()
                  ),
+                 conditionalPanel(condition = "input.tools.includes('hbGPS')",
+                                  h3("hbGPS:"),
+                                  shinyjs::useShinyjs(),
+                                  actionButton("start_hbGPS", "Start analysis", width = '300px'),
+                                  p("\n"),
+                                  verbatimTextOutput("mylog_hbGPS"),
+                                  tags$head(tags$style("#mylog_hbGPS{color:darkblue; font-size:12px; font-style:italic; 
+overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
+                                  p("\n"),
+                                  htmlOutput("hbGPS_end_message"),
+                                  p("\n"),
+                                  DT::dataTableOutput("hbGPS_file1"),
+                                  hr()
+                 ),
                  conditionalPanel(condition = "input.tools.includes('palmsplusr')",
                                   h3("palmsplusr:"),
                                   shinyjs::useShinyjs(),
@@ -1128,6 +1142,112 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       return()
     })
     #========================================================================
+    # Apply hbGPS after button is pressed
+    #========================================================================
+    runhbGPS <- eventReactive(input$start_hbGPS, {
+      hbGPS_message = ""
+      if ("hbGPS" %in% input$tools) {
+        hbGPS_message = "Error: Contact maintainer"
+        # Basic check before running function:
+        ready_to_run_hbGPS = FALSE
+        # Check for GGIR output (two possible sources either from this run or from a previous run)
+        if (dir.exists(global$ggirout_in)) {
+          Nfiles_in_dir = length(dir(path = expected_ggir_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
+          if (Nfiles_in_dir > 0) {
+            # also check for GPS files
+            if (dir.exists(global$gps_in)) {
+              Nfiles_in_gpsdir = length(dir(path = global$gps_in, recursive = FALSE, full.names = FALSE))
+              if (Nfiles_in_gpsdir == 0) {
+                hbGPS_message = paste0("No files found in GPS folder: ", global$gps_in)
+              } else {
+                ready_to_run_hbGPS = TRUE
+              }
+            } else {
+              hbGPS_message = paste0("Folder that is supposed to hold GPS files does not exist: ", global$gps_in)
+            }
+          } else {
+            hbGPS_message = paste0("No files found in GGIR output folder: ", global$ggirout_in)
+          }
+        } else {
+          hbGPS_message = paste0("Folder that is supposed to hold GGIR output files does not exist: ", global$ggirout_in)
+        }
+        # Only run function when checks are met:
+        if (ready_to_run_hbGPS == TRUE) {
+          shinyjs::hide(id = "start_hbGPS")
+          id_palmsplusr = showNotification("hbGPS in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+          
+          write.table(x = NULL, file = stdout_hbGPS_tmp) # initialise empty file
+          output$mylog_hbGPS <- renderText({
+            paste(mylog_hbGPS(), collapse = '\n')
+          })
+          
+          # If process somehow unexpectedly terminates, always copy tmp log 
+          # file to actual log file for user to see
+          logfile = paste0(isolate(global$data_out), "/hbGPS.log")
+          on.exit(file.copy(from = stdout_hbGPS_tmp, to = logfile, overwrite = TRUE), add = TRUE)
+          
+          # Start hbGPS
+          x_hbGPS <- r_bg(func = function(hbGPS_shiny, ggiroutdir, gpsdir,
+                                               outputdir, dataset_name,
+                                               configfile){
+            hbGPS_shiny(ggiroutdir, gpsdir,
+                             outputdir, dataset_name,
+                             configfile)
+          },
+          args = list(hbGPS_shiny = hbGPS_shiny,
+                      ggiroutdir = global$ggirout_in,
+                      gpsdir = global$gps_in,
+                      outputdir = isolate(global$data_out),
+                      dataset_name = input$dataset_name,
+                      configfile =  paste0(global$data_out, "/config_hbGPS.csv")),
+          stdout = stdout_hbGPS_tmp,
+          stderr = "2>&1")
+
+          observe({
+            if (x_hbGPS$poll_io(0)[["process"]] != "ready") {
+              invalidateLater(5000)
+            } else {
+              on.exit(removeNotification(id_hbGPS), add = TRUE)
+              # When process is finished copy tmp log file to actual log file for user to see
+              if (file.exists(stdout_hbGPS_tmp)) {
+                file.copy(from = stdout_hbGPS_tmp, to = logfile, overwrite = TRUE)     
+              }
+              # Now check whether results are correctly generated:
+              expected_hbGPS_folder = paste0(isolate(global$data_out), "/hbGPS_output")
+              if (dir.exists(expected_hbGPS_folder) == TRUE) {
+                csv_files_hbGPS = dir(expected_hbGPS_folder, pattern = "csv", recursive = TRUE, full.names = TRUE)
+                if (length(csv_files_hbGPS) > 0) {
+                  palmsplusr_message = paste0(
+                    "Output is stored in: ", expected_hbGPS_folder,
+                    paste0("<br/>The table below shows the content of ", basename(csv_files_hbGPS)[1]),
+                    "<br/>Log file: ", logfile)
+                  Sys.sleep(3)
+                  hbGPS_file1 = read.csv(file = csv_files_hbGPS[1])
+                  if (length(hbGPS_file1) > 0) {
+                    output$hbGPS_file1 <- DT::renderDataTable(hbGPS_file1, options = list(scrollX = TRUE))
+                  }
+                } else {
+                  hbGPS_message = paste0("hbGPS unsuccessful",
+                                              "<br/>No file found inside: ", expected_hbGPS_folder,
+                                              "<br/>Log file: ", logfile)
+                }
+              } else {
+                hbGPS_message = paste0("hbGPS unsuccessful",
+                                            "<br/>No file found inside: ", expected_hbGPS_folder,
+                                            "<br/>Log file: ", logfile)
+              }
+              output$hbGPS_end_message <- renderUI({
+                HTML(paste0(hbGPS_message))
+              })
+            }
+          })
+        }
+      }
+      return()
+    })
+    
+    
+    #========================================================================
     # Apply palmsplusr after button is pressed
     #========================================================================
     runpalmsplusr <- eventReactive(input$start_palmsplusr, {
@@ -1172,7 +1292,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           shinyjs::hide(id = "start_palmsplusr")
           id_palmsplusr = showNotification("palmsplusr in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           
-          write.table(x = NULL, file = stdout_PALMSpy_tmp) # initialise empty file
+          write.table(x = NULL, file = stdout_palmsplusr_tmp) # initialise empty file
           output$mylog_palmsplusr <- renderText({
             paste(mylog_palmsplusr(), collapse = '\n')
           })
