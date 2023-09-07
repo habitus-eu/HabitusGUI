@@ -85,10 +85,14 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                                                         "palmsplusr (R package)"),
                                                      choiceValues = list("GGIR", "CountConverter", "PALMSpy", "hbGPS", "palmsplusr"), width = '100%')
                  ), 
-                 actionButton("page_12", "next"),
-                 actionButton("restart_1", "restart", 
-                              style = "position:absolute;right:1em;")
-                 
+                 hr(),
+                 actionButton("page_12", "next",  style = "position:absolute;right:1em;"),
+                 p("\n"),
+                 fluidRow(
+                   column(1, offset = 0,
+                          actionButton("restart_1", "restart", class = "btn-danger")  
+                   )
+                 )
         ),
         tabPanel("page_2",
                  fluidRow(column(8, div(h1("Habitus - Data selection"), style = "height:50px")),
@@ -177,12 +181,15 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
                                   strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
                  ),
-                 
                  hr(),
                  actionButton("page_21", "prev"),
-                 actionButton("page_23", "next"),
-                 actionButton("restart_2", "restart", 
-                              style = "position:absolute;right:1em;")
+                 actionButton("page_23", "next",  style = "position:absolute;right:1em;"),
+                 p("\n"),
+                 fluidRow(
+                   column(1, offset = 0,
+                          actionButton("restart_2", "restart", class = "btn-danger")  
+                   )
+                 )
         ),
         tabPanel("page_3",
                  fluidRow(column(8, div(h1("Habitus - Parameter Configuration"), style = "height:50px")),
@@ -214,10 +221,15 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   modConfigUI("edit_palmsplusr_config"),
                                   hr()
                  ),
+                 hr(),
                  actionButton("page_32", "prev"),
-                 actionButton("page_34", "next"),
-                 actionButton("restart_3", "restart", 
-                              style = "position:absolute;right:1em;")
+                 actionButton("page_34", "next", style = "position:absolute;right:1em;"),
+                 p("\n"),
+                 fluidRow(
+                   column(1, offset = 0,
+                          actionButton("restart_3", "restart", class = "btn-danger")  
+                   )
+                 )
         ),
         tabPanel("page_4",
                  # Button to start analysis ---------------------------------------------
@@ -280,8 +292,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                   hr()
                  ),
                  actionButton("page_43", "prev"),
-                 actionButton("restart_4", "restart", 
-                              style = "position:absolute;right:1em;")
+                 p("\n"),
+                 fluidRow(
+                   column(1, offset = 0,
+                          actionButton("restart_4", "restart", class = "btn-danger")  
+                   )
+                 )
+                 
         )
       )
     )
