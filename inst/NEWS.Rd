@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-\section{Changes in version 0.1.9 (GitHub-only-release date: ??-??-2023)}{
+\section{Changes in version 0.1.9 (GitHub-only-release date: 08-09-2023)}{
   \itemize{
     \item Deprecate saving configfile in Shiny state as currently functionality
     was not working well (e.g. it did not allow for overwriting previous configfile)
