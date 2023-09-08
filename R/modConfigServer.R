@@ -30,19 +30,19 @@ modConfigServer = function(id, tool, homedir = getwd()) {
             if (config_default != file) file.copy(config_default, file)
           },
           contentType = "text/csv")
+      } else if (tool() == "hbGPS") {
+        output$download = downloadHandler(
+          filename = "config_hbGPS.csv",
+          content <- function(file) {
+            config_default = system.file("testfiles_hbGPS/config_hbGPS.csv", package = "HabitusGUI")[1]
+            if (config_default != file) file.copy(config_default, file)
+          },
+          contentType = "text/csv")
       } else if (tool() == "palmsplusr") {
         output$download = downloadHandler(
           filename = "config_palmsplusr.csv",
           content <- function(file) {
             config_default = system.file("testfiles_palmsplusr/config_palmsplusr.csv", package = "HabitusGUI")[1]
-            if (config_default != file) file.copy(config_default, file)
-          },
-          contentType = "text/csv")
-      } else if (tool() == "hbGPS") {
-        output$download = downloadHandler(
-          filename = "config_hbGPS.csv",
-          content <- function(file) {
-            config_default = system.file("testfiles_palmsplusr/config_hbGPS.csv", package = "HabitusGUI")[1]
             if (config_default != file) file.copy(config_default, file)
           },
           contentType = "text/csv")
