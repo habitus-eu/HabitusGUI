@@ -473,7 +473,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                     if ("hbGPS_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$hbgpsoutdir)[1] == "0" & is.null(selectedHbgpsoutdir)) {
                       showNotification("Select previously generated hbGPS output directory", type = "error")
                     } else {
-                      if ("GGIR_out" %in% input$availabledata & "hbGPS" %in% input$tools & as.character(input$ggiroutdir)[1] == "0" & is.null(selectedHbgpsoutdir)) {
+                      if ("GGIR_out" %in% input$availabledata & "hbGPS" %in% input$tools & as.character(input$ggiroutdir)[1] == "0" & is.null(selectedGgiroutdir)) {
                         showNotification("Select previously generated hbGPS output directory", type = "error")
                       } else {
                         switch_page(3)
@@ -754,7 +754,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       sleepdiary_file = getPrevPath(dirname = "sleepdiaryfile", ifEmpty = NULL, homedir = homedir, values)
     } else {
       data_out = homedir
-      raw_acc_in = count_acc_in = gps_in = gis_in = gislinkfile_in = palmspyout_in = hbgpsout_in = sleepdiary_file = NULL
+      raw_acc_in = count_acc_in = gps_in = gis_in = gislinkfile_in = palmspyout_in = hbgpsout_in = sleepdiary_file = ggirout_in = NULL
     }
     global <- reactiveValues(data_out = cleanPath(data_out),
                              raw_acc_in = cleanPath(raw_acc_in),
@@ -763,6 +763,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                              gis_in = cleanPath(gis_in),
                              gislinkfile_in = cleanPath(gislinkfile_in),
                              palmspyout_in = cleanPath(palmspyout_in),
+                             ggirout_in = cleanPath(ggirout_in),
                              hbgpsout_in = cleanPath(hbgpsout_in),
                              sleepdiaryfile = cleanPath(sleepdiary_file)) #, pipeline = NULL)
     
