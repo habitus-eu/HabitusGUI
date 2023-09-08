@@ -1,11 +1,11 @@
 argument,value,context
-idloc,2,general
+idloc,6,general
 maxBreakLengthSeconds,120,trip
 minTripDur,60,trip
 minTripDist_m,100,trip
 threshold_snr,225,noise
 threshold_snr_ratio,50,noise
-tz,,general
-time_format,%d/%m/%Y %H:%M:%SO,general
-outputFormat,default,general
-AccThresholds,,accelerometer
+tz,Europe/Brussels,general
+time_format,%Y/%m/%d %H:%M:%S,general
+outputFormat,PALMS,general
+AccThresholds,"c(8.33, 208.33, 833.33, 1250)",accelerometer

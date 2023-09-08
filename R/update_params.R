@@ -1,7 +1,7 @@
 #' update_params
 #'
 #' @param file Character to specify location of original configuration file
-#' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, or csv_palmsplusr
+#' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_hbGPS or csv_palmsplusr
 #' @param new_params New parameters
 #' @return No object returned, function only reads original data, and overwrites parameters and stores it again
 #' @importFrom jsonlite fromJSON toJSON
@@ -9,6 +9,29 @@
 #' @export
 
 update_params = function(new_params = c(), file = c(), format="json_palmspy") {
+  
+  overwriteMatchingFields = function(params, new_params, format = "") {
+    # Remove duplicates
+    dups = duplicated(params$argument)
+    params = params[!dups,]
+    rownames(params) = params$argument
+    # Only overwrite the matching fields of csv file
+    for (j in 1:nrow(new_params)) {
+      ind = which(rownames(params) %in% rownames(new_params)[j] == TRUE)
+      if (length(ind) > 0) {
+        if (format == "csv_palmsplusr") {
+          if (new_params$value[j] != params$formula[ind]) {
+            params$formula[ind] = new_params$value[j]
+          }
+        } else {
+          params$value[ind] = new_params$value[j]
+        }
+      }
+    }
+    return(params)
+  }
+
+  
   if (format == "json_palmspy") {
     config = fromJSON(txt = file, simplifyDataFrame = TRUE)
     if ("gps" %in% names(config) & "accelerometer" %in% names(config)) {
@@ -38,15 +61,7 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
     write(exportJson, file = file)
   } else if (format == "csv_ggir") {
     params = read.csv(file = file)
-    # remove duplicates, because sometimes GGIR config files have duplicates
-    dups = duplicated(params$argument)
-    params = params[!dups,]
-    rownames(params) = params$argument
-    # only overwrite the matching fields
-    for (j in 1:nrow(new_params)) {
-      ind = which(rownames(params) %in% rownames(new_params)[j] == TRUE)
-      params$value[ind] = new_params$value[j]
-    }
+    params = overwriteMatchingFields(params, new_params, format)
     # match acc.metric with do.metric arguments
     do_metrics = c("do.zcx", "do.zcy", "do.zcz", 
                    "do.en", "do.enmo", "do.enmoa",
@@ -68,22 +83,14 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
     params[do_argument, "value"] = TRUE
     params[do_metrics[-which(do_metrics == do_argument)], "value"] = FALSE 
     write.csv(x = params, file = file, row.names = FALSE)
+  } else if (format == "csv_hbGPS") {
+    params = read.csv(file = file)
+    params = overwriteMatchingFields(params, new_params, format)
+    write.csv(x = params, file = file, row.names = FALSE)
   } else if (format == "csv_palmsplusr") {
     params = read.csv(file = file, sep = ",")
-    # remove duplicates, just in case palmsplusr config files have duplicates
     params$argument = with(params, paste0(params$context, "__",params$name))
-    dups = duplicated(params$argument)
-    params = params[!dups,]
-    rownames(params) = params$argument
-    # only overwrite the matching fields
-    for (j in 1:nrow(new_params)) {
-      ind = which(rownames(params) %in% rownames(new_params)[j] == TRUE)
-      if (length(ind) > 0) {
-        if (new_params$value[j] != params$formula[ind]) {
-          params$formula[ind] = new_params$value[j]
-        }
-      }
-    }
+    params = overwriteMatchingFields(params, new_params, format)
     params = params[,-which(colnames(params) %in% c("argument"))]
     write.csv(x = params, file = file, row.names = FALSE)
   }

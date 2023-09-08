@@ -157,9 +157,9 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  # Select input folder hbGPS output data -----------------------------------
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`hbGPS_out`) > -1 && ",
                                                      "input.tools.includes(`palmsplusr`) && !input.tools.includes(`hbGPS`)"),
-                                  shinyFiles::shinyDirButton("hbgpsoutdir", label = "Previously generated hbGPS output directory...",
+                                  shinyFiles::shinyDirButton("hbGPSoutdir", label = "Previously generated hbGPS output directory...",
                                                              title = "Select hbGPS output directory"),
-                                  verbatimTextOutput("hbgpsoutdir", placeholder = TRUE),
+                                  verbatimTextOutput("hbGPSoutdir", placeholder = TRUE),
                                   hr()
                  ),
                  # Upload sleep diary ----------------------------------------------------
@@ -351,9 +351,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     if (length(values$gpsdir) < 2) selectedGpsdir = c() else selectedGpsdir = paste(values$gpsdir$path, collapse = .Platform$file.sep)
     if (length(values$gisdir) < 2) selectedGisdir = c() else selectedGisdir = paste(values$gisdir$path, collapse = .Platform$file.sep)
     if (length(values$gislinkfile) < 2) selectedGislinkfile = c() else selectedGislinkfile = paste(values$gislinkfile$path, collapse = .Platform$file.sep)
-    if (length(values$palmspyoutdir) < 2) selectedPalmspyoutdir = c() else selectedPalmspyoutdir = paste(values$palmspyoutdir$path, collapse = .Platform$file.sep)
-    if (length(values$ggiroutdir) < 2) selectedGgiroutdir = c() else selectedGgiroutdir = paste(values$ggiroutdir$path, collapse = .Platform$file.sep)
-    if (length(values$hbgpsoutdir) < 2) selectedHbgpsoutdir = c() else selectedHbgpsoutdir = paste(values$hbgpsoutdir$path, collapse = .Platform$file.sep)
+    if (length(values$palmspyoutdir) < 2) selected_PALMSpyoutdir = c() else selected_PALMSpyoutdir = paste(values$palmspyoutdir$path, collapse = .Platform$file.sep)
+    if (length(values$ggiroutdir) < 2) selected_GGIRoutdir = c() else selected_GGIRoutdir = paste(values$ggiroutdir$path, collapse = .Platform$file.sep)
+    if (length(values$hbGPSoutdir) < 2) selected_hbGPSoutdir = c() else selected_hbGPSoutdir = paste(values$hbGPSoutdir$path, collapse = .Platform$file.sep)
     if (length(values$sleepdiaryfile) < 2) selectedSleepdiaryfile = c() else selectedSleepdiaryfile = paste(values$sleepdiaryfile$path, collapse = .Platform$file.sep)
     if (length(values$outputdir) < 2) selectedOutputdir = c() else selectedOutputdir = paste(values$outputdir$path, collapse = .Platform$file.sep)
 
@@ -419,7 +419,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       prevPathNames = c("rawaccdir", "countaccdir", "sleepdiaryfile",
                         "configfileGGIR", "configfilepalmsplusr", "configfilehbGPS",
                         "gpsdir", "gisdir", "gislinkfile",
-                        "palmspyoutdir", "hbgpsoutdir", "ggiroutdir", "outputdir")
+                        "palmspyoutdir", "hbGPSoutdir", "ggiroutdir", "outputdir")
       prevPathNames = prevPathNames[which(prevPathNames %in% names(values))]
       prevPaths = values[prevPathNames]
       values_tmp = lapply(reactiveValuesToList(input), unclass)
@@ -467,13 +467,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                      length(current_gislinkfile) == 0) & is.null(selectedGisdir)) {
                   showNotification("Select GIS data directory and GIS linkage file", type = "error")
                 } else {
-                  if ("PALMSpy_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0" & is.null(selectedPalmspyoutdir)) {
+                  if ("PALMSpy_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0" & is.null(selected_PALMSpyoutdir)) {
                     showNotification("Select previously generated PALMS(py) output directory", type = "error")
                   } else {
-                    if ("hbGPS_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$hbgpsoutdir)[1] == "0" & is.null(selectedHbgpsoutdir)) {
+                    if ("hbGPS_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$hbGPSoutdir)[1] == "0" & is.null(selected_hbGPSoutdir)) {
                       showNotification("Select previously generated hbGPS output directory", type = "error")
                     } else {
-                      if ("GGIR_out" %in% input$availabledata & "hbGPS" %in% input$tools & as.character(input$ggiroutdir)[1] == "0" & is.null(selectedGgiroutdir)) {
+                      if ("GGIR_out" %in% input$availabledata & "hbGPS" %in% input$tools & as.character(input$ggiroutdir)[1] == "0" & is.null(selected_GGIRoutdir)) {
                         showNotification("Select previously generated hbGPS output directory", type = "error")
                       } else {
                         switch_page(3)
@@ -492,7 +492,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       # Previous selection of directories
       prevPathNames = c("rawaccdir", "countaccdir", "sleepdiaryfile",
                         "gpsdir", "gisdir", "gislinkfile",
-                        "palmspyoutdir", "hbgpsoutdir", "ggiroutdir", "outputdir")
+                        "palmspyoutdir", "hbGPSoutdir", "ggiroutdir", "outputdir")
       prevPathNames = prevPathNames[which(prevPathNames %in% names(values))]
       prevPaths = values[prevPathNames]
       values_tmp = lapply(reactiveValuesToList(input), unclass)
@@ -539,7 +539,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       }
       if (configs_ready == TRUE) {
         showNotification("Saving configuration file(s) to output folder", type = "message", duration = 2)
-        
         copyFile = function(from, to) {
           # Copies configuration file to output folder if:
           # - from and to are not the same path
@@ -563,7 +562,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
             if (sleepdiaryfile() != 0) {
               diary_from = cleanPath(as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath))
               diary_to = cleanPath(paste0(global$data_out, "/sleepdiary.csv"))
-              if (length(config_from) > 0) {
+              if (length(diary_from) > 0) {
                 sleepdiaryfile_local = copyFile(from = diary_from, to = diary_to)
               } else  {
                 sleepdiaryfile_local = c()
@@ -704,7 +703,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     shinyDirChoose(input, 'gisdir',  roots = c(home = homedir))
     shinyFileChoose(input, 'gislinkfile',  roots = c(home = homedir))
     shinyDirChoose(input, 'palmspyoutdir',  roots = c(home = homedir)) # Allow for old output to be used as input
-    shinyDirChoose(input, 'hbgpsoutdir',  roots = c(home = homedir)) # Allow for old output to be used as input
+    shinyDirChoose(input, 'hbGPSoutdir',  roots = c(home = homedir)) # Allow for old output to be used as input
     shinyDirChoose(input, 'ggiroutdir',  roots = c(home = homedir)) # Allow for old output to be used as input
     shinyDirChoose(input, 'outputdir',  roots = c(home = homedir))
     shinyFileChoose(input, 'sleepdiaryfile',  roots = c(home = homedir))
@@ -717,7 +716,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     gisdir <- reactive(input$gisdir)
     gislinkfile <- reactive(input$gislinkfile)
     palmspyoutdir <- reactive(input$palmspyoutdir) # Allow for old output to be used as input
-    hbgpsoutdir <- reactive(input$hbgpsoutdir) # Allow for old output to be used as input
+    hbGPSoutdir <- reactive(input$hbGPSoutdir) # Allow for old output to be used as input
     ggiroutdir <- reactive(input$ggiroutdir) # Allow for old output to be used as input
     outputdir <- reactive(input$outputdir)
     sleepdiaryfile <- reactive(input$sleepdiaryfile) #$datapath
@@ -749,12 +748,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
       gis_in = getPrevPath(dirname = "gisdir", ifEmpty = NULL, homedir = homedir, values)
       gislinkfile_in = getPrevPath(dirname = "gislinkfile", ifEmpty = NULL, homedir = homedir, values)
       palmspyout_in = getPrevPath(dirname = "palmspyoutdir", ifEmpty = NULL, homedir = homedir, values)
-      hbgpsout_in = getPrevPath(dirname = "hbgpsoutdir", ifEmpty = NULL, homedir = homedir, values)
+      hbGPSout_in = getPrevPath(dirname = "hbGPSoutdir", ifEmpty = NULL, homedir = homedir, values)
       ggirout_in = getPrevPath(dirname = "ggiroutdir", ifEmpty = NULL, homedir = homedir, values)
       sleepdiary_file = getPrevPath(dirname = "sleepdiaryfile", ifEmpty = NULL, homedir = homedir, values)
     } else {
       data_out = homedir
-      raw_acc_in = count_acc_in = gps_in = gis_in = gislinkfile_in = palmspyout_in = hbgpsout_in = sleepdiary_file = ggirout_in = NULL
+      raw_acc_in = count_acc_in = gps_in = gis_in = gislinkfile_in = palmspyout_in = hbGPSout_in = sleepdiary_file = ggirout_in = NULL
     }
     global <- reactiveValues(data_out = cleanPath(data_out),
                              raw_acc_in = cleanPath(raw_acc_in),
@@ -764,7 +763,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                              gislinkfile_in = cleanPath(gislinkfile_in),
                              palmspyout_in = cleanPath(palmspyout_in),
                              ggirout_in = cleanPath(ggirout_in),
-                             hbgpsout_in = cleanPath(hbgpsout_in),
+                             hbGPSout_in = cleanPath(hbGPSout_in),
                              sleepdiaryfile = cleanPath(sleepdiary_file)) #, pipeline = NULL)
     
     
@@ -846,13 +845,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
-                   input$hbgpsoutdir # every time input$hbgpsoutdir updates ...
+                   input$hbGPSoutdir # every time input$hbGPSoutdir updates ...
                  },
-                 handlerExpr = { # ... we re-assign global$hbgpsout_in
-                   if (!"path" %in% names(hbgpsoutdir())) return()
+                 handlerExpr = { # ... we re-assign global$hbGPSout_in
+                   if (!"path" %in% names(hbGPSoutdir())) return()
                    home <- normalizePath(homedir)
-                   global$hbgpsout_in <-
-                     file.path(home, paste(unlist(hbgpsoutdir()$path[-1]), collapse = .Platform$file.sep))
+                   global$hbGPSout_in <-
+                     file.path(home, paste(unlist(hbGPSoutdir()$path[-1]), collapse = .Platform$file.sep))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -905,8 +904,8 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     output$palmspyoutdir <- renderText({
       global$palmspyout_in
     })
-    output$hbgpsoutdir <- renderText({
-      global$hbgpsout_in
+    output$hbGPSoutdir <- renderText({
+      global$hbGPSout_in
     })
     output$ggiroutdir <- renderText({
       global$ggirout_in
@@ -1152,6 +1151,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         # Basic check before running function:
         ready_to_run_hbGPS = FALSE
         # Check for GGIR output (two possible sources either from this run or from a previous run)
+        expected_ggir_results_dir = global$ggirout_in
         if (dir.exists(global$ggirout_in)) {
           Nfiles_in_dir = length(dir(path = expected_ggir_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
           if (Nfiles_in_dir > 0) {
@@ -1175,7 +1175,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
         # Only run function when checks are met:
         if (ready_to_run_hbGPS == TRUE) {
           shinyjs::hide(id = "start_hbGPS")
-          id_palmsplusr = showNotification("hbGPS in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+          id_hbGPS = showNotification("hbGPS in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           
           write.table(x = NULL, file = stdout_hbGPS_tmp) # initialise empty file
           output$mylog_hbGPS <- renderText({
@@ -1214,11 +1214,11 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                 file.copy(from = stdout_hbGPS_tmp, to = logfile, overwrite = TRUE)     
               }
               # Now check whether results are correctly generated:
-              expected_hbGPS_folder = paste0(isolate(global$data_out), "/hbGPS_output")
+              expected_hbGPS_folder = paste0(isolate(global$data_out), "/hbGPSoutput")
               if (dir.exists(expected_hbGPS_folder) == TRUE) {
                 csv_files_hbGPS = dir(expected_hbGPS_folder, pattern = "csv", recursive = TRUE, full.names = TRUE)
                 if (length(csv_files_hbGPS) > 0) {
-                  palmsplusr_message = paste0(
+                  hbGPS_message = paste0(
                     "Output is stored in: ", expected_hbGPS_folder,
                     paste0("<br/>The table below shows the content of ", basename(csv_files_hbGPS)[1]),
                     "<br/>Log file: ", logfile)
@@ -1406,6 +1406,9 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
     })
     output$palmspy_end_message <- renderText({
       message = runPALMSpy()
+    })
+    output$hbGPS_end_message <- renderText({
+      message = runhbGPS()
     })
     output$palmsplusr_end_message <- renderText({
       message = runpalmsplusr()

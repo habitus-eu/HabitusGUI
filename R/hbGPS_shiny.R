@@ -22,11 +22,10 @@ hbGPS_shiny = function(ggiroutdir = NULL, gpsdir = NULL, outputdir = NULL,
                "hbGPS::hbGPS(gps_file = args[1], ",
                      "GGIRpath = args[2],",
                      "outputDir = args[3],",
-                     "configFile = args[4])",
+                     "configFile = args[4])"
                ),
              fileConn)
   close(fileConn)
-  
   if (.Platform$OS.type == "windows") {
     logFile = paste0(outputdir, "/hbGPS.log")
     fileConn = file(logFile)
@@ -36,8 +35,8 @@ hbGPS_shiny = function(ggiroutdir = NULL, gpsdir = NULL, outputdir = NULL,
     close(fileConn)
     
     basecommand = paste0(outputdir, "/hbgps_cmdline.R ",
-                         gps_file, " ",
-                         GGIRpath, " ",
+                         gpsdir, " ",
+                         ggiroutdir, " ",
                          outputdir, " ",
                          configfile)
     system2(command = "Rscript", args = basecommand,
@@ -52,8 +51,8 @@ hbGPS_shiny = function(ggiroutdir = NULL, gpsdir = NULL, outputdir = NULL,
     
   } else {
     basecommand = paste0("cd ", outputdir, " ; nohup Rscript hbgps_cmdline.R ",
-                         gps_file, " ",
-                         GGIRpath, " ",
+                         gpsdir, " ",
+                         ggiroutdir, " ",
                          outputdir, " ",
                          configfile, " > ", outputdir, "/hbGPS.log 2>&1 &")
     system2(command = "cd", args = gsub(pattern = "cd ", replacement = "", x = basecommand),
