@@ -273,7 +273,12 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   ),
                                   tags$style(HTML("#mylog_GGIR {color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
-                                  verbatimTextOutput("mylog_GGIR", placeholder = TRUE),
+                                  checkboxInput("GGIR_showlog", "hide log", value = FALSE),
+                                  shinyjs::hidden(
+                                    div(id = "GGIR_log_div",
+                                        verbatimTextOutput("mylog_GGIR", placeholder = TRUE)
+                                    )
+                                  ),
                                   p("\n"),
                                   htmlOutput("ggir_end_message"),
                                   p("\n"),
@@ -290,7 +295,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
                                   ),
                                   tags$style(HTML("#mylog_PALMSpy {color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
-                                  verbatimTextOutput("mylog_PALMSpy", placeholder = TRUE),
+                                  checkboxInput("PALMSpy_showlog", "hide log", value = FALSE),
+                                  shinyjs::hidden(
+                                    div(id = "PALMSpy_log_div",
+                                        verbatimTextOutput("mylog_PALMSpy", placeholder = TRUE)
+                                    )
+                                  ),
                                   p("\n"),
                                   htmlOutput("palmspy_end_message"),
                                   p("\n"),
@@ -307,12 +317,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
                                   ),
                                   tags$style(HTML("#mylog_hbGPS {color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
-                                  # actionbutton("hbGPS_showlog_button", "hide/show log"),
-                                  # hidden(
-                                  #   div(id = "hbGPS_log_div",
-                                  verbatimTextOutput("mylog_hbGPS", placeholder = TRUE),
-                                  #   )
-                                  # ),
+                                  checkboxInput("hbGPS_showlog", "hide log", value = FALSE),
+                                  shinyjs::hidden(
+                                    div(id = "hbGPS_log_div",
+                                        verbatimTextOutput("mylog_hbGPS", placeholder = TRUE)
+                                    )
+                                  ),
                                   p("\n"),
                                   htmlOutput("hbGPS_end_message"),
                                   p("\n"),
@@ -329,7 +339,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
                                   ),
                                   tags$style(HTML("#mylog_palmsplusr {color:darkblue; font-size:12px; font-style:italic; 
 overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
-                                  verbatimTextOutput("mylog_palmsplusr", placeholder = TRUE),
+                                  checkboxInput("palmsplusr_showlog", "hide log", value = FALSE),
+                                  shinyjs::hidden(
+                                    div(id = "palmsplusr_log_div",
+                                        verbatimTextOutput("mylog_palmsplusr", placeholder = TRUE)
+                                    )
+                                  ),
                                   p("\n"),
                                   htmlOutput("palmsplusr_end_message"),
                                   p("\n"),
@@ -1006,8 +1021,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
           # on.exit(file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE))
           
           write.table(x = NULL, file = stdout_GGIR_tmp) # initialise empty file
-          output$mylog_GGIR <- renderText({
-            paste(mylog_GGIR(), collapse = '\n')
+      
+          observeEvent(input$GGIR_showlog, {
+            shinyjs::toggle('GGIR_log_div')
+            output$mylog_GGIR <- renderText({
+              paste(mylog_GGIR(), collapse = '\n')
+            })
           })
           # Start GGIR
           x_ggir <- r_bg(func = function(GGIRshiny, rawaccdir, outputdir, 
@@ -1120,10 +1139,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
         
         write.table(x = NULL, file = stdout_PALMSpy_tmp) # initialise empty file
         
-        output$mylog_PALMSpy <- renderText({
-          paste(mylog_PALMSpy(), collapse = '\n')
+        observeEvent(input$PALMSpy_showlog, {
+          shinyjs::toggle('PALMSpy_log_div')
+          output$mylog_PALMSpy <- renderText({
+            paste(mylog_PALMSpy(), collapse = '\n')
+          })
         })
-        
         
         # # Start PALMSpy
         x_palmspy <- r_bg(func = function(PALMSpyshiny, outputdir, gpsdir, count_file_location, envConda) {
@@ -1209,16 +1230,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
           id_hbGPS = showNotification("hbGPS in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           
           write.table(x = NULL, file = stdout_hbGPS_tmp) # initialise empty file
-          # observeEvent(input$hbGPS_showlog_button, {
-          #   toggle('hbGPS_log_div')
-          #   output$mylog_hbGPS <- renderText({
-          #     paste(mylog_hbGPS(), collapse = '\n')
-          #   })
-          # })
-          output$mylog_hbGPS <- renderText({
-            paste(mylog_hbGPS(), collapse = '\n')
+          observeEvent(input$hbGPS_showlog, {
+            shinyjs::toggle('hbGPS_log_div')
+            output$mylog_hbGPS <- renderText({
+              paste(mylog_hbGPS(), collapse = '\n')
+            })
           })
-          
+
           # If process somehow unexpectedly terminates, always copy tmp log 
           # file to actual log file for user to see
           logfile = paste0(isolate(global$data_out), "/hbGPS.log")
@@ -1331,10 +1349,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
           id_palmsplusr = showNotification("palmsplusr in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           
           write.table(x = NULL, file = stdout_palmsplusr_tmp) # initialise empty file
-          output$mylog_palmsplusr <- renderText({
-            paste(mylog_palmsplusr(), collapse = '\n')
-          })
           
+          observeEvent(input$palmsplusr_showlog, {
+            shinyjs::toggle('palmsplusr_log_div')
+            output$mylog_palmsplusr <- renderText({
+              paste(mylog_palmsplusr(), collapse = '\n')
+            })
+          })
           # If process somehow unexpectedly terminates, always copy tmp log 
           # file to actual log file for user to see
           logfile = paste0(isolate(global$data_out), "/palmsplusr.log")
