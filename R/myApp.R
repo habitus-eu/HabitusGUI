@@ -27,6 +27,20 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
   mylog_hbGPS <- shiny::reactiveFileReader(500, NULL, stdout_hbGPS_tmp, readLines, warn = FALSE)
   mylog_PALMSpy <- shiny::reactiveFileReader(500, NULL, stdout_PALMSpy_tmp, readLines, warn = FALSE)
   
+  js_hbGPS <- paste0("$(document).on('shiny:value', function(evt){",
+               "if(evt.name == 'mylog_hbGPS'){",
+               "  setTimeout(function(){",
+               "  var objDiv = document.getElementById('mylog_hbGPS');",
+               "  objDiv.scrollTop = objDiv.scrollHeight - objDiv.clientHeight;",
+               " }, 500);",
+               "}",
+               "});")
+  
+  js_GGIR <- sub(pattern = "hbGPS", replacement = "GGIR", x = js_hbGPS)
+  js_palmsplusr <- sub(pattern = "hbGPS", replacement = "palmsplusr", x = js_hbGPS)
+  js_PALMSpy <- sub(pattern = "hbGPS", replacement = "PALMSpy", x = js_hbGPS)
+  
+
   ui <- function() {
     fluidPage(
       theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
@@ -254,9 +268,12 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   shinyjs::useShinyjs(),
                                   actionButton("start_ggir", "Start analysis", width = '300px'),
                                   p("\n"),
-                                  verbatimTextOutput("mylog_GGIR"),
-                                  tags$head(tags$style("#mylog_GGIR{color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
+                                  tags$head(
+                                    tags$script(HTML(js_GGIR))
+                                  ),
+                                  tags$style(HTML("#mylog_GGIR {color:darkblue; font-size:12px; font-style:italic; 
+overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
+                                  verbatimTextOutput("mylog_GGIR", placeholder = TRUE),
                                   p("\n"),
                                   htmlOutput("ggir_end_message"),
                                   p("\n"),
@@ -268,9 +285,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                   shinyjs::useShinyjs(),
                                   actionButton("start_palmspy", "Start analysis", width = '300px'),
                                   p("\n"),
-                                  verbatimTextOutput("mylog_PALMSpy"),
-                                  tags$head(tags$style("#mylog_PALMSpy{color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
+                                  tags$head(
+                                    tags$script(HTML(js_PALMSpy))
+                                  ),
+                                  tags$style(HTML("#mylog_PALMSpy {color:darkblue; font-size:12px; font-style:italic; 
+overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
+                                  verbatimTextOutput("mylog_PALMSpy", placeholder = TRUE),
                                   p("\n"),
                                   htmlOutput("palmspy_end_message"),
                                   p("\n"),
@@ -282,9 +302,17 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                   shinyjs::useShinyjs(),
                                   actionButton("start_hbGPS", "Start analysis", width = '300px'),
                                   p("\n"),
-                                  verbatimTextOutput("mylog_hbGPS"),
-                                  tags$head(tags$style("#mylog_hbGPS{color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
+                                  tags$head(
+                                    tags$script(HTML(js_hbGPS))
+                                  ),
+                                  tags$style(HTML("#mylog_hbGPS {color:darkblue; font-size:12px; font-style:italic; 
+overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
+                                  # actionbutton("hbGPS_showlog_button", "hide/show log"),
+                                  # hidden(
+                                  #   div(id = "hbGPS_log_div",
+                                  verbatimTextOutput("mylog_hbGPS", placeholder = TRUE),
+                                  #   )
+                                  # ),
                                   p("\n"),
                                   htmlOutput("hbGPS_end_message"),
                                   p("\n"),
@@ -296,9 +324,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
                                   shinyjs::useShinyjs(),
                                   actionButton("start_palmsplusr", "Start analysis", width = '300px'),
                                   p("\n"),
-                                  verbatimTextOutput("mylog_palmsplusr"),
-                                  tags$head(tags$style("#mylog_palmsplusr{color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
+                                  tags$head(
+                                    tags$script(HTML(js_palmsplusr))
+                                  ),
+                                  tags$style(HTML("#mylog_palmsplusr {color:darkblue; font-size:12px; font-style:italic; 
+overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
+                                  verbatimTextOutput("mylog_palmsplusr", placeholder = TRUE),
                                   p("\n"),
                                   htmlOutput("palmsplusr_end_message"),
                                   p("\n"),
@@ -1178,6 +1209,12 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")),
           id_hbGPS = showNotification("hbGPS in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           
           write.table(x = NULL, file = stdout_hbGPS_tmp) # initialise empty file
+          # observeEvent(input$hbGPS_showlog_button, {
+          #   toggle('hbGPS_log_div')
+          #   output$mylog_hbGPS <- renderText({
+          #     paste(mylog_hbGPS(), collapse = '\n')
+          #   })
+          # })
           output$mylog_hbGPS <- renderText({
             paste(mylog_hbGPS(), collapse = '\n')
           })
