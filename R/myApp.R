@@ -27,26 +27,20 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
   mylog_hbGPS <- shiny::reactiveFileReader(500, NULL, stdout_hbGPS_tmp, readLines, warn = FALSE)
   mylog_PALMSpy <- shiny::reactiveFileReader(500, NULL, stdout_PALMSpy_tmp, readLines, warn = FALSE)
   
-  js_hbGPS <- paste0("$(document).on('shiny:value', function(evt){",
-                     "if(evt.name == 'mylog_hbGPS'){",
-                     "  setTimeout(function(){",
-                     "  var objDiv = document.getElementById('mylog_hbGPS');",
-                     "  objDiv.scrollTop = objDiv.scrollHeight - objDiv.clientHeight;",
-                     " }, 500);",
-                     "}",
-                     "});")
-  
-  js_GGIR <- sub(pattern = "hbGPS", replacement = "GGIR", x = js_hbGPS)
-  js_palmsplusr <- sub(pattern = "hbGPS", replacement = "palmsplusr", x = js_hbGPS)
-  js_PALMSpy <- sub(pattern = "hbGPS", replacement = "PALMSpy", x = js_hbGPS)
-  
+  logViewStyle = paste0("color:darkblue; ",
+                        "overflow-y:scroll; font-size:12px; font-style:italic; ;",
+                        "max-height: 300px; background: ghostwhite;",
+                        "position:relative; align: centre;")
   ui <- function() {
+ 
     fluidPage(
       theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
       # preview examples: https://bootswatch.com/
       # “cerulean”, “cosmo”, “cyborg”, “darkly”, “flatly”, “journal”, “litera”, “lumen”, 
       # “lux”, “materia”, “minty”, “morph”, “pulse”, “quartz”, “sandstone”, “simplex”, 
       #     “sketchy”, “slate”, “solar”, “spacelab”, “superhero”, “united”, “vapor”, “yeti”, “zephyr” 
+      
+      
       tabsetPanel(
         id = "wizard",
         type = "hidden",
@@ -267,11 +261,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   shinyjs::useShinyjs(),
                                   actionButton("start_ggir", "Start analysis", width = '300px'),
                                   p("\n"),
-                                  tags$head(
-                                    tags$script(HTML(js_GGIR))
-                                  ),
-                                  tags$style(HTML("#mylog_GGIR {color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
+                                  tags$style(HTML("#mylog_GGIR {", logViewStyle, "}")), br(),
                                   checkboxInput("GGIR_showlog", "hide log", value = FALSE),
                                   shinyjs::hidden(
                                     div(id = "GGIR_log_div",
@@ -289,11 +279,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
                                   shinyjs::useShinyjs(),
                                   actionButton("start_palmspy", "Start analysis", width = '300px'),
                                   p("\n"),
-                                  tags$head(
-                                    tags$script(HTML(js_PALMSpy))
-                                  ),
-                                  tags$style(HTML("#mylog_PALMSpy {color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
+                                  tags$style(HTML("#mylog_PALMSpy {", logViewStyle, "}")), br(),
                                   checkboxInput("PALMSpy_showlog", "hide log", value = FALSE),
                                   shinyjs::hidden(
                                     div(id = "PALMSpy_log_div",
@@ -311,11 +297,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
                                   shinyjs::useShinyjs(),
                                   actionButton("start_hbGPS", "Start analysis", width = '300px'),
                                   p("\n"),
-                                  tags$head(
-                                    tags$script(HTML(js_hbGPS))
-                                  ),
-                                  tags$style(HTML("#mylog_hbGPS {color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
+                                  tags$style(HTML("#mylog_hbGPS {", logViewStyle, "}")), br(),
                                   checkboxInput("hbGPS_showlog", "hide log", value = FALSE),
                                   shinyjs::hidden(
                                     div(id = "hbGPS_log_div",
@@ -333,11 +315,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
                                   shinyjs::useShinyjs(),
                                   actionButton("start_palmsplusr", "Start analysis", width = '300px'),
                                   p("\n"),
-                                  tags$head(
-                                    tags$script(HTML(js_palmsplusr))
-                                  ),
-                                  tags$style(HTML("#mylog_palmsplusr {color:darkblue; font-size:12px; font-style:italic; 
-overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
+                                  tags$style(HTML(paste0("#mylog_palmsplusr {", logViewStyle, "}"))), br(),
                                   checkboxInput("palmsplusr_showlog", "hide log", value = FALSE),
                                   shinyjs::hidden(
                                     div(id = "palmsplusr_log_div",
@@ -1357,7 +1335,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
           id_palmsplusr = showNotification("palmsplusr in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           
           write.table(x = NULL, file = stdout_palmsplusr_tmp) # initialise empty file
-          
           observeEvent(input$palmsplusr_showlog, {
             shinyjs::toggle('palmsplusr_log_div')
             output$mylog_palmsplusr <- renderText({
