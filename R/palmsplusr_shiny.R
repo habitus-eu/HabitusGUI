@@ -86,7 +86,7 @@ palmsplusr_shiny <- function(gisdir = "",
   # Data cleaning:
   if (verbose) cat("\nstart cleaning\n")
   PALMS_reduced <- subset(PALMS_combined, lon > -180)
-  palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, dataset_name)
+  palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, dataset_name, outputdir)
   if (verbose) cat("\ncleaning completed\n")
   
   PALMS_reduced$dateTime = as.POSIXct(PALMS_reduced$dateTime, format = "%d/%m/%Y %H:%M:%S", tz = "")
