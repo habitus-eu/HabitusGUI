@@ -28,19 +28,18 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
   mylog_PALMSpy <- shiny::reactiveFileReader(500, NULL, stdout_PALMSpy_tmp, readLines, warn = FALSE)
   
   js_hbGPS <- paste0("$(document).on('shiny:value', function(evt){",
-               "if(evt.name == 'mylog_hbGPS'){",
-               "  setTimeout(function(){",
-               "  var objDiv = document.getElementById('mylog_hbGPS');",
-               "  objDiv.scrollTop = objDiv.scrollHeight - objDiv.clientHeight;",
-               " }, 500);",
-               "}",
-               "});")
+                     "if(evt.name == 'mylog_hbGPS'){",
+                     "  setTimeout(function(){",
+                     "  var objDiv = document.getElementById('mylog_hbGPS');",
+                     "  objDiv.scrollTop = objDiv.scrollHeight - objDiv.clientHeight;",
+                     " }, 500);",
+                     "}",
+                     "});")
   
   js_GGIR <- sub(pattern = "hbGPS", replacement = "GGIR", x = js_hbGPS)
   js_palmsplusr <- sub(pattern = "hbGPS", replacement = "palmsplusr", x = js_hbGPS)
   js_PALMSpy <- sub(pattern = "hbGPS", replacement = "PALMSpy", x = js_hbGPS)
   
-
   ui <- function() {
     fluidPage(
       theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
@@ -402,7 +401,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
     if (length(values$hbGPSoutdir) < 2) selected_hbGPSoutdir = c() else selected_hbGPSoutdir = paste(values$hbGPSoutdir$path, collapse = .Platform$file.sep)
     if (length(values$sleepdiaryfile) < 2) selectedSleepdiaryfile = c() else selectedSleepdiaryfile = paste(values$sleepdiaryfile$path, collapse = .Platform$file.sep)
     if (length(values$outputdir) < 2) selectedOutputdir = c() else selectedOutputdir = paste(values$outputdir$path, collapse = .Platform$file.sep)
-
     observeEvent(input$page_12, {
       values_tmp = lapply(reactiveValuesToList(input), unclass)
       if (exists("values") & length(values) > 10) {
@@ -448,7 +446,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
                     if ("CountConverter" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
                       showNotification("CountConverter not possible without access to raw accelerometer data", type = "error")
                     } else {
-                      switch_page(2)
+                      if ("PALMSpy_out" %in% input$availabledata & "hbGPS_out" %in% input$availabledata) {
+                        showNotification(paste0("You cannot select previously generated",
+                                                " output from both PALMS(py) and hbGPS.",
+                                                " Please select one of them."), type = "error")
+                      } else {
+                        switch_page(2)
+                      }
                     }
                   }
                 }
@@ -929,7 +933,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
                    global$sleepdiaryfile <-
                      as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
                  })
-
     
     # Send directories to UI --------------------------------------------
     output$rawaccdir <- renderText({
@@ -975,7 +978,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
     # Apply GGIR / CountConverter after button is pressed
     #========================================================================
     runGGIR <- eventReactive(input$start_ggir, {
-
       GGIRCounts_message = ""
       
       if ("GGIR" %in% input$tools | "CountConverter" %in% input$tools) {
@@ -1021,7 +1023,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
           # on.exit(file.copy(from = stdout_GGIR_tmp, to = logfile, overwrite = TRUE))
           
           write.table(x = NULL, file = stdout_GGIR_tmp) # initialise empty file
-      
           observeEvent(input$GGIR_showlog, {
             shinyjs::toggle('GGIR_log_div')
             output$mylog_GGIR <- renderText({
@@ -1236,7 +1237,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
               paste(mylog_hbGPS(), collapse = '\n')
             })
           })
-
           # If process somehow unexpectedly terminates, always copy tmp log 
           # file to actual log file for user to see
           logfile = paste0(isolate(global$data_out), "/hbGPS.log")
@@ -1244,11 +1244,11 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
           
           # Start hbGPS
           x_hbGPS <- r_bg(func = function(hbGPS_shiny, ggiroutdir, gpsdir,
-                                               outputdir, dataset_name,
-                                               configfile){
+                                          outputdir, dataset_name,
+                                          configfile){
             hbGPS_shiny(ggiroutdir, gpsdir,
-                             outputdir, dataset_name,
-                             configfile)
+                        outputdir, dataset_name,
+                        configfile)
           },
           args = list(hbGPS_shiny = hbGPS_shiny,
                       ggiroutdir = global$ggirout_in,
@@ -1258,7 +1258,6 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
                       configfile =  paste0(global$data_out, "/config_hbGPS.csv")),
           stdout = stdout_hbGPS_tmp,
           stderr = "2>&1")
-
           observe({
             if (x_hbGPS$poll_io(0)[["process"]] != "ready") {
               invalidateLater(5000)
@@ -1284,13 +1283,13 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
                   }
                 } else {
                   hbGPS_message = paste0("hbGPS unsuccessful",
-                                              "<br/>No file found inside: ", expected_hbGPS_folder,
-                                              "<br/>Log file: ", logfile)
+                                         "<br/>No file found inside: ", expected_hbGPS_folder,
+                                         "<br/>Log file: ", logfile)
                 }
               } else {
                 hbGPS_message = paste0("hbGPS unsuccessful",
-                                            "<br/>No file found inside: ", expected_hbGPS_folder,
-                                            "<br/>Log file: ", logfile)
+                                       "<br/>No file found inside: ", expected_hbGPS_folder,
+                                       "<br/>Log file: ", logfile)
               }
               output$hbGPS_end_message <- renderUI({
                 HTML(paste0(hbGPS_message))
@@ -1314,13 +1313,21 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
         # Basic check before running function:
         ready_to_run_palmsplusr = FALSE
         # Check for PALMSpy output (two possible sources either from this run or from a previous run)
-        if (dir.exists(global$palmspyout_in)) {
-          expected_palmspy_results_dir = global$palmspyout_in
-        } else {
-          expected_palmspy_results_dir = paste0(global$data_out,"/PALMSpy_output")
+        if ("PALMSpy_out" %in% input$availabledata) {
+          if (dir.exists(global$palmspyout_in)) {
+            expected_results_dir = global$palmspyout_in
+          } else {
+            expected_results_dir = paste0(global$data_out,"/PALMSpy_output")
+          }
+        } else if ("hbGPS_out" %in% input$availabledata) {
+          if (dir.exists(global$hbGPSout_in)) {
+            expected_results_dir = global$hbGPSout_in
+          } else {
+            expected_results_dir = paste0(global$data_out,"/hbGPS_output")
+          }
         }
-        if (dir.exists(expected_palmspy_results_dir)) {
-          Nfiles_in_dir = length(dir(path = expected_palmspy_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
+        if (dir.exists(expected_results_dir)) {
+          Nfiles_in_dir = length(dir(path = expected_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
           if (Nfiles_in_dir > 0) {
             # also check for GIS files
             if (dir.exists(global$gis_in)) {
@@ -1338,10 +1345,11 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
               palmsplusr_message = paste0("Folder that is supposed to hold  GIS files does not exist: ", global$gis_in)
             }
           } else {
-            palmsplusr_message = paste0("No files found in PALMSpy output folder: ", expected_palmspy_results_dir)
+            nameinput = ifelse(test = "PALMSpy_out" %in% input$availabledata, yes = "PALMSpy", no = "hbGPS")
+            palmsplusr_message = paste0("No files found in ", nameinput, " output folder: ", expected_results_dir)
           }
         } else {
-          palmsplusr_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", expected_palmspy_results_dir)
+          palmsplusr_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", expected_results_dir)
         }
         # Only run function when checks are met:
         if (ready_to_run_palmsplusr == TRUE) {
@@ -1387,7 +1395,7 @@ overflow-y:scroll; max-height: 300px; background: ghostwhite;}")), br(),
           },
           args = list(palmsplusr_shiny = palmsplusr_shiny,
                       gisdir = global$gis_in,
-                      palmsdir = expected_palmspy_results_dir,
+                      palmsdir = expected_results_dir,
                       gislinkfile = global$gislinkfile_in,
                       outputdir = isolate(global$data_out),
                       dataset_name = input$dataset_name,
