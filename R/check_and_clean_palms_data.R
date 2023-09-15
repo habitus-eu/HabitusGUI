@@ -40,7 +40,7 @@ check_and_clean_palms_data <- function(palms_to_clean, country_name){
   
   # Saving the new 'clean'  dataset  - %>% ---------------------------------------
   # write_csv(palms, str_replace(link_to_csv, pattern = '.csv', '_cleaned.csv'), na = "") 
-  write_csv(error_list, paste(country_name,"error_list.csv", sep = "_"))
+  data.table::fwrite(error_list, paste(country_name,"error_list.csv", sep = "_"))
   
   return(palms_to_clean_lower)
 }
