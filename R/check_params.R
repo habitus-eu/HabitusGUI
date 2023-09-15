@@ -86,7 +86,19 @@ check_params = function(params = c(), tool = c()) {
       }
     }
   }
-  
+  # Check parameters which value should be timeformat
+  seti = which(params$class == "timeformat")
+  if (length(seti) > 0) {
+    for (i in seti) {
+      stmp = unlist(strsplit(params$value[i], "%"))
+      stmp = stmp[which(stmp != "")]
+      if (length(stmp) != 6) {
+        blocked_params$name[cnt] = rowNames[i]
+        blocked_params$error[cnt] = "is not a valid R time format specification."
+        cnt = cnt + 1
+      }
+    }
+  }
   # Create messages
   if (cnt <= N) {
     blocked_params = blocked_params[-c(cnt:N),]

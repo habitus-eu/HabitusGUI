@@ -2,8 +2,8 @@
 #'
 #' @param rawaccdir Path to input directory
 #' @param outputdir Path to output directory
-#' @param configfile Configfile path
 #' @param sleepdiary Path to sleep diary
+#' @param configfile Configfile path
 #' @param do.Counts Boolean to indicate whether BrondCounts should be derived
 #' @return no object is returned, only a new file is created in the output directory
 #' @import GGIR
@@ -40,7 +40,7 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),
   if (.Platform$OS.type == "windows") {
     logFile = paste0(outputdir, "/GGIR.log")
     fileConn = file(logFile)
-    writeLines(c("Hello, this Shiny app is primarily designed for Linux.",
+    writeLines(c("Hello, this Shiny app is primarily designed for Unix.",
                  "In Windows OS live progress of the analysis can be followed in the RStudio console.",
                  "In Unix-like systems the progress would be shown here inside this window in the Shiny app."), fileConn)
     close(fileConn)

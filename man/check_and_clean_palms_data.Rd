@@ -4,12 +4,14 @@
 \alias{check_and_clean_palms_data}
 \title{check_and_clean_palms_data}
 \usage{
-check_and_clean_palms_data(palms_to_clean, country_name)
+check_and_clean_palms_data(palms_to_clean, country_name, outputdir = NULL)
 }
 \arguments{
 \item{palms_to_clean}{palms_to_clean}
 
 \item{country_name}{country_name}
+
+\item{outputdir}{outputdir}
 }
 \value{
 palms_to_clean_lower object

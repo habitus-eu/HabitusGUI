@@ -12,11 +12,15 @@ test_that("Parameters can be loaded and updated from config files", {
   params_palmspy = load_params(file = palmspy_config_json, format = "json_palmspy")
   expect_equal(ncol(params_palmspy), 10)
   
-  
   # Load palmsplusr .csv file
   palmsplusr_config_csv = system.file("testfiles_palmsplusr/config_palmsplusr.csv", package = "HabitusGUI")[1]
   params_palmsplusr = load_params(file = palmsplusr_config_csv, format = "csv_palmsplusr")
   expect_equal(ncol(params_palmsplusr), 10)
+  
+  # Load hbGPS .csv file
+  hbGPS_config_csv = system.file("testfiles_hbGPS/config_hbGPS.csv", package = "HabitusGUI")[1]
+  params_hbGPS = load_params(file = hbGPS_config_csv, format = "csv_hbGPS")
+  expect_equal(ncol(params_hbGPS), 9)
   
   # Update PALMSpy .json file
   params_palmspy$value[which(rownames(params_palmspy) == "interval")] = "25"

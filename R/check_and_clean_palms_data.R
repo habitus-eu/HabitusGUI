@@ -2,10 +2,11 @@
 #'
 #' @param palms_to_clean palms_to_clean
 #' @param country_name country_name
+#' @param outputdir outputdir
 #' @return palms_to_clean_lower object
 #' @import dplyr
 #' @export
-check_and_clean_palms_data <- function(palms_to_clean, country_name){
+check_and_clean_palms_data <- function(palms_to_clean, country_name, outputdir = NULL){
   dif = datetime = identifier = tripnumber = triptype = tt1 = tt4 = NULL
   miss_end = miss_start = multi_start = multi_end = error = NULL
   # Create error list -------------------------------------------------------
@@ -40,7 +41,7 @@ check_and_clean_palms_data <- function(palms_to_clean, country_name){
   
   # Saving the new 'clean'  dataset  - %>% ---------------------------------------
   # write_csv(palms, str_replace(link_to_csv, pattern = '.csv', '_cleaned.csv'), na = "") 
-  write_csv(error_list, paste(country_name,"error_list.csv", sep = "_"))
+  data.table::fwrite(error_list, paste(outputdir, country_name,"error_list.csv", sep = "_"))
   
   return(palms_to_clean_lower)
 }

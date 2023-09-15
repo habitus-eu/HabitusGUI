@@ -1,0 +1,11 @@
+parameter	field	subfield	display	class	minimum	maximum	set	priority	description
+idloc	general		TRUE	set			2;6	1	
+maxBreakLengthSeconds	trip		TRUE	integer	30	300		0	"How participant identifier should be extracted: idloc=2 looks at the filename and extracts the character string preceding the first occurance of a '_', idloc = 6  '.' (dot)"
+minTripDur	trip		TRUE	integer	30	900		0	Minimum trip duration seconds
+minTripDist_m	trip		TRUE	integer	10	1000		0	Minimum trip distance in meters
+threshold_snr	noise		TRUE	integer	0	1000		0	Threshold for snr
+threshold_snr_ratio	noise		TRUE	integer	0	1000		0	Threshold for snr ratio
+tz	general		TRUE	timezone				1	"Timezone in which experiments took place according to the timezone database (https://en.wikipedia.org/wiki/Zone.tab). If empty, then local timezone where the app is run will be used."
+time_format	general		TRUE	timeformat				1	"Timestamp format in R code, e.g.  %Y-%m-%d %H:%M:%S, see also https://www.stat.berkeley.edu/~s133/dates.html"
+outputFormat	general		TRUE	set			default;PALMS	1	Control the output modality of hbGPS
+AccThresholds	accelerometer		TRUE	double	0	1000000		0	Acceleration thresholds corresponding to the intensity levels

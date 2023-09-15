@@ -11,27 +11,36 @@
 # S4 class needs to be defined outside function
 setClass(Class = "toolio", slots = list(input = "character", output = "character", usecases = "character"))
 
-identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", "PALMSpy_out"),
+identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", 
+                                        "PALMSpy_out", "GGIR_out", "hbGPS_out"),
                           goals = c("PA", "QC", "Trips", "Environment"),
-                          available_tools = c("GGIR", "PALMSpy", "palmsplusr", "Counts")) {
+                          available_tools = c("GGIR", "PALMSpy", "palmsplusr", "CountConverter", "hbGPS")) {
   iotools = list(GGIR = new("toolio",
                             input = "AccRaw",
                             output = c("GGIR_out", "ACount"),
                             usecases = c("PA", "QC", "Trips", "Environment")), 
                  PALMSpy = new("toolio",
-                               input = c("ACount","GPS"),
+                               input = c("ACount", "GPS"),
                                output = c("PALMSpy_out"),
                                usecases = c("Trips", "QC", "Environment")),
-                 palmsplusr = new("toolio",
-                                  input = c("PALMSpy_out", "GIS"),
-                                  output = c("palmsplusr_out"),
-                                  usecases = c("Environment", "QC")),
-                 Counts = new("toolio",
-                              input = "AccRaw",
-                              output = c("Counts_out"),
-                              usecases = c("PA", "Trips", "QC", "Environment")))
+                 palmsplusr = new("toolio", # palmsplusr based on PALMSpy output
+                                   input = c("PALMSpy_out", "GIS"),
+                                   output = c("palmsplusr_out"),
+                                   usecases = c("Environment", "QC")),
+                 palmsplusr = new("toolio", # palmsplusr based on hbGPS output
+                                   input = c("hbGPS_out", "GIS"),
+                                   output = c("palmsplusr_out"),
+                                   usecases = c("Environment", "QC")),
+                 CountConverter = new("toolio",
+                                      input = "AccRaw",
+                                      output = c("Counts_out"),
+                                      usecases = c("PA", "Trips", "QC", "Environment")),
+                 hbGPS = new("toolio",
+                             input = c("GGIR_out","GPS"),
+                             output = c("hbGPS_out"),
+                             usecases = c("Trips", "QC", "Environment")))
   iotools = iotools[which(names(iotools) %in% available_tools)] # only look at available tools
-  allgoals = tools_needed = outputs = c()
+  tools_needed = outputs = c()
   # loop over tools and select the ones that generate the output users needs and is able to generate
   for (j in 1:length(available_tools)) { # assumption is that pipeline is never longer then number of tools
     for (i in 1:length(iotools)) {
@@ -46,10 +55,10 @@ identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", "PALMS
   if ("AccRaw" %in% datatypes == FALSE & "GGIR" %in% tools_needed) {
     tools_needed = tools_needed[-which(tools_needed == "GGIR")]
   }
-  if ("Counts" %in% tools_needed) {
+  if ("CountConverter" %in% tools_needed) {
     if ("ACount" %in% datatypes == TRUE | # No need to estimate counts if they already exist
         ("AccRaw" %in% datatypes == TRUE & "GPS" %in% datatypes == FALSE)) { # No need to estimate counts if there is no GPS data
-      tools_needed = tools_needed[-which(tools_needed == "Counts")]
+      tools_needed = tools_needed[-which(tools_needed == "CountConverter")]
     }
   }
   invisible(list(tools_needed = tools_needed, iotools = iotools[which(names(iotools) %in% tools_needed)]))

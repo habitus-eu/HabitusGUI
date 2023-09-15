@@ -12,9 +12,6 @@ modConfigUI <- function(id) {
            tags$p(HTML(paste(textOutput(NS(id,"config_explanation1"))))),
            tags$hr(),
            tags$p(HTML(paste(textOutput(NS(id, "config_explanation2"))))),
-           # fileInput(NS(id, "configfile"), NULL, label = "", width = '100%',
-           #           accept = c(".json", ".csv"), multiple = FALSE,
-           #           buttonLabel = "File ..."),
            shinyFiles::shinyFilesButton(NS(id, "configfile"), label = "Configuration file...",
                                         title = "", multiple = FALSE, fileType = c(".json", ".csv")),
            shiny::downloadButton(NS(id, "download"), "Download template", class = "info-xs"),
@@ -22,12 +19,12 @@ modConfigUI <- function(id) {
            tags$hr(),
     ),
     column(9,
-           span(h4(textOutput(NS(id, "config_instruction"))), style="color:purple"),
+           span(h4(textOutput(NS(id, "config_instruction"))), style = "color:purple"),
            DT::DTOutput(NS(id, "mod_table")),
            # This line has no function locally, but seems critical for the app to work on UCloud:
            shiny::dataTableOutput(NS(id, 'test_shinytable1')),
-           span(htmlOutput(NS(id, "config_issues")), style="color:red"),
-           span(htmlOutput(NS(id, "config_green")), style="color:green"),
+           span(htmlOutput(NS(id, "config_issues")), style = "color:red"),
+           span(htmlOutput(NS(id, "config_green")), style = "color:green"),
     )
   )
 }

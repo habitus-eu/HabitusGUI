@@ -9,7 +9,7 @@ load_params(file = c(), format = "json_palmspy")
 \arguments{
 \item{file}{Character to specify location of configuration file}
 
-\item{format}{Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_palmsplusr}
+\item{format}{Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_palmsplusr, csv_hbGPS}
 }
 \value{
 list of parameters extract from the configuration file
