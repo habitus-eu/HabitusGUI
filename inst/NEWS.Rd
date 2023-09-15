@@ -1,7 +1,7 @@
 \name{NEWS}
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-\section{Changes in version 0.2.0 (GitHub-only-release date: ??-??-2023)}{
+\section{Changes in version 0.2.0 (GitHub-only-release date: 15-09-2023)}{
   \itemize{
     \item Embed hbGPS #90
     \item Allow for hiding progress log view #46
