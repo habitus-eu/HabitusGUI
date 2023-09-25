@@ -36,5 +36,11 @@ install.packages(remotes); library("remotes"); remotes::install_github("habitus-
 
 `data_dir = "/home/vincent/projects/fontys"`
 
-4. Launch HabitusGUI app: `HabitusGUI::myApp(homedir=data_dir)`
+4. Tell R to us ignore sp evoluation warnings and use sf instead:
+
+`options("sp_evolution_status" = 2)`
+
+5. Launch HabitusGUI app:
+
+`HabitusGUI::myApp(homedir=data_dir)`
 

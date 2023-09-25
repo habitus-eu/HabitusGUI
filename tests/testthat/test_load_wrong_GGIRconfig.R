@@ -1,3 +1,4 @@
+options("sp_evolution_status" = 2)
 library(HabitusGUI)
 context("Identify wrong files loaded as GGIR config files")
 test_that("Wrong GGIR config files trigger a message and a sample config.csv file is created and used", {

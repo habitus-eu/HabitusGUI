@@ -1,3 +1,4 @@
+options("sp_evolution_status" = 2)
 library(HabitusGUI)
 context("Identify tools needed to process data")
 test_that("Correct tools are proposed by test_identify_tools", {

@@ -1,3 +1,4 @@
+options("sp_evolution_status" = 2)
 library(HabitusGUI)
 context("Check parameters during loading and before saving")
 test_that("Parameters are checked", {

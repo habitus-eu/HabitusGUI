@@ -1,3 +1,4 @@
+options("sp_evolution_status" = 2)
 library(HabitusGUI)
 context("Load and update parameters from configuration files")
 test_that("Parameters can be loaded and updated from config files", {
