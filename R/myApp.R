@@ -11,6 +11,7 @@
 
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") 
 # HabitusGUI::myApp(homedir="~/projects")
+# options("sp_evolution_status" = 2)
 # pkgload::load_all("."); myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus")
 # roxygen2::roxygenise()
 
@@ -50,8 +51,8 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  ),
                  p("\n"),
                  checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
-                                    choiceNames = list("Raw acceleration (at least ten values per second per axis)", 
-                                                       "Counts (in ActiGraph .csv format)",
+                                    choiceNames = list("Acceleration", 
+                                                       "Counts (in ActiGraph .csv format) => select only when using PALMSpy",
                                                        "GPS (in .csv format)", 
                                                        "GIS (shape files + linkage file)", 
                                                        "Sleep Diary (in GGIR compatible .csv format)",
@@ -332,7 +333,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  p("\n"),
                  fluidRow(
                    column(1, offset = 0,
-                          actionButton("restart_4", "restart app", class = "btn-danger")  
+                          actionButton("restart_4", "restart app", class = "btn-danger", style = 'width:120px')  
                    )
                  )
                  
