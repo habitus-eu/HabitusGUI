@@ -17,7 +17,6 @@ check_params = function(params = c(), tool = c()) {
     for (i in numi) {
       
       val = params$value[i]
-      val = 0.9
       # Consider vectors specified with c()
       num_value = unlist(lapply(strsplit(x = as.character(val), "[(]|[)]|[,]|c"), function(x){x[!x == ""]}))
       # Consider vectors specified with :
@@ -29,7 +28,6 @@ check_params = function(params = c(), tool = c()) {
         }
         num_value = num_value[-val2expand]
       }
-      
       # Attempt to turn into numeric
       try(expr = {
         num_value = suppressWarnings(
@@ -41,24 +39,8 @@ check_params = function(params = c(), tool = c()) {
         blocked_params$name[cnt] = rowNames[i]
         blocked_params$error[cnt] = "is not numeric"
         cnt = cnt + 1
-      } else {
-        if (length(num_value) > 1) {
-          if (tool == "GGIR") {
-            nc = nchar(params$value[i])
-            print(nc)
-            if ((substr(params$value[i], 1, 2) != "c(" | substr(params$value[i], nc, nc) != ")") &
-                length(grep(pattern = ":", x = params$value[i])) == 0) {
-              blocked_params$name[cnt] = rowNames[i]
-              blocked_params$error[cnt] = "numeric vector needs to start with c( and end with ), with values separated by a comma"
-              cnt = cnt + 1
-            }
-          }
-        }
-      }
-      if (test_na == FALSE) {
+      } else if (test_na == FALSE) {
         if (params$class[i] == "integer") {
-          print(num_value)
-          print(rowNames[i])
           if (any(round(num_value) != num_value)) {
             blocked_params$name[cnt] = rowNames[i]
             blocked_params$error[cnt] = "is not an integer"
