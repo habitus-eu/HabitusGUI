@@ -15,13 +15,29 @@ check_params = function(params = c(), tool = c()) {
   cnt = 1
   if (length(numi) > 0) {
     for (i in numi) {
+      
+      val = params$value[i]
+      val = 0.9
+      # Consider vectors specified with c()
+      num_value = unlist(lapply(strsplit(x = as.character(val), "[(]|[)]|[,]|c"), function(x){x[!x == ""]}))
+      # Consider vectors specified with :
+      val2expand = grep(pattern = ":", x = num_value)
+      if (length(val2expand) > 0) {
+        for (vi in 1:length(val2expand)) {
+          tmp = as.numeric(unlist(strsplit(num_value[val2expand[vi]], ":")))
+          num_value = c(num_value, tmp[1]:tmp[2])
+        }
+        num_value = num_value[-val2expand]
+      }
+      
+      # Attempt to turn into numeric
       try(expr = {
         num_value = suppressWarnings(
-          as.numeric(unlist(lapply(strsplit(x = as.character(params$value[i]), "[(]|[)]|[,]|c"), function(x){x[!x == ""]})))
+          as.numeric(num_value)
         )
       }, silent = TRUE)
       test_na = any(is.na(num_value))
-      if (test_na == TRUE) {
+      if (test_na == TRUE || length(num_value) == 0) {
         blocked_params$name[cnt] = rowNames[i]
         blocked_params$error[cnt] = "is not numeric"
         cnt = cnt + 1
@@ -29,7 +45,9 @@ check_params = function(params = c(), tool = c()) {
         if (length(num_value) > 1) {
           if (tool == "GGIR") {
             nc = nchar(params$value[i])
-            if (substr(params$value[i], 1, 2) != "c(" | substr(params$value[i], nc, nc) != ")") {
+            print(nc)
+            if ((substr(params$value[i], 1, 2) != "c(" | substr(params$value[i], nc, nc) != ")") &
+                length(grep(pattern = ":", x = params$value[i])) == 0) {
               blocked_params$name[cnt] = rowNames[i]
               blocked_params$error[cnt] = "numeric vector needs to start with c( and end with ), with values separated by a comma"
               cnt = cnt + 1
@@ -39,6 +57,8 @@ check_params = function(params = c(), tool = c()) {
       }
       if (test_na == FALSE) {
         if (params$class[i] == "integer") {
+          print(num_value)
+          print(rowNames[i])
           if (any(round(num_value) != num_value)) {
             blocked_params$name[cnt] = rowNames[i]
             blocked_params$error[cnt] = "is not an integer"

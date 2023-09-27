@@ -13,6 +13,7 @@
 # HabitusGUI::myApp(homedir="~/projects")
 # options("sp_evolution_status" = 2)
 # pkgload::load_all("."); myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus")
+# myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/Teun/Driestam")
 # roxygen2::roxygenise()
 
 
