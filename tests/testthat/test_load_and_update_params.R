@@ -4,10 +4,12 @@ context("Load and update parameters from configuration files")
 test_that("Parameters can be loaded and updated from config files", {
  
   # Load GGIR .csv file
-  ggir_config_csv = system.file("testfiles_ggir/config.csv", package = "HabitusGUI")[1]
+  ggir_config_zip = system.file("testfiles_ggir/example_config_files_GGIR.zip", package = "HabitusGUI")[1]
+  ggir_config_csv = "config_GGIR_raw.csv"
+  unzip(ggir_config_zip, ggir_config_csv)
   params_ggir = load_params(file = ggir_config_csv, format = "csv_ggir")
   expect_equal(ncol(params_ggir), 9)
-  
+
   # Load PALMSpy .json file
   palmspy_config_json = system.file("testfiles_palmspy/palmspy-params.json", package = "HabitusGUI")[1]
   params_palmspy = load_params(file = palmspy_config_json, format = "json_palmspy")
