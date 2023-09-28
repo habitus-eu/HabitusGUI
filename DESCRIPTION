@@ -1,8 +1,8 @@
 Package: HabitusGUI
 Title: R Shiny App for Processing Behavioural Data
 Description: Shiny app to ease processing behavioural data with research software such as GGIR, activityCounts, PALMSpy,and palmsplusr.
-Version: 0.2.0
-Date: 2022-09-30
+Version: 0.3.0
+Date: 2022-09-28
 Authors@R: 
     c(person(given = "Vincent",
            family = "van Hees",
