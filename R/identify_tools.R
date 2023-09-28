@@ -61,5 +61,10 @@ identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS",
       tools_needed = tools_needed[-which(tools_needed == "CountConverter")]
     }
   }
+  # Mask tools that will be deprecated
+  if (any(c("CountConverter", "PALMSpy") %in% tools_needed == TRUE)) {
+    tools_needed = tools_needed[-which(tools_needed %in% c("CountConverter", "PALMSpy"))]
+  }
+  
   invisible(list(tools_needed = tools_needed, iotools = iotools[which(names(iotools) %in% tools_needed)]))
 }

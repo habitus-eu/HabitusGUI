@@ -52,16 +52,16 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  ),
                  p("\n"),
                  checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
-                                    choiceNames = list("Acceleration", 
-                                                       "Counts (in ActiGraph .csv format) => select only when using PALMSpy",
+                                    choiceNames = list("Acceleration (all formats accepted by GGIR)",
                                                        "GPS (in .csv format)", 
                                                        "GIS (shape files + linkage file)", 
                                                        "Sleep Diary (in GGIR compatible .csv format)",
-                                                       "previously generated PALMS(py) output",
                                                        "previously generated GGIR time series output",
-                                                       "previously generated hbGPS output"),
-                                    choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "SleepDiary",
-                                                        "PALMSpy_out", "GGIR_out", "hbGPS_out"), width = '100%'),
+                                                       "previously generated hbGPS output",
+                                                       "Counts (in ActiGraph .csv format) => soon to be deprecated",
+                                                       "previously generated PALMS(py) output => soon to be deprecated"),
+                                    choiceValues = list("AccRaw", "GPS", "GIS", "SleepDiary",
+                                                        "GGIR_out", "hbGPS_out", "ACount", "PALMSpy_out"), width = '100%'),
                  # Only show more check boxs if user specified available data sufficient for any of the tools
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ", # GGIR
                                                      "(input.availabledata.indexOf(`ACount`) > -1 && ", # PALMSpy
@@ -88,11 +88,12 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   hr(),
                                   checkboxGroupInput("tools", label = "Select the tools you would like to use:",
                                                      choiceNames = list("GGIR (R package)",
-                                                                        "CountConverter (R package GGIR + actilifecounts)",
-                                                                        "PALMSpy (Python library)",
                                                                         "hbGPS (R package)",
-                                                                        "palmsplusr (R package)"),
-                                                     choiceValues = list("GGIR", "CountConverter", "PALMSpy", "hbGPS", "palmsplusr"), width = '100%')
+                                                                        "palmsplusr (R package)",
+                                                                        "CountConverter (R package GGIR + actilifecounts)  => soon to be deprecated from this app",
+                                                                        "PALMSpy (Python library) => soon to be deprecated from this app"),
+                                                     choiceValues = list("GGIR", "hbGPS", "palmsplusr",
+                                                                         "CountConverter", "PALMSpy"), width = '100%')
                  ), 
                  hr(),
                  actionButton("page_12", "next",  style = "position:absolute;right:1em;"),
@@ -112,8 +113,8 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1 && ",
                                                      "(input.tools.includes(`GGIR`) || ",
                                                      "input.tools.includes(`CountConverter`))"),
-                                  shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
-                                                             title = "Select raw accelerometer data directory"),
+                                  shinyFiles::shinyDirButton("rawaccdir", label = "Accelerometry data directory...",
+                                                             title = "Select accelerometer data directory"),
                                   verbatimTextOutput("rawaccdir", placeholder = TRUE),
                                   hr()
                  ),
@@ -403,7 +404,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           showNotification("Select at least one tool", type = "error")
         } else {
           if ("GGIR" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
-            showNotification("GGIR not possible without access to raw accelerometer data", type = "error")
+            showNotification("GGIR not possible without access to accelerometer data", type = "error")
           } else {
             if ("PALMSpy" %in% input$tools == TRUE & all(c("AccRaw", "ACount", "GPS") %in% input$availabledata == FALSE)) {
               showNotification("PALMSpy not possible without access to Accelerometer and GPS data", type = "error")
@@ -424,7 +425,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                             " run"), type = "error")
                   } else {
                     if ("CountConverter" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
-                      showNotification("CountConverter not possible without access to raw accelerometer data", type = "error")
+                      showNotification("CountConverter not possible without access to accelerometer data", type = "error")
                     } else {
                       if ("PALMSpy_out" %in% input$availabledata & "hbGPS_out" %in% input$availabledata) {
                         showNotification(paste0("You cannot select previously generated",
@@ -474,10 +475,10 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
       save(values, file = "./HabitusGUIbookmark.RData")
       # -----
       if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
-        showNotification("Select raw accelerometer data directory", type = "error")
+        showNotification("Select accelerometer data directory", type = "error")
       } else {
         if ("AccRaw" %in% input$availabledata & "CountConverter" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
-          showNotification("Select raw accelerometer data directory", type = "error")
+          showNotification("Select accelerometer data directory", type = "error")
         } else {
           if ("ACount" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$countaccdir)[1] == "0" & is.null(selectedCountaccdir)) {
             showNotification("Select count accelerometer data directory", type = "error")
