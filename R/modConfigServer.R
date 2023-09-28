@@ -24,12 +24,12 @@ modConfigServer = function(id, tool, homedir = getwd()) {
           contentType = "application/json")
       } else if (tool() == "GGIR") {
         output$download = downloadHandler(
-          filename = "config.csv",
+          filename = "example_config_files_GGIR.zip",
           content <- function(file) {
-            config_default = system.file("testfiles_ggir/config.csv", package = "HabitusGUI")[1]
+            config_default = system.file("testfiles_ggir/example_config_files_GGIR.zip", package = "HabitusGUI")[1]
             if (config_default != file) file.copy(config_default, file)
           },
-          contentType = "text/csv")
+          contentType = "zip")
       } else if (tool() == "hbGPS") {
         output$download = downloadHandler(
           filename = "config_hbGPS.csv",
