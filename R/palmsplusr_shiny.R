@@ -10,7 +10,7 @@
 #' @return palms_to_clean_lower object
 #' @importFrom stats end start formula as.formula
 #' @importFrom tidyr pivot_wider
-#' @importFrom readr read_csv
+#' @importFrom readr write_csv read_csv
 #' @import palmsplusr
 #' @import dplyr
 #' @importFrom utils head tail
@@ -69,6 +69,8 @@ palmsplusr_shiny <- function(gisdir = "",
   sf::sf_use_s2(FALSE)
   # identify palms csv output files in palmsdir:
   palms_country_files <- list.files(path = palmsdir, pattern = "*.csv", full.names = TRUE)
+  # skip the combined file that hbGPS generates
+  palms_country_files = grep(pattern = "combined.csv", x = palms_country_files, invert = TRUE, value = TRUE)
   # read and combine palms csv output files 
   csv_palms <- lapply(palms_country_files, FUN = readr::read_csv, col_types = list(
     identifier = readr::col_character(),
@@ -81,31 +83,29 @@ palmsplusr_shiny <- function(gisdir = "",
     tripType = readr::col_integer(),
     tripMOT = readr::col_integer(),
     activity = readr::col_double()
-  ))
+  ), show_col_types = FALSE)
   PALMS_combined <- bind_rows(csv_palms)
   # Data cleaning:
-  if (verbose) cat("\nstart cleaning\n")
+  # if (verbose) cat("\nstart cleaning...\n")
   PALMS_reduced <- subset(PALMS_combined, lon > -180)
   palms_reduced_cleaned <- check_and_clean_palms_data(PALMS_reduced, dataset_name, outputdir)
-  if (verbose) cat("\ncleaning completed\n")
-  
+  # if (verbose) cat("\ncleaning completed\n")
   PALMS_reduced$dateTime = as.POSIXct(PALMS_reduced$dateTime, format = "%d/%m/%Y %H:%M:%S", tz = "")
   
   # Write to csv and read using read_palms to format the object as expected from the rest of the code
   PALMS_reduced_file = normalizePath(paste0(palmsplus_folder, "/", stringr::str_interp("PALMS_${dataset_name}_reduced.csv")))
-  if (verbose) cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
+  # if (verbose) cat(paste0("\nCheck PALMS_reduced_file: ", PALMS_reduced_file))
   write.csv(palms_reduced_cleaned, PALMS_reduced_file)
-  palms = palmsplusr::read_palms(PALMS_reduced_file)
+  palms = palmsplusr::read_palms(PALMS_reduced_file, verbose = FALSE)
   palms$datetime = as.POSIXct(palms$datetime, format = "%d/%m/%Y %H:%M:%S", tz = "")
-  
   # Helper function to find shape files
   find_file = function(path, namelowercase) {
     allcsvfiles = dir(path, recursive = TRUE, full.names = TRUE)
     file_of_interest = allcsvfiles[which(tolower(basename(allcsvfiles)) == namelowercase)]
     return(file_of_interest)
   }
-  if (verbose) cat("\nreading basis file\n")
-  participant_basis = read_csv(gislinkfile)
+  # if (verbose) cat("\nreading basis file\n")
+  participant_basis = read_csv(gislinkfile, show_col_types = FALSE)
   # Load all shape files ----------------------------------------------------
   #----------------
   # NEW CODE
@@ -145,7 +145,9 @@ palmsplusr_shiny <- function(gisdir = "",
   participant_basis = withoutMissingId$participant_basis
   loca = withoutMissingId$loca
   write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
-  
+  if (length(participant_basis) == 0 || nrow(participant_basis) == 0) {
+    stop("\nParticipant basis file does not include references for the expected recording IDs")
+  }
   
   #===========================================================================================  
   # Create field tables
@@ -242,7 +244,7 @@ palmsplusr_shiny <- function(gisdir = "",
                                      loca = loca,
                                      participant_basis = participant_basis,
                                      verbose = verbose)
-    data.table::fwrite(palmsplus, file = fns[1])
+    write_csv(palmsplus, file = fns[1])
     if (verbose) cat(">>>\n")
   } else {
     if (verbose) cat("skipped because insufficient input data>>>\n")
@@ -259,7 +261,7 @@ palmsplusr_shiny <- function(gisdir = "",
     
     if (length(days) > 0) {
       if (verbose) cat(paste0("  N rows in days object: ", nrow(days)))
-      data.table::fwrite(x = days, file = fns[2])
+      write_csv(x = days, file = fns[2])
     } else {
       if (verbose) cat(paste0("  WARNING: no days object produced."))
     }
@@ -278,7 +280,7 @@ palmsplusr_shiny <- function(gisdir = "",
                                            trajectory_fields = trajectory_fields,
                                            trajectory_locations = trajectory_locations)
     if (length(trajectories) > 0) {
-      data.table::fwrite(trajectories,  file = fns[3])
+      write_csv(trajectories,  file = fns[3])
       shp_file = paste0(palmsplus_folder, "/", dataset_name, "_trajecories.shp")
       if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
       
@@ -302,7 +304,7 @@ palmsplusr_shiny <- function(gisdir = "",
                                        verbose = verbose)
     
     if (length(multimodal) > 0) {
-      data.table::fwrite(multimodal, file = fns[4])
+      write_csv(multimodal, file = fns[4])
       shp_file = paste0(palmsplus_folder, "/", dataset_name, "_multimodal.shp")
       if (file.exists(shp_file)) file.remove(shp_file) # remove because st_write does not know how to overwrite
       sf::st_write(obj = multimodal, dsn = shp_file)
@@ -310,7 +312,7 @@ palmsplusr_shiny <- function(gisdir = "",
     } else {
       if (verbose) cat(paste0("  WARNING: no multimodal object produced."))
     }
-    if (verbose) cat(">>>\n")
+    if (verbose) cat(">>>\n\n")
   } else {
     if (verbose) cat("skipped because insufficient input data>>>\n")
   }

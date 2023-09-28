@@ -1,6 +1,6 @@
 parameter	field	subfield	display	class	minimum	maximum	set	priority	description
-idloc	general		TRUE	set			2;6	1	
-maxBreakLengthSeconds	trip		TRUE	integer	30	300		0	"How participant identifier should be extracted: idloc=2 looks at the filename and extracts the character string preceding the first occurance of a '_', idloc = 6  '.' (dot)"
+idloc	general		TRUE	set			2;6	1	"How participant identifier should be extracted: idloc=2 looks at the filename and extracts the character string preceding the first occurance of a '_', idloc = 6  '.' (dot)"
+maxBreakLengthSeconds	trip		TRUE	integer	30	300		0	maximum trip break duration in seconds
 minTripDur	trip		TRUE	integer	30	900		0	Minimum trip duration seconds
 minTripDist_m	trip		TRUE	integer	10	1000		0	Minimum trip distance in meters
 threshold_snr	noise		TRUE	integer	0	1000		0	Threshold for snr

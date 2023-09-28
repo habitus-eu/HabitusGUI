@@ -13,6 +13,8 @@
 # HabitusGUI::myApp(homedir="~/projects")
 # options("sp_evolution_status" = 2)
 # pkgload::load_all("."); myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus")
+# myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata")
+# myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/Teun/Driestam")
 # roxygen2::roxygenise()
 
 
@@ -51,16 +53,16 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  ),
                  p("\n"),
                  checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
-                                    choiceNames = list("Acceleration", 
-                                                       "Counts (in ActiGraph .csv format) => select only when using PALMSpy",
+                                    choiceNames = list("Acceleration (all formats accepted by GGIR)",
                                                        "GPS (in .csv format)", 
                                                        "GIS (shape files + linkage file)", 
                                                        "Sleep Diary (in GGIR compatible .csv format)",
-                                                       "previously generated PALMS(py) output",
                                                        "previously generated GGIR time series output",
-                                                       "previously generated hbGPS output"),
-                                    choiceValues = list("AccRaw", "ACount", "GPS", "GIS", "SleepDiary",
-                                                        "PALMSpy_out", "GGIR_out", "hbGPS_out"), width = '100%'),
+                                                       "previously generated hbGPS output",
+                                                       "Counts (in ActiGraph .csv format) => soon to be deprecated",
+                                                       "previously generated PALMS(py) output => soon to be deprecated"),
+                                    choiceValues = list("AccRaw", "GPS", "GIS", "SleepDiary",
+                                                        "GGIR_out", "hbGPS_out", "ACount", "PALMSpy_out"), width = '100%'),
                  # Only show more check boxs if user specified available data sufficient for any of the tools
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1  || ", # GGIR
                                                      "(input.availabledata.indexOf(`ACount`) > -1 && ", # PALMSpy
@@ -87,11 +89,12 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   hr(),
                                   checkboxGroupInput("tools", label = "Select the tools you would like to use:",
                                                      choiceNames = list("GGIR (R package)",
-                                                                        "CountConverter (R package GGIR + actilifecounts)",
-                                                                        "PALMSpy (Python library)",
                                                                         "hbGPS (R package)",
-                                                                        "palmsplusr (R package)"),
-                                                     choiceValues = list("GGIR", "CountConverter", "PALMSpy", "hbGPS", "palmsplusr"), width = '100%')
+                                                                        "palmsplusr (R package)",
+                                                                        "CountConverter (R package GGIR + actilifecounts)  => soon to be deprecated from this app",
+                                                                        "PALMSpy (Python library) => soon to be deprecated from this app"),
+                                                     choiceValues = list("GGIR", "hbGPS", "palmsplusr",
+                                                                         "CountConverter", "PALMSpy"), width = '100%')
                  ), 
                  hr(),
                  actionButton("page_12", "next",  style = "position:absolute;right:1em;"),
@@ -111,8 +114,8 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1 && ",
                                                      "(input.tools.includes(`GGIR`) || ",
                                                      "input.tools.includes(`CountConverter`))"),
-                                  shinyFiles::shinyDirButton("rawaccdir", label = "Raw accelerometry data directory...",
-                                                             title = "Select raw accelerometer data directory"),
+                                  shinyFiles::shinyDirButton("rawaccdir", label = "Accelerometry data directory...",
+                                                             title = "Select accelerometer data directory"),
                                   verbatimTextOutput("rawaccdir", placeholder = TRUE),
                                   hr()
                  ),
@@ -402,7 +405,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           showNotification("Select at least one tool", type = "error")
         } else {
           if ("GGIR" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
-            showNotification("GGIR not possible without access to raw accelerometer data", type = "error")
+            showNotification("GGIR not possible without access to accelerometer data", type = "error")
           } else {
             if ("PALMSpy" %in% input$tools == TRUE & all(c("AccRaw", "ACount", "GPS") %in% input$availabledata == FALSE)) {
               showNotification("PALMSpy not possible without access to Accelerometer and GPS data", type = "error")
@@ -423,7 +426,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                             " run"), type = "error")
                   } else {
                     if ("CountConverter" %in% input$tools == TRUE & "AccRaw" %in% input$availabledata == FALSE) {
-                      showNotification("CountConverter not possible without access to raw accelerometer data", type = "error")
+                      showNotification("CountConverter not possible without access to accelerometer data", type = "error")
                     } else {
                       if ("PALMSpy_out" %in% input$availabledata & "hbGPS_out" %in% input$availabledata) {
                         showNotification(paste0("You cannot select previously generated",
@@ -473,10 +476,10 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
       save(values, file = "./HabitusGUIbookmark.RData")
       # -----
       if ("AccRaw" %in% input$availabledata & "GGIR" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
-        showNotification("Select raw accelerometer data directory", type = "error")
+        showNotification("Select accelerometer data directory", type = "error")
       } else {
         if ("AccRaw" %in% input$availabledata & "CountConverter" %in% input$tools & as.character(input$rawaccdir)[1] == "0" & is.null(selectedRawaccdir)) {
-          showNotification("Select raw accelerometer data directory", type = "error")
+          showNotification("Select accelerometer data directory", type = "error")
         } else {
           if ("ACount" %in% input$availabledata & "PALMSpy" %in% input$tools & as.character(input$countaccdir)[1] == "0" & is.null(selectedCountaccdir)) {
             showNotification("Select count accelerometer data directory", type = "error")
@@ -688,7 +691,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
       } else {
         researchgoalsNames =  reasearchgoalsNames[which(reasearchgoalsValues %in% researchgoals == TRUE)]
         reasearchgoalsValues =  reasearchgoalsValues[which(reasearchgoalsValues %in% researchgoals == TRUE)]
-        researchgoalsLabel = "What is your research interest?"
+        researchgoalsLabel = "(Optional) Do you need guidance on which tool(s) to use? Tell us your objective(s):"
       }
       
       # check previously selected
@@ -806,7 +809,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(rawaccdir())) return()
                    home <- normalizePath(homedir)
                    global$raw_acc_in <-
-                     file.path(home, paste(unlist(rawaccdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(rawaccdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -816,7 +819,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(countaccdir())) return()
                    home <- normalizePath(homedir)
                    global$count_acc_in <-
-                     file.path(home, paste(unlist(countaccdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(countaccdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -826,7 +829,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(gpsdir())) return()
                    home <- normalizePath(homedir)
                    global$gps_in <-
-                     file.path(home, paste(unlist(gpsdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(gpsdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -836,7 +839,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(gisdir())) return()
                    home <- normalizePath(homedir)
                    global$gis_in <-
-                     file.path(home, paste(unlist(gisdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(gisdir()$path[-1]), collapse = .Platform$file.sep)))
                    
                    # send gisdir to textInput field
                    # Can also set the label, this time for input$inText2
@@ -860,7 +863,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"files" %in% names(gislinkfile())) return()
                    home <- normalizePath(homedir)
                    global$gislinkfile_in <-
-                     as.character(parseFilePaths(c(home = homedir), gislinkfile())$datapath)
+                     normalizePath(as.character(parseFilePaths(c(home = homedir), gislinkfile())$datapath))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -870,7 +873,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(palmspyoutdir())) return()
                    home <- normalizePath(homedir)
                    global$palmspyout_in <-
-                     file.path(home, paste(unlist(palmspyoutdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(palmspyoutdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -880,7 +883,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(hbGPSoutdir())) return()
                    home <- normalizePath(homedir)
                    global$hbGPSout_in <-
-                     file.path(home, paste(unlist(hbGPSoutdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(hbGPSoutdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -890,7 +893,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(ggiroutdir())) return()
                    home <- normalizePath(homedir)
                    global$ggirout_in <-
-                     file.path(home, paste(unlist(ggiroutdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(ggiroutdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -900,7 +903,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(outputdir())) return()
                    home <- normalizePath(homedir)
                    global$data_out <-
-                     file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -910,7 +913,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"files" %in% names(sleepdiaryfile())) return()
                    home <- normalizePath(homedir)
                    global$sleepdiaryfile <-
-                     as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
+                     normalizePath(as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath))
                  })
     
     # Send directories to UI --------------------------------------------
@@ -1183,8 +1186,19 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
         # Basic check before running function:
         ready_to_run_hbGPS = FALSE
         # Check for GGIR output (two possible sources either from this run or from a previous run)
-        expected_ggir_results_dir = global$ggirout_in
-        if (dir.exists(global$ggirout_in)) {
+        # expected_ggir_results_dir = global$ggirout_in
+        
+        if ("GGIR_out" %in% input$availabledata && dir.exists(global$ggirout_in)) {
+          expected_ggir_results_dir = global$ggirout_in
+        } else {
+          expected_ggir_results_dir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
+        }
+        
+        if (dirname(expected_ggir_results_dir) != "ms5.rawout") {
+          expected_ggir_results_dir = paste0(expected_ggir_results_dir, "/meta/ms5.outraw")
+        }
+
+        if (dir.exists(expected_ggir_results_dir)) {
           Nfiles_in_dir = length(dir(path = expected_ggir_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
           if (Nfiles_in_dir > 0) {
             # also check for GPS files
@@ -1222,15 +1236,15 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           on.exit(file.copy(from = stdout_hbGPS_tmp, to = logfile, overwrite = TRUE), add = TRUE)
           
           # Start hbGPS
-          x_hbGPS <- r_bg(func = function(hbGPS_shiny, ggiroutdir, gpsdir,
+          x_hbGPS <- r_bg(func = function(hbGPS_shiny, expected_ggir_results_dir, gpsdir,
                                           outputdir, dataset_name,
                                           configfile){
-            hbGPS_shiny(ggiroutdir, gpsdir,
+            hbGPS_shiny(expected_ggir_results_dir, gpsdir,
                         outputdir, dataset_name,
                         configfile)
           },
           args = list(hbGPS_shiny = hbGPS_shiny,
-                      ggiroutdir = global$ggirout_in,
+                      expected_ggir_results_dir = expected_ggir_results_dir,
                       gpsdir = global$gps_in,
                       outputdir = isolate(global$data_out),
                       dataset_name = input$dataset_name,
@@ -1298,13 +1312,13 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           } else {
             expected_results_dir = paste0(global$data_out,"/PALMSpy_output")
           }
-        } else if ("hbGPS_out" %in% input$availabledata) {
-          if (dir.exists(global$hbGPSout_in)) {
-            expected_results_dir = global$hbGPSout_in
-          } else {
-            expected_results_dir = paste0(global$data_out,"/hbGPS_output")
-          }
+        } else if ("hbGPS_out" %in% input$availabledata && dir.exists(global$hbGPSout_in)) {
+          expected_results_dir = global$hbGPSout_in
+        } else {
+          expected_results_dir = paste0(global$data_out,"/hbGPSoutput")
         }
+
+        
         if (dir.exists(expected_results_dir)) {
           Nfiles_in_dir = length(dir(path = expected_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
           if (Nfiles_in_dir > 0) {
