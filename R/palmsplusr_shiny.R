@@ -145,7 +145,9 @@ palmsplusr_shiny <- function(gisdir = "",
   participant_basis = withoutMissingId$participant_basis
   loca = withoutMissingId$loca
   write.csv(participant_basis, paste0(palmsplus_folder, "/", stringr::str_interp("participant_basis_${dataset_name}.csv"))) # store file for logging purposes only
-  
+  if (length(participant_basis) == 0 || nrow(participant_basis) == 0) {
+    stop("\nParticipant basis file does not include references for the expected recording IDs")
+  }
   
   #===========================================================================================  
   # Create field tables
