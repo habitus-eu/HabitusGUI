@@ -808,7 +808,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(rawaccdir())) return()
                    home <- normalizePath(homedir)
                    global$raw_acc_in <-
-                     file.path(home, paste(unlist(rawaccdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(rawaccdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -818,7 +818,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(countaccdir())) return()
                    home <- normalizePath(homedir)
                    global$count_acc_in <-
-                     file.path(home, paste(unlist(countaccdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(countaccdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -828,7 +828,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(gpsdir())) return()
                    home <- normalizePath(homedir)
                    global$gps_in <-
-                     file.path(home, paste(unlist(gpsdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(gpsdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -838,7 +838,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(gisdir())) return()
                    home <- normalizePath(homedir)
                    global$gis_in <-
-                     file.path(home, paste(unlist(gisdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(gisdir()$path[-1]), collapse = .Platform$file.sep)))
                    
                    # send gisdir to textInput field
                    # Can also set the label, this time for input$inText2
@@ -862,7 +862,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"files" %in% names(gislinkfile())) return()
                    home <- normalizePath(homedir)
                    global$gislinkfile_in <-
-                     as.character(parseFilePaths(c(home = homedir), gislinkfile())$datapath)
+                     normalizePath(as.character(parseFilePaths(c(home = homedir), gislinkfile())$datapath))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -872,7 +872,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(palmspyoutdir())) return()
                    home <- normalizePath(homedir)
                    global$palmspyout_in <-
-                     file.path(home, paste(unlist(palmspyoutdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(palmspyoutdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -882,7 +882,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(hbGPSoutdir())) return()
                    home <- normalizePath(homedir)
                    global$hbGPSout_in <-
-                     file.path(home, paste(unlist(hbGPSoutdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(hbGPSoutdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -892,7 +892,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(ggiroutdir())) return()
                    home <- normalizePath(homedir)
                    global$ggirout_in <-
-                     file.path(home, paste(unlist(ggiroutdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(ggiroutdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -902,7 +902,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"path" %in% names(outputdir())) return()
                    home <- normalizePath(homedir)
                    global$data_out <-
-                     file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep))
+                     normalizePath(file.path(home, paste(unlist(outputdir()$path[-1]), collapse = .Platform$file.sep)))
                  })
     observeEvent(ignoreNULL = TRUE,
                  eventExpr = {
@@ -912,7 +912,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    if (!"files" %in% names(sleepdiaryfile())) return()
                    home <- normalizePath(homedir)
                    global$sleepdiaryfile <-
-                     as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath)
+                     normalizePath(as.character(parseFilePaths(c(home = homedir), sleepdiaryfile())$datapath))
                  })
     
     # Send directories to UI --------------------------------------------
