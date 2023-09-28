@@ -1184,8 +1184,19 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
         # Basic check before running function:
         ready_to_run_hbGPS = FALSE
         # Check for GGIR output (two possible sources either from this run or from a previous run)
-        expected_ggir_results_dir = global$ggirout_in
-        if (dir.exists(global$ggirout_in)) {
+        # expected_ggir_results_dir = global$ggirout_in
+        
+        if ("GGIR_out" %in% input$availabledata && dir.exists(global$ggirout_in)) {
+          expected_ggir_results_dir = global$ggirout_in
+        } else {
+          expected_ggir_results_dir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
+        }
+        
+        if (dirname(expected_ggir_results_dir) != "ms5.rawout") {
+          expected_ggir_results_dir = paste0(expected_ggir_results_dir, "/meta/ms5.outraw")
+        }
+
+        if (dir.exists(expected_ggir_results_dir)) {
           Nfiles_in_dir = length(dir(path = expected_ggir_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
           if (Nfiles_in_dir > 0) {
             # also check for GPS files
@@ -1223,15 +1234,15 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           on.exit(file.copy(from = stdout_hbGPS_tmp, to = logfile, overwrite = TRUE), add = TRUE)
           
           # Start hbGPS
-          x_hbGPS <- r_bg(func = function(hbGPS_shiny, ggiroutdir, gpsdir,
+          x_hbGPS <- r_bg(func = function(hbGPS_shiny, expected_ggir_results_dir, gpsdir,
                                           outputdir, dataset_name,
                                           configfile){
-            hbGPS_shiny(ggiroutdir, gpsdir,
+            hbGPS_shiny(expected_ggir_results_dir, gpsdir,
                         outputdir, dataset_name,
                         configfile)
           },
           args = list(hbGPS_shiny = hbGPS_shiny,
-                      ggiroutdir = global$ggirout_in,
+                      expected_ggir_results_dir = expected_ggir_results_dir,
                       gpsdir = global$gps_in,
                       outputdir = isolate(global$data_out),
                       dataset_name = input$dataset_name,
