@@ -24,3 +24,4 @@ threshold.vig	physical activity		TRUE	double	0	10000		0	"Threshold for vigorous 
 excludefirstlast.part5	physical activity		TRUE	set			TRUE;FALSE	0	If TRUE then the first and last window (waking-waking or midnight-midnight) are ignored in the part 5 reports.
 includedaycrit	physical activity		TRUE	integer	0	24		0	Minimum required number of valid hours in day specific analysis (24 hour window between midnight and midnight)
 includedaycrit.part5	physical activity		TRUE	double	0	24		0	"Inclusion criteria for number of valid hours for the waking time window, either as expressed as a ratio of 1 or as the number of hours in a 24 hour day."
+extEpochData_timeformat	general		TRUE	timeformat				0	"Timestamp format in R code, e.g.  %Y-%m-%d %H:%M:%S, see also https://www.stat.berkeley.edu/~s133/dates.html"
