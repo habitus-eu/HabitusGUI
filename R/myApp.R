@@ -13,6 +13,7 @@
 # HabitusGUI::myApp(homedir="~/projects")
 # options("sp_evolution_status" = 2)
 # pkgload::load_all("."); myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus")
+# myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata")
 # myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/Teun/Driestam")
 # roxygen2::roxygenise()
 
@@ -690,7 +691,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
       } else {
         researchgoalsNames =  reasearchgoalsNames[which(reasearchgoalsValues %in% researchgoals == TRUE)]
         reasearchgoalsValues =  reasearchgoalsValues[which(reasearchgoalsValues %in% researchgoals == TRUE)]
-        researchgoalsLabel = "What is your research interest?"
+        researchgoalsLabel = "(Optional) Do you need guidance on which tool(s) to use? Tell us your objective(s):"
       }
       
       # check previously selected
@@ -1311,13 +1312,13 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           } else {
             expected_results_dir = paste0(global$data_out,"/PALMSpy_output")
           }
-        } else if ("hbGPS_out" %in% input$availabledata) {
-          if (dir.exists(global$hbGPSout_in)) {
-            expected_results_dir = global$hbGPSout_in
-          } else {
-            expected_results_dir = paste0(global$data_out,"/hbGPS_output")
-          }
+        } else if ("hbGPS_out" %in% input$availabledata && dir.exists(global$hbGPSout_in)) {
+          expected_results_dir = global$hbGPSout_in
+        } else {
+          expected_results_dir = paste0(global$data_out,"/hbGPSoutput")
         }
+
+        
         if (dir.exists(expected_results_dir)) {
           Nfiles_in_dir = length(dir(path = expected_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
           if (Nfiles_in_dir > 0) {
