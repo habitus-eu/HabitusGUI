@@ -7,14 +7,11 @@ Authors@R:
     c(person(given = "Vincent",
            family = "van Hees",
            role = c("aut", "cre"),
-           email = "v.vanhees@accelting.com"),
-           person("Tom", "Stewart", role = "cph", email = "tom.stewart@aut.ac.nz",
-           comment = "holds copyright over original palmsplusr code"))
+           email = "v.vanhees@accelting.com"))
 License: Apache License version 2.0 | file LICENSE
 Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, 
-    dplyr, magrittr, shinyjs, sf, readr, tidyr, stringr, callr, palmsplusr,
-    data.table, rlang, purrr, geosphere, hbGPS
-Remotes: vincentvanhees/palmsplusr, habitus-eu/hbGPS
+    magrittr, shinyjs, callr, hbGPS, hbGIS
+Remotes: habitus-eu/hbGPS, habitus-eu/hbGIS
 LazyData: true
 Suggests: testthat, covr, rmarkdown
 Depends: stats, utils, R (>= 3.5.0)

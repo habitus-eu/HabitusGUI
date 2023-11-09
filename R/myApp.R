@@ -7,6 +7,7 @@
 #' @import shiny
 #' @import shinyFiles
 #' @importFrom callr r_bg
+#' @importFrom hbGIS hbGIS
 #' @export
 
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") 
@@ -1361,7 +1362,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           logfile = paste0(isolate(global$data_out), "/palmsplusr.log")
           on.exit(file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE), add = TRUE)
           
-          # palmsplusr_shiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          # hbGIS(#country_name = "BA", # <= Discuss, extract from GIS foldername?
           #   # participant_exclude_list, # <= Discuss, leave out from linkfile?
           #   gisdir = global$gis_in,
           #   palmsdir = expected_palmspy_results_dir,
@@ -1370,7 +1371,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           #   dataset_name = input$dataset_name)
           
           
-          # print(list(palmsplusr_shiny = palmsplusr_shiny,
+          # print(list(hbGIS = hbGIS,
           #            gisdir = global$gis_in,
           #            palmsdir = expected_palmspy_results_dir,
           #            gislinkfile = global$gislinkfile_in,
@@ -1379,13 +1380,13 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           #            configfile =  paste0(global$data_out, "/config_palmsplusr.csv")))
           
           # Start palmsplusr
-          x_palmsplusr <- r_bg(func = function(palmsplusr_shiny, gisdir, palmsdir,
+          x_palmsplusr <- r_bg(func = function(hbGIS, gisdir, palmsdir,
                                                gislinkfile, outputdir, dataset_name,
                                                configfile){
-            palmsplusr_shiny(gisdir, palmsdir, gislinkfile,
+            hbGIS(gisdir, palmsdir, gislinkfile,
                              outputdir, dataset_name, configfile)
           },
-          args = list(palmsplusr_shiny = palmsplusr_shiny,
+          args = list(hbGIS = hbGIS,
                       gisdir = global$gis_in,
                       palmsdir = expected_results_dir,
                       gislinkfile = global$gislinkfile_in,
@@ -1395,7 +1396,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           stdout = stdout_palmsplusr_tmp,
           stderr = "2>&1")
           #   # Start PALMSplusR
-          #   palmsplusr_shiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          #   hbGIS(#country_name = "BA", # <= Discuss, extract from GIS foldername?
           #     # participant_exclude_list, # <= Discuss, leave out from linkfile?
           #     gisdir = global$gis_in,
           #     palmsdir = expected_palmspy_results_dir,
