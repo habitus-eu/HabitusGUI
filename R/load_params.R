@@ -1,7 +1,7 @@
 #' load_params
 #'
 #' @param file Character to specify location of configuration file
-#' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_palmsplusr, csv_hbGPS
+#' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_hbGIS, csv_hbGPS
 #' @return list of parameters extract from the configuration file
 #' @importFrom jsonlite fromJSON
 #' @importFrom utils read.csv read.table
@@ -71,24 +71,23 @@ load_params = function(file=c(), format="json_palmspy") {
     rownames(params_merged) = params_merged$parameter
     params = params_merged[, expected_tsv_columns]
     params = params[,-which(colnames(params) == "subfield")]
-  } else if (format == "csv_palmsplusr") {
+  } else if (format == "csv_hbGIS") {
     params = read.csv(file = file, sep = ",")
     # remove duplicates, because sometimes GGIR config files have duplicates
     dups = duplicated(params)
     params = params[!dups,]
     # Keep only parameters with a matching description in the description file
-    params_info_palmsplusr_file = system.file("testfiles_palmsplusr/params_description_palmsplusr.tsv", package = "HabitusGUI")[1]
-    params_info_palmsplusr = read.table(file = params_info_palmsplusr_file, sep = "\t", header = TRUE)
-    params_info_palmsplusr$id = with(params_info_palmsplusr, paste0(field,  "__",  parameter))
+    params_info_hbGIS_file = system.file("testfiles_hbGIS/params_description_hbGIS.tsv", package = "HabitusGUI")[1]
+    params_info_hbGIS = read.table(file = params_info_hbGIS_file, sep = "\t", header = TRUE)
+    params_info_hbGIS$id = with(params_info_hbGIS, paste0(field,  "__",  parameter))
     params$id = with(params, paste0(params$context, "__", params$name))
-    params_merged = merge(params_info_palmsplusr, params, by.x = "id", by.y = "id")
+    params_merged = merge(params_info_hbGIS, params, by.x = "id", by.y = "id")
     dups = duplicated(params_merged)
     params_merged = params_merged[!dups,]
     rownames(params_merged) = params_merged$id
     colnames(params_merged)[which(colnames(params_merged) == "formula")] = "value"
-    # colnames(params_merged)[which(colnames(params_merged) == "id")] = "field"
     colnames(params_merged)[which(colnames(params_merged) == "name")] = "subfield"
-    expected_tsv_columns = c(expected_tsv_columns, "domain_field", "after_conversion")
+    expected_tsv_columns = c(expected_tsv_columns, "is_where_field", "after_conversion")
     params = params_merged[, expected_tsv_columns]
     params = params[,-which(colnames(params) %in% c("subfield", "id", "field"))]
   }

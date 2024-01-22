@@ -7,6 +7,7 @@
 #' @import shiny
 #' @import shinyFiles
 #' @importFrom callr r_bg
+#' @importFrom hbGIS hbGIS
 #' @export
 
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") 
@@ -15,6 +16,8 @@
 # pkgload::load_all("."); myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus")
 # myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata")
 # myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/Teun/Driestam")
+# myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010")
+
 # roxygen2::roxygenise()
 
 
@@ -22,11 +25,11 @@
 
 myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
   stdout_GGIR_tmp <- tempfile(fileext = ".log")
-  stdout_palmsplusr_tmp <- tempfile(fileext = ".log")
+  stdout_hbGIS_tmp <- tempfile(fileext = ".log")
   stdout_hbGPS_tmp <- tempfile(fileext = ".log")
   stdout_PALMSpy_tmp <- tempfile(fileext = ".log")
   mylog_GGIR <- shiny::reactiveFileReader(500, NULL, stdout_GGIR_tmp, readLines, warn = FALSE)
-  mylog_palmsplusr <- shiny::reactiveFileReader(500, NULL, stdout_palmsplusr_tmp, readLines, warn = FALSE)
+  mylog_hbGIS <- shiny::reactiveFileReader(500, NULL, stdout_hbGIS_tmp, readLines, warn = FALSE)
   mylog_hbGPS <- shiny::reactiveFileReader(500, NULL, stdout_hbGPS_tmp, readLines, warn = FALSE)
   mylog_PALMSpy <- shiny::reactiveFileReader(500, NULL, stdout_PALMSpy_tmp, readLines, warn = FALSE)
   
@@ -35,7 +38,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                         "max-height: 300px; background: ghostwhite;",
                         "position:relative; align: centre;")
   ui <- function() {
- 
+    
     fluidPage(
       theme = bslib::bs_theme(bootswatch = "litera"), #,"sandstone"), "sketchy" "pulse"
       # preview examples: https://bootswatch.com/
@@ -55,7 +58,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  checkboxGroupInput("availabledata", label = "Which type(s) of data would you like to analyse? ",
                                     choiceNames = list("Acceleration (all formats accepted by GGIR)",
                                                        "GPS (in .csv format)", 
-                                                       "GIS (shape files + linkage file)", 
+                                                       "GIS (shape files + optionally linkage file)", 
                                                        "Sleep Diary (in GGIR compatible .csv format)",
                                                        "previously generated GGIR time series output",
                                                        "previously generated hbGPS output",
@@ -71,13 +74,13 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                                      "input.availabledata.indexOf(`GPS`) > -1) || ",
                                                      "(input.availabledata.indexOf(`AccRaw`) > -1 && ", # hbGPS variant 2
                                                      "input.availabledata.indexOf(`GPS`) > -1) || ",
-                                                     "(input.availabledata.indexOf(`ACount`) > -1 && ", # palmsplusr variant 1
+                                                     "(input.availabledata.indexOf(`ACount`) > -1 && ", # hbGIS variant 1
                                                      "input.availabledata.indexOf(`GPS`) > -1 && ",
                                                      "input.availabledata.indexOf(`GIS`) > -1) || ", 
-                                                     "(input.availabledata.indexOf(`AccRaw`) > -1 && ", # palmsplusr variant 2
+                                                     "(input.availabledata.indexOf(`AccRaw`) > -1 && ", # hbGIS variant 2
                                                      "input.availabledata.indexOf(`GPS`) > -1 && ",
                                                      "input.availabledata.indexOf(`GIS`) > -1) || ", 
-                                                     "((input.availabledata.indexOf(`hbGPS_out`) > -1 || ", #palmsplusr variant 3
+                                                     "((input.availabledata.indexOf(`hbGPS_out`) > -1 || ", #hbGIS variant 3
                                                      "input.availabledata.indexOf(`PALMSpy_out`) > -1)  && ", 
                                                      "input.availabledata.indexOf(`GIS`) > -1)"),
                                   hr(),
@@ -90,10 +93,10 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   checkboxGroupInput("tools", label = "Select the tools you would like to use:",
                                                      choiceNames = list("GGIR (R package)",
                                                                         "hbGPS (R package)",
-                                                                        "palmsplusr (R package)",
+                                                                        "hbGIS (R package)",
                                                                         "CountConverter (R package GGIR + actilifecounts)  => soon to be deprecated from this app",
                                                                         "PALMSpy (Python library) => soon to be deprecated from this app"),
-                                                     choiceValues = list("GGIR", "hbGPS", "palmsplusr",
+                                                     choiceValues = list("GGIR", "hbGPS", "hbGIS",
                                                                          "CountConverter", "PALMSpy"), width = '100%')
                  ), 
                  hr(),
@@ -138,20 +141,20 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   hr()
                  ),
                  # Select input folder GIS data and GIS linkage file -----------------------------------
-                 conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
+                 conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`hbGIS`)",
                                   shinyFiles::shinyDirButton("gisdir", label = "GIS data directory...",
                                                              title = "Select GIS data directory"),
                                   verbatimTextOutput("gisdir", placeholder = TRUE),
                                   uiOutput("uiSelectedGisdir"),
                                   hr(),
-                                  shinyFiles::shinyFilesButton("gislinkfile", label = "GIS linkage file...",
+                                  shinyFiles::shinyFilesButton("gislinkfile", label = "GIS linkage file... (optional)",
                                                                title = "Select GIS linkage file", multiple = FALSE),
                                   verbatimTextOutput("gislinkfile", placeholder = TRUE),
                                   hr()
                  ),
                  # Select input folder PALMSpy output data -----------------------------------
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`PALMSpy_out`) > -1 && ",
-                                                     "input.tools.includes(`palmsplusr`) && !input.tools.includes(`PALMSpy`)"),
+                                                     "input.tools.includes(`hbGIS`) && !input.tools.includes(`PALMSpy`)"),
                                   shinyFiles::shinyDirButton("palmspyoutdir", label = "Previously generated PALMS(py) output directory...",
                                                              title = "Select PALMS(py) output directory"),
                                   verbatimTextOutput("palmspyoutdir", placeholder = TRUE),
@@ -167,7 +170,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                  ),
                  # Select input folder hbGPS output data -----------------------------------
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`hbGPS_out`) > -1 && ",
-                                                     "input.tools.includes(`palmsplusr`) && !input.tools.includes(`hbGPS`)"),
+                                                     "input.tools.includes(`hbGIS`) && !input.tools.includes(`hbGPS`)"),
                                   shinyFiles::shinyDirButton("hbGPSoutdir", label = "Previously generated hbGPS output directory...",
                                                              title = "Select hbGPS output directory"),
                                   verbatimTextOutput("hbGPSoutdir", placeholder = TRUE),
@@ -189,7 +192,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                    )
                  ),
                  # Provide dataset name (only needed when working with GIS data ---------------------------------
-                 conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`palmsplusr`)",
+                 conditionalPanel(condition = "input.availabledata.indexOf(`GIS`) > -1 && input.tools.includes(`hbGIS`)",
                                   strong(textInput("dataset_name", label = "Give your dataset a name:", value = "", width = '100%')),
                  ),
                  hr(),
@@ -227,9 +230,9 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   modConfigUI("edit_hbGPS_config"),
                                   hr()
                  ),
-                 conditionalPanel(condition = "input.tools.includes('palmsplusr')",
-                                  h2("palmsplusr"),
-                                  modConfigUI("edit_palmsplusr_config"),
+                 conditionalPanel(condition = "input.tools.includes('hbGIS')",
+                                  h2("hbGIS"),
+                                  modConfigUI("edit_hbGIS_config"),
                                   hr()
                  ),
                  hr(),
@@ -314,22 +317,22 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                                   DT::dataTableOutput("hbGPS_file1"),
                                   hr()
                  ),
-                 conditionalPanel(condition = "input.tools.includes('palmsplusr')",
-                                  h3("palmsplusr:"),
+                 conditionalPanel(condition = "input.tools.includes('hbGIS')",
+                                  h3("hbGIS:"),
                                   shinyjs::useShinyjs(),
-                                  actionButton("start_palmsplusr", "Start analysis", width = '300px'),
+                                  actionButton("start_hbGIS", "Start analysis", width = '300px'),
                                   p("\n"),
-                                  tags$style(HTML(paste0("#mylog_palmsplusr {", logViewStyle, "}"))), br(),
-                                  checkboxInput("palmsplusr_showlog", "hide log", value = FALSE),
+                                  tags$style(HTML(paste0("#mylog_hbGIS {", logViewStyle, "}"))), br(),
+                                  checkboxInput("hbGIS_showlog", "hide log", value = FALSE),
                                   shinyjs::hidden(
-                                    div(id = "palmsplusr_log_div",
-                                        verbatimTextOutput("mylog_palmsplusr", placeholder = TRUE)
+                                    div(id = "hbGIS_log_div",
+                                        verbatimTextOutput("mylog_hbGIS", placeholder = TRUE)
                                     )
                                   ),
                                   p("\n"),
-                                  htmlOutput("palmsplusr_end_message"),
+                                  htmlOutput("hbGIS_end_message"),
                                   p("\n"),
-                                  DT::dataTableOutput("palmsplusr_file1"),
+                                  DT::dataTableOutput("hbGIS_file1"),
                                   hr()
                  ),
                  actionButton("page_43", "prev"),
@@ -413,13 +416,13 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
               if ("hbGPS" %in% input$tools == TRUE & all(c("GPS", "GGIR_out") %in% input$availabledata == FALSE)) {
                 showNotification("hbGPS not possible without access to GPS data and GGIR times series output", type = "error")
               } else {
-                if ("palmsplusr" %in% input$tools == TRUE & "GIS" %in% input$availabledata == FALSE) {
-                  showNotification("palmsplusr not possible without access to GIS data", type = "error")
+                if ("hbGIS" %in% input$tools == TRUE & "GIS" %in% input$availabledata == FALSE) {
+                  showNotification("hbGIS not possible without access to GIS data", type = "error")
                 } else {
-                  if ("palmsplusr" %in% input$tools == TRUE & ("PALMSpy_out" %in% input$availabledata == FALSE &
-                                                               "hbGPS_out" %in% input$availabledata == FALSE &
-                                                               "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
-                    showNotification(paste0("palmsplusr requires either previously",
+                  if ("hbGIS" %in% input$tools == TRUE & ("PALMSpy_out" %in% input$availabledata == FALSE &
+                                                          "hbGPS_out" %in% input$availabledata == FALSE &
+                                                          "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
+                    showNotification(paste0("hbGIS requires either previously",
                                             " generated PALMS(py) or hbGPS output,",
                                             " or GPS and Accelerometer data such",
                                             " that either PALMSpyor hbGPS can be",
@@ -449,7 +452,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
     observeEvent(input$page_23, {
       # Previous selection of directories
       prevPathNames = c("rawaccdir", "countaccdir", "sleepdiaryfile",
-                        "configfileGGIR", "configfilepalmsplusr", "configfilehbGPS",
+                        "configfileGGIR", "configfilehbGIS", "configfilehbGPS",
                         "gpsdir", "gisdir", "gislinkfile",
                         "palmspyoutdir", "hbGPSoutdir", "ggiroutdir", "outputdir")
       prevPathNames = prevPathNames[which(prevPathNames %in% names(values))]
@@ -492,17 +495,19 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                   length(current_sleepdiary) == 0 & is.null(selectedSleepdiaryfile)) { 
                 showNotification("Select sleepdiary file", type = "error")
               } else {
-                current_gislinkfile = as.character(parseFilePaths(c(home = homedir), input$gislinkfile)$datapath)
                 if ("GIS" %in% input$availabledata &
-                    "palmsplusr" %in% input$tools &
-                    (as.character(input$gisdir)[1] == "0" |
-                     length(current_gislinkfile) == 0) & is.null(selectedGisdir)) {
-                  showNotification("Select GIS data directory and GIS linkage file", type = "error")
+                    "hbGIS" %in% input$tools &
+                    as.character(input$gisdir)[1] == "0") {
+                  showNotification("Select GIS data directory", type = "error")
                 } else {
-                  if ("PALMSpy_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0" & is.null(selected_PALMSpyoutdir)) {
+                  # current_gislinkfile = as.character(parseFilePaths(c(home = homedir), input$gislinkfile)$datapath)
+                  # if (length(current_gislinkfile) == 0 & is.null(selectedGisdir)) {
+                  #   showNotification("Note that no GIS linkage file is specified", type = "warning")
+                  # } else {
+                  if ("PALMSpy_out" %in% input$availabledata & "hbGIS" %in% input$tools & as.character(input$palmspyoutdir)[1] == "0" & is.null(selected_PALMSpyoutdir)) {
                     showNotification("Select previously generated PALMS(py) output directory", type = "error")
                   } else {
-                    if ("hbGPS_out" %in% input$availabledata & "palmsplusr" %in% input$tools & as.character(input$hbGPSoutdir)[1] == "0" & is.null(selected_hbGPSoutdir)) {
+                    if ("hbGPS_out" %in% input$availabledata & "hbGIS" %in% input$tools & as.character(input$hbGPSoutdir)[1] == "0" & is.null(selected_hbGPSoutdir)) {
                       showNotification("Select previously generated hbGPS output directory", type = "error")
                     } else {
                       if ("GGIR_out" %in% input$availabledata & "hbGPS" %in% input$tools & as.character(input$ggiroutdir)[1] == "0" & is.null(selected_GGIRoutdir)) {
@@ -512,6 +517,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
                       }
                     }
                   }
+                  # }
                 }
               }
             }
@@ -564,8 +570,8 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           configs_ready = FALSE
         }
       }
-      if ("palmsplusr" %in% input$tools) {
-        if (length(paste0(configfilepalmsplusr())) == 0) {
+      if ("hbGIS" %in% input$tools) {
+        if (length(paste0(configfilehbGIS())) == 0) {
           configs_ready = FALSE
         }
       }
@@ -621,11 +627,11 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
             values$configfilehbGPS = copyFile(from = config_from, to = config_to)
           }
         }
-        if ("palmsplusr" %in% input$tools) {
-          config_from = cleanPath(configfilepalmsplusr())
-          config_to = cleanPath(paste0(global$data_out, "/config_palmsplusr.csv"))
+        if ("hbGIS" %in% input$tools) {
+          config_from = cleanPath(configfilehbGIS())
+          config_to = cleanPath(paste0(global$data_out, "/config_hbGIS.csv"))
           if (length(config_from) > 0) {
-            values$configfilepalmsplusr = copyFile(from = config_from, to = config_to)
+            values$configfilehbGIS = copyFile(from = config_from, to = config_to)
           }
         }
         save(values, file = "./HabitusGUIbookmark.RData")
@@ -953,7 +959,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
     configfilePALMSpy <- modConfigServer("edit_palmspy_config", tool = reactive("PALMSpy"), homedir = homedir)
     configfileGGIR <- modConfigServer("edit_ggir_config", tool = reactive("GGIR"), homedir = homedir)
     configfilehbGPS <- modConfigServer("edit_hbGPS_config", tool = reactive("hbGPS"), homedir = homedir)
-    configfilepalmsplusr <- modConfigServer("edit_palmsplusr_config", tool = reactive("palmsplusr"), homedir = homedir)
+    configfilehbGIS <- modConfigServer("edit_hbGIS_config", tool = reactive("hbGIS"), homedir = homedir)
     
     
     #========================================================================
@@ -1197,7 +1203,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
         if (dirname(expected_ggir_results_dir) != "ms5.rawout") {
           expected_ggir_results_dir = paste0(expected_ggir_results_dir, "/meta/ms5.outraw")
         }
-
+        
         if (dir.exists(expected_ggir_results_dir)) {
           Nfiles_in_dir = length(dir(path = expected_ggir_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
           if (Nfiles_in_dir > 0) {
@@ -1296,15 +1302,15 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
     
     
     #========================================================================
-    # Apply palmsplusr after button is pressed
+    # Apply hbGIS after button is pressed
     #========================================================================
-    runpalmsplusr <- eventReactive(input$start_palmsplusr, {
-      palmsplusr_message = ""
+    runhbGIS <- eventReactive(input$start_hbGIS, {
+      hbGIS_message = ""
       
-      if ("palmsplusr" %in% input$tools) {
-        palmsplusr_message = "Error: Contact maintainer"
+      if ("hbGIS" %in% input$tools) {
+        hbGIS_message = "Error: Contact maintainer"
         # Basic check before running function:
-        ready_to_run_palmsplusr = FALSE
+        ready_to_run_hbGIS = FALSE
         # Check for PALMSpy output (two possible sources either from this run or from a previous run)
         if ("PALMSpy_out" %in% input$availabledata) {
           if (dir.exists(global$palmspyout_in)) {
@@ -1317,7 +1323,7 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
         } else {
           expected_results_dir = paste0(global$data_out,"/hbGPSoutput")
         }
-
+        
         
         if (dir.exists(expected_results_dir)) {
           Nfiles_in_dir = length(dir(path = expected_results_dir, pattern = "csv", recursive = FALSE, full.names = FALSE))
@@ -1326,42 +1332,42 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
             if (dir.exists(global$gis_in)) {
               Nfiles_in_gisdir = length(dir(path = global$gis_in, recursive = FALSE, full.names = FALSE))
               if (Nfiles_in_gisdir > 0) {
-                if (file.exists(global$gislinkfile_in)) {
-                  ready_to_run_palmsplusr = TRUE
-                } else {
-                  palmsplusr_message = paste0("GIS link file not found: ", global$gislinkfile_in)
-                }
+                # if (file.exists(global$gislinkfile_in)) {
+                ready_to_run_hbGIS = TRUE
+                # } else {
+                #   hbGIS_message = paste0("GIS link file not found: ", global$gislinkfile_in)
+                # }
               } else {
-                palmsplusr_message = paste0("No files found in GIS folder: ", global$gis_in)
+                hbGIS_message = paste0("No files found in GIS folder: ", global$gis_in)
               }
             } else {
-              palmsplusr_message = paste0("Folder that is supposed to hold  GIS files does not exist: ", global$gis_in)
+              hbGIS_message = paste0("Folder that is supposed to hold  GIS files does not exist: ", global$gis_in)
             }
           } else {
             nameinput = ifelse(test = "PALMSpy_out" %in% input$availabledata, yes = "PALMSpy", no = "hbGPS")
-            palmsplusr_message = paste0("No files found in ", nameinput, " output folder: ", expected_results_dir)
+            hbGIS_message = paste0("No files found in ", nameinput, " output folder: ", expected_results_dir)
           }
         } else {
-          palmsplusr_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", expected_results_dir)
+          hbGIS_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", expected_results_dir)
         }
         # Only run function when checks are met:
-        if (ready_to_run_palmsplusr == TRUE) {
-          shinyjs::hide(id = "start_palmsplusr")
-          id_palmsplusr = showNotification("palmsplusr in progress ...", type = "message", duration = NULL, closeButton = FALSE)
+        if (ready_to_run_hbGIS == TRUE) {
+          shinyjs::hide(id = "start_hbGIS")
+          id_hbGIS = showNotification("hbGIS in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           
-          write.table(x = NULL, file = stdout_palmsplusr_tmp) # initialise empty file
-          observeEvent(input$palmsplusr_showlog, {
-            shinyjs::toggle('palmsplusr_log_div')
-            output$mylog_palmsplusr <- renderText({
-              paste(mylog_palmsplusr(), collapse = '\n')
+          write.table(x = NULL, file = stdout_hbGIS_tmp) # initialise empty file
+          observeEvent(input$hbGIS_showlog, {
+            shinyjs::toggle('hbGIS_log_div')
+            output$mylog_hbGIS <- renderText({
+              paste(mylog_hbGIS(), collapse = '\n')
             })
           })
           # If process somehow unexpectedly terminates, always copy tmp log 
           # file to actual log file for user to see
-          logfile = paste0(isolate(global$data_out), "/palmsplusr.log")
-          on.exit(file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE), add = TRUE)
+          logfile = paste0(isolate(global$data_out), "/hbGIS.log")
+          on.exit(file.copy(from = stdout_hbGIS_tmp, to = logfile, overwrite = TRUE), add = TRUE)
           
-          # palmsplusr_shiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          # hbGIS(#country_name = "BA", # <= Discuss, extract from GIS foldername?
           #   # participant_exclude_list, # <= Discuss, leave out from linkfile?
           #   gisdir = global$gis_in,
           #   palmsdir = expected_palmspy_results_dir,
@@ -1370,32 +1376,32 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           #   dataset_name = input$dataset_name)
           
           
-          # print(list(palmsplusr_shiny = palmsplusr_shiny,
+          # print(list(hbGIS = hbGIS,
           #            gisdir = global$gis_in,
           #            palmsdir = expected_palmspy_results_dir,
           #            gislinkfile = global$gislinkfile_in,
           #            outputdir = isolate(global$data_out),
           #            dataset_name = input$dataset_name,
-          #            configfile =  paste0(global$data_out, "/config_palmsplusr.csv")))
+          #            configfile =  paste0(global$data_out, "/config_hbGIS.csv")))
           
-          # Start palmsplusr
-          x_palmsplusr <- r_bg(func = function(palmsplusr_shiny, gisdir, palmsdir,
-                                               gislinkfile, outputdir, dataset_name,
-                                               configfile){
-            palmsplusr_shiny(gisdir, palmsdir, gislinkfile,
-                             outputdir, dataset_name, configfile)
+          # Start hbGIS
+          x_hbGIS <- r_bg(func = function(hbGIS, gisdir, palmsdir,
+                                          gislinkfile, outputdir, dataset_name,
+                                          configfile){
+            hbGIS(gisdir, palmsdir, gislinkfile,
+                  outputdir, dataset_name, configfile)
           },
-          args = list(palmsplusr_shiny = palmsplusr_shiny,
+          args = list(hbGIS = hbGIS,
                       gisdir = global$gis_in,
                       palmsdir = expected_results_dir,
                       gislinkfile = global$gislinkfile_in,
                       outputdir = isolate(global$data_out),
                       dataset_name = input$dataset_name,
-                      configfile =  paste0(global$data_out, "/config_palmsplusr.csv")),
-          stdout = stdout_palmsplusr_tmp,
+                      configfile =  paste0(global$data_out, "/config_hbGIS.csv")),
+          stdout = stdout_hbGIS_tmp,
           stderr = "2>&1")
-          #   # Start PALMSplusR
-          #   palmsplusr_shiny(#country_name = "BA", # <= Discuss, extract from GIS foldername?
+          #   # Start hbGIS
+          #   hbGIS(#country_name = "BA", # <= Discuss, extract from GIS foldername?
           #     # participant_exclude_list, # <= Discuss, leave out from linkfile?
           #     gisdir = global$gis_in,
           #     palmsdir = expected_palmspy_results_dir,
@@ -1404,40 +1410,40 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
           #     dataset_name = input$dataset_name)
           
           observe({
-            if (x_palmsplusr$poll_io(0)[["process"]] != "ready") {
+            if (x_hbGIS$poll_io(0)[["process"]] != "ready") {
               invalidateLater(5000)
             } else {
-              on.exit(removeNotification(id_palmsplusr), add = TRUE)
+              on.exit(removeNotification(id_hbGIS), add = TRUE)
               # When process is finished copy tmp log file to actual log file for user to see
-              if (file.exists(stdout_palmsplusr_tmp)) {
-                file.copy(from = stdout_palmsplusr_tmp, to = logfile, overwrite = TRUE)     
+              if (file.exists(stdout_hbGIS_tmp)) {
+                file.copy(from = stdout_hbGIS_tmp, to = logfile, overwrite = TRUE)     
               }
               # Now check whether results are correctly generated:
-              expected_palmsplusr_folder = paste0(isolate(global$data_out), "/palmsplusr_output")
-              if (dir.exists(expected_palmsplusr_folder) == TRUE) {
-                csv_files_palmsplusr = dir(expected_palmsplusr_folder, pattern = "csv", recursive = TRUE, full.names = TRUE)
-                if (length(csv_files_palmsplusr) > 0) {
-                  palmsplusr_message = paste0(#"PALMSplusR successfully completed at ", Sys.time(),
-                    "Output is stored in: ", expected_palmsplusr_folder, #<br/>
-                    paste0("<br/>The table below shows the content of ", basename(csv_files_palmsplusr)[1]),
+              expected_hbGIS_folder = paste0(isolate(global$data_out), "/hbGIS_output")
+              if (dir.exists(expected_hbGIS_folder) == TRUE) {
+                csv_files_hbGIS = dir(expected_hbGIS_folder, pattern = "csv", recursive = TRUE, full.names = TRUE)
+                if (length(csv_files_hbGIS) > 0) {
+                  hbGIS_message = paste0(#"hbGIS successfully completed at ", Sys.time(),
+                    "Output is stored in: ", expected_hbGIS_folder, #<br/>
+                    paste0("<br/>The table below shows the content of ", basename(csv_files_hbGIS)[1]),
                     "<br/>Log file: ", logfile)
                   Sys.sleep(3)
-                  palmsplusr_file1 = read.csv(file = csv_files_palmsplusr[1])
-                  if (length(palmsplusr_file1) > 0) {
-                    output$palmsplusr_file1 <- DT::renderDataTable(palmsplusr_file1, options = list(scrollX = TRUE))
+                  hbGIS_file1 = read.csv(file = csv_files_hbGIS[1])
+                  if (length(hbGIS_file1) > 0) {
+                    output$hbGIS_file1 <- DT::renderDataTable(hbGIS_file1, options = list(scrollX = TRUE))
                   }
                 } else {
-                  palmsplusr_message = paste0("palmsplusr unsuccessful",
-                                              "<br/>No file found inside: ", expected_palmsplusr_folder, #<br/>
-                                              "<br/>Log file: ", logfile)
+                  hbGIS_message = paste0("hbGIS unsuccessful",
+                                         "<br/>No file found inside: ", expected_hbGIS_folder, #<br/>
+                                         "<br/>Log file: ", logfile)
                 }
               } else {
-                palmsplusr_message = paste0("palmsplusr unsuccessful",
-                                            "<br/>No file found inside: ", expected_palmsplusr_folder,
-                                            "<br/>Log file: ", logfile)
+                hbGIS_message = paste0("hbGIS unsuccessful",
+                                       "<br/>No file found inside: ", expected_hbGIS_folder,
+                                       "<br/>Log file: ", logfile)
               }
-              output$palmsplusr_end_message <- renderUI({
-                HTML(paste0(palmsplusr_message))
+              output$hbGIS_end_message <- renderUI({
+                HTML(paste0(hbGIS_message))
               })
             }
           })
@@ -1468,8 +1474,8 @@ myApp <- function(homedir=getwd(), envConda = "~/miniconda3/bin/conda", ...) {
     output$hbGPS_end_message <- renderText({
       message = runhbGPS()
     })
-    output$palmsplusr_end_message <- renderText({
-      message = runpalmsplusr()
+    output$hbGIS_end_message <- renderText({
+      message = runhbGIS()
     })
   }
   # Run the application 

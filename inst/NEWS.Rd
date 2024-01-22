@@ -1,6 +1,11 @@
 \name{NEWS}
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
+\section{Changes in version 0.3.1 (GitHub-only-release date: 22-01-2024)}{
+  \itemize{
+    \item Migrate all palmsplusr functionality hbGIS package, see issue #64. 
+  }
+}
 \section{Changes in version 0.3.0 (GitHub-only-release date: 28-09-2023)}{
   \itemize{
     \item Series of fixes based on initial testing phase, see issue #94. 

@@ -1,7 +1,7 @@
 #' update_params
 #'
 #' @param file Character to specify location of original configuration file
-#' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_hbGPS or csv_palmsplusr
+#' @param format Character to specify format of configuration file: json_palsmpy, csv_GGIR, csv_hbGPS or csv_hbGIS
 #' @param new_params New parameters
 #' @return No object returned, function only reads original data, and overwrites parameters and stores it again
 #' @importFrom jsonlite fromJSON toJSON
@@ -19,7 +19,7 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
     for (j in 1:nrow(new_params)) {
       ind = which(rownames(params) %in% rownames(new_params)[j] == TRUE)
       if (length(ind) > 0) {
-        if (format == "csv_palmsplusr") {
+        if (format == "csv_hbGIS") {
           if (new_params$value[j] != params$formula[ind]) {
             params$formula[ind] = new_params$value[j]
           }
@@ -87,7 +87,7 @@ update_params = function(new_params = c(), file = c(), format="json_palmspy") {
     params = read.csv(file = file)
     params = overwriteMatchingFields(params, new_params, format)
     write.csv(x = params, file = file, row.names = FALSE)
-  } else if (format == "csv_palmsplusr") {
+  } else if (format == "csv_hbGIS") {
     params = read.csv(file = file, sep = ",")
     params$argument = with(params, paste0(params$context, "__",params$name))
     params = overwriteMatchingFields(params, new_params, format)

@@ -14,7 +14,7 @@ setClass(Class = "toolio", slots = list(input = "character", output = "character
 identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", 
                                         "PALMSpy_out", "GGIR_out", "hbGPS_out"),
                           goals = c("PA", "QC", "Trips", "Environment"),
-                          available_tools = c("GGIR", "PALMSpy", "palmsplusr", "CountConverter", "hbGPS")) {
+                          available_tools = c("GGIR", "PALMSpy", "hbGIS", "CountConverter", "hbGPS")) {
   iotools = list(GGIR = new("toolio",
                             input = "AccRaw",
                             output = c("GGIR_out", "ACount"),
@@ -23,13 +23,13 @@ identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS",
                                input = c("ACount", "GPS"),
                                output = c("PALMSpy_out"),
                                usecases = c("Trips", "QC", "Environment")),
-                 palmsplusr = new("toolio", # palmsplusr based on PALMSpy output
+                 hbGIS = new("toolio", # hbGIS based on PALMSpy output
                                    input = c("PALMSpy_out", "GIS"),
-                                   output = c("palmsplusr_out"),
+                                   output = c("hbGIS_out"),
                                    usecases = c("Environment", "QC")),
-                 palmsplusr = new("toolio", # palmsplusr based on hbGPS output
+                 hbGIS = new("toolio", # hbGIS based on hbGPS output
                                    input = c("hbGPS_out", "GIS"),
-                                   output = c("palmsplusr_out"),
+                                   output = c("hbGIS_out"),
                                    usecases = c("Environment", "QC")),
                  CountConverter = new("toolio",
                                       input = "AccRaw",
