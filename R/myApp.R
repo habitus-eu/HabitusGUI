@@ -12,10 +12,7 @@
 
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") 
 # HabitusGUI::myApp(homedir="~/projects")
-# options("sp_evolution_status" = 2)
 # pkgload::load_all("."); myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus")
-# myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/BEtestdata")
-# myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/Teun/Driestam")
 # myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010")
 
 # roxygen2::roxygenise()
@@ -100,8 +97,7 @@ myApp <- function(homedir=getwd(), ...) {
                  p("\n"),
                  # Select input folder raw accelerometer data if raw data is available and GGIR is planned------------------
                  conditionalPanel(condition = paste0("input.availabledata.indexOf(`AccRaw`) > -1 && ",
-                                                     "(input.tools.includes(`GGIR`) || ",
-                                                     "input.tools.includes(`CountConverter`))"),
+                                                     "input.tools.includes(`GGIR`)"),
                                   shinyFiles::shinyDirButton("rawaccdir", label = "Accelerometry data directory...",
                                                              title = "Select accelerometer data directory"),
                                   verbatimTextOutput("rawaccdir", placeholder = TRUE),
@@ -182,11 +178,6 @@ myApp <- function(homedir=getwd(), ...) {
                                   modConfigUI("edit_ggir_config"),
                                   hr()
                  ),
-                 conditionalPanel(condition = "input.tools.includes('CountConverter')",
-                                  h2("CountConverter"),
-                                  p("No parameters are needed for the CountConverter"),
-                                  hr()
-                 ),
                  conditionalPanel(condition = "input.tools.includes('hbGPS')",
                                   h2("hbGPS"),
                                   modConfigUI("edit_hbGPS_config"),
@@ -215,18 +206,9 @@ myApp <- function(homedir=getwd(), ...) {
                  p("\n"),
                  p("\n"),
                  span(h4(textOutput("recommendorder")), style = "color:purple"),
-                 # hr(),
                  p("\n"),
-                 conditionalPanel(condition = paste0("input.tools.includes('GGIR') || ",
-                                                     "input.tools.includes('CountConverter')"),
-                                  conditionalPanel(condition =
-                                                     paste0("input.tools.indexOf(`GGIR`) > -1  && ",
-                                                            "input.tools.indexOf(`CountConverter`) > -1"), 
-                                                   h3("GGIR and CountConverter:")
-                                  ),
-                                  conditionalPanel(condition = "input.tools.indexOf(`CountConverter`) == -1", 
-                                                   h3("GGIR:")
-                                  ),
+                 conditionalPanel(condition = "input.tools.includes('GGIR')",
+                                  h3("GGIR:"),
                                   shinyjs::useShinyjs(),
                                   actionButton("start_ggir", "Start analysis", width = '300px'),
                                   p("\n"),
@@ -286,7 +268,6 @@ myApp <- function(homedir=getwd(), ...) {
                           actionButton("restart_4", "restart app", class = "btn-danger", style = 'width:120px')  
                    )
                  )
-                 
         )
       )
     )
@@ -321,7 +302,6 @@ myApp <- function(homedir=getwd(), ...) {
     
     # previously selected directories -----
     if (length(values$rawaccdir) < 2) selectedRawaccdir = c() else selectedRawaccdir = paste(values$rawaccdir$path, collapse = .Platform$file.sep)
-    if (length(values$countaccdir) < 2) selectedCountaccdir = c() else selectedCountaccdir = paste(values$countaccdir$path, collapse = .Platform$file.sep)
     if (length(values$gpsdir) < 2) selectedGpsdir = c() else selectedGpsdir = paste(values$gpsdir$path, collapse = .Platform$file.sep)
     if (length(values$gisdir) < 2) selectedGisdir = c() else selectedGisdir = paste(values$gisdir$path, collapse = .Platform$file.sep)
     if (length(values$gislinkfile) < 2) selectedGislinkfile = c() else selectedGislinkfile = paste(values$gislinkfile$path, collapse = .Platform$file.sep)
@@ -360,7 +340,8 @@ myApp <- function(homedir=getwd(), ...) {
                 showNotification("hbGIS not possible without access to GIS data", type = "error")
               } else {
                 if ("hbGIS" %in% input$tools == TRUE & ("hbGPS_out" %in% input$availabledata == FALSE &
-                                                        "GPS" %in% input$availabledata == FALSE & all(c("AccRaw", "ACount") %in% input$availabledata == FALSE))) {
+                                                        "GPS" %in% input$availabledata == FALSE &
+                                                        "AccRaw" %in% input$availabledata == FALSE)) {
                   showNotification(paste0("hbGIS requires either previously",
                                           " generated PALMS or hbGPS output,",
                                           " or GPS and Accelerometer data such",
@@ -814,7 +795,6 @@ myApp <- function(homedir=getwd(), ...) {
     configfilehbGPS <- modConfigServer("edit_hbGPS_config", tool = reactive("hbGPS"), homedir = homedir)
     configfilehbGIS <- modConfigServer("edit_hbGIS_config", tool = reactive("hbGIS"), homedir = homedir)
     
-    
     #========================================================================
     # Apply GGIR after button is pressed
     #========================================================================
@@ -1162,10 +1142,6 @@ myApp <- function(homedir=getwd(), ...) {
     })
     output$recommendorder <- renderText({
       pipeline = proposed_pipeline()
-      if ("GGIR" %in% pipeline & "CountConverter" %in% pipeline) {
-        pipeline = pipeline[-which(pipeline %in% c("GGIR", "CountConverter"))]
-        pipeline = c("GGIR & CountConverter", pipeline)
-      }
       if (length(pipeline) > 1) {
         message = paste0("Recommended order of analyses: ", paste0(pipeline, collapse = " -> "))
       } else {
