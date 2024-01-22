@@ -17,8 +17,8 @@ Install RStudio: https://posit.co/products/open-source/rstudio/
 
 Install the tools you plan to use:
 - [install GGIR](https://cran.r-project.org/web/packages/GGIR/vignettes/GGIR.html#2_Setting_up_your_work_environment)
-- [install PALMSpy](https://github.com/emolinaro/PALMSpy#readme)
-- [install palmsplusr](https://github.com/TheTS/palmsplusr)
+- [install hbGPS](https://github.com/habitus-eu/hbGPS)
+- [install hbGIS](https://github.com/habitus-eu/hbGIS)
 
 ### 2.3 Install HabitusGUI
 

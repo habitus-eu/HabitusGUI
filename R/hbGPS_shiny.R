@@ -7,6 +7,7 @@
 #' @param configfile Path to configuration file
 #' @return no object is returned, only a new file is created in the output directory
 #' @import hbGPS
+#' @importFrom utils write.table
 #' @export
 
 hbGPS_shiny = function(ggiroutdir = NULL, gpsdir = NULL, outputdir = NULL,

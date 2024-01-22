@@ -7,6 +7,7 @@
 #' @param do.Counts Boolean to indicate whether BrondCounts should be derived
 #' @return no object is returned, only a new file is created in the output directory
 #' @import GGIR
+#' @importFrom utils write.table
 #' @export
 
 GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c(),

@@ -11,30 +11,18 @@
 # S4 class needs to be defined outside function
 setClass(Class = "toolio", slots = list(input = "character", output = "character", usecases = "character"))
 
-identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS", 
-                                        "PALMSpy_out", "GGIR_out", "hbGPS_out"),
+identify_tools = function(datatypes = c("AccRaw", "GPS", "GIS", 
+                                        "GGIR_out", "hbGPS_out"),
                           goals = c("PA", "QC", "Trips", "Environment"),
-                          available_tools = c("GGIR", "PALMSpy", "hbGIS", "CountConverter", "hbGPS")) {
+                          available_tools = c("GGIR", "hbGIS", "hbGPS")) {
   iotools = list(GGIR = new("toolio",
                             input = "AccRaw",
-                            output = c("GGIR_out", "ACount"),
+                            output = "GGIR_out",
                             usecases = c("PA", "QC", "Trips", "Environment")), 
-                 PALMSpy = new("toolio",
-                               input = c("ACount", "GPS"),
-                               output = c("PALMSpy_out"),
-                               usecases = c("Trips", "QC", "Environment")),
-                 hbGIS = new("toolio", # hbGIS based on PALMSpy output
-                                   input = c("PALMSpy_out", "GIS"),
-                                   output = c("hbGIS_out"),
-                                   usecases = c("Environment", "QC")),
-                 hbGIS = new("toolio", # hbGIS based on hbGPS output
+                 hbGIS = new("toolio",
                                    input = c("hbGPS_out", "GIS"),
                                    output = c("hbGIS_out"),
                                    usecases = c("Environment", "QC")),
-                 CountConverter = new("toolio",
-                                      input = "AccRaw",
-                                      output = c("Counts_out"),
-                                      usecases = c("PA", "Trips", "QC", "Environment")),
                  hbGPS = new("toolio",
                              input = c("GGIR_out","GPS"),
                              output = c("hbGPS_out"),
@@ -55,16 +43,5 @@ identify_tools = function(datatypes = c("AccRaw", "ACount", "GPS", "GIS",
   if ("AccRaw" %in% datatypes == FALSE & "GGIR" %in% tools_needed) {
     tools_needed = tools_needed[-which(tools_needed == "GGIR")]
   }
-  if ("CountConverter" %in% tools_needed) {
-    if ("ACount" %in% datatypes == TRUE | # No need to estimate counts if they already exist
-        ("AccRaw" %in% datatypes == TRUE & "GPS" %in% datatypes == FALSE)) { # No need to estimate counts if there is no GPS data
-      tools_needed = tools_needed[-which(tools_needed == "CountConverter")]
-    }
-  }
-  # Mask tools that will be deprecated
-  if (any(c("CountConverter", "PALMSpy") %in% tools_needed == TRUE)) {
-    tools_needed = tools_needed[-which(tools_needed %in% c("CountConverter", "PALMSpy"))]
-  }
-  
   invisible(list(tools_needed = tools_needed, iotools = iotools[which(names(iotools) %in% tools_needed)]))
 }
