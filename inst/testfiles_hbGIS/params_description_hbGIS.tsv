@@ -1,0 +1,46 @@
+parameter	field	subfield	display	class	minimum	maximum	set	priority	description
+weekday	whenwhat_field		TRUE	formula				0	description missing
+weekend	whenwhat_field		TRUE	formula				0	description missing
+indoors	whenwhat_field		TRUE	formula				0	description missing
+outdoors	whenwhat_field		TRUE	formula				0	description missing
+in_vehicle	whenwhat_field		TRUE	formula				0	description missing
+inserted	whenwhat_field		TRUE	formula				0	description missing
+pedestrian	whenwhat_field		TRUE	formula				0	description missing
+bicycle	whenwhat_field		TRUE	formula				0	description missing
+vehicle	whenwhat_field		TRUE	formula				0	description missing
+nonwear	whenwhat_field		TRUE	formula				0	description missing
+wear	whenwhat_field		TRUE	formula				0	description missing
+sedentary	whenwhat_field		TRUE	formula				0	description missing
+light	whenwhat_field		TRUE	formula				0	description missing
+moderate	whenwhat_field		TRUE	formula				0	description missing
+vigorous	whenwhat_field		TRUE	formula				0	description missing
+mvpa	whenwhat_field		TRUE	formula				0	description missing
+mot	trajectory_field		TRUE	formula				0	description missing
+date	trajectory_field		TRUE	formula				0	description missing
+start	trajectory_field		TRUE	formula				0	description missing
+end	trajectory_field		TRUE	formula				0	description missing
+duration	trajectory_field		TRUE	formula				0	description missing
+nonwear	trajectory_field		TRUE	formula				0	description missing
+wear	trajectory_field		TRUE	formula				0	description missing
+sedentary	trajectory_field		TRUE	formula				0	description missing
+light	trajectory_field		TRUE	formula				0	description missing
+moderate	trajectory_field		TRUE	formula				0	description missing
+vigorous	trajectory_field		TRUE	formula				0	description missing
+mvpa	trajectory_field		TRUE	formula				0	description missing
+length	trajectory_field		TRUE	formula				0	description missing
+speed	trajectory_field		TRUE	formula				0	description missing
+duration	multimodal_field		TRUE	formula				0	description missing
+nonwear	multimodal_field		TRUE	formula				0	description missing
+wear	multimodal_field		TRUE	formula				0	description missing
+sedentary	multimodal_field		TRUE	formula				0	description missing
+light	multimodal_field		TRUE	formula				0	description missing
+moderate	multimodal_field		TRUE	formula				0	description missing
+vigorous	multimodal_field		TRUE	formula				0	description missing
+mvpa	multimodal_field		TRUE	formula				0	description missing
+length	multimodal_field		TRUE	formula				0	description missing
+speed	multimodal_field		TRUE	formula				0	description missing
+groupinglocation	general		TRUE	formula				0	description missing
+baselocation	general		TRUE	formula				0	description missing
+write_shp	general		TRUE	set			TRUE;FALSE	0	description missing
+split_GIS	general		TRUE	set			TRUE;FALSE	0	description missing
+sublocationID	general		TRUE	formula				0	description missing

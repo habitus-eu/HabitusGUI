@@ -38,11 +38,11 @@ modConfigServer = function(id, tool, homedir = getwd()) {
             if (config_default != file) file.copy(config_default, file)
           },
           contentType = "text/csv")
-      } else if (tool() == "palmsplusr") {
+      } else if (tool() == "hbGIS") {
         output$download = downloadHandler(
-          filename = "config_palmsplusr.csv",
+          filename = "config_hbGIS.csv",
           content <- function(file) {
-            config_default = system.file("testfiles_palmsplusr/config_palmsplusr.csv", package = "HabitusGUI")[1]
+            config_default = system.file("testfiles_hbGIS/config_hbGIS.csv", package = "HabitusGUI")[1]
             if (config_default != file) file.copy(config_default, file)
           },
           contentType = "text/csv")
@@ -86,8 +86,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
             params = load_params(file = current_config, format = "json_palmspy") #$datapath
           } else if (tool() == "GGIR") {
             params = load_params(file = current_config, format = "csv_ggir") #$datapath
-          } else if (tool() == "palmsplusr") {
-            params = load_params(file = current_config, format = "csv_palmsplusr") #$datapath
+          } else if (tool() == "hbGIS") {
+            params = load_params(file = current_config, format = "csv_hbGIS") #$datapath
           } else if (tool() == "hbGPS") {
             params = load_params(file = current_config, format = "csv_hbGPS") #$datapath
           }
@@ -134,8 +134,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
                 update_params(new_params = v$params, file = current_config, format = "json_palmspy") #$datapath
               } else if (tool() == "GGIR") {
                 update_params(new_params = v$params, file = current_config, format = "csv_ggir") #$datapath
-              } else if (tool() == "palmsplusr") {
-                update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
+              } else if (tool() == "hbGIS") {
+                update_params(new_params = v$params, file = current_config, format = "csv_hbGIS") #$datapath
               } else if (tool() == "hbGPS") {
                 update_params(new_params = v$params, file = current_config, format = "csv_hbGPS") #$datapath
               }
@@ -152,8 +152,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
               update_params(new_params = v$params, file = current_config, format = "json_palmspy") #$datapath
             } else if (tool() == "GGIR") {
               update_params(new_params = v$params, file = current_config, format = "csv_ggir") #$datapath
-            } else if (tool() == "palmsplusr") {
-              update_params(new_params = v$params, file = current_config, format = "csv_palmsplusr") #$datapath
+            } else if (tool() == "hbGIS") {
+              update_params(new_params = v$params, file = current_config, format = "csv_hbGIS") #$datapath
             } else if (tool() == "hbGPS") {
               update_params(new_params = v$params, file = current_config, format = "csv_hbGPS") #$datapath
             }
@@ -204,8 +204,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         explanation = paste0("PALMSpy takes as input summarised accelerometer data (ActiGraph counts) ",
                              "and GPS data and uses them to estimate movement behaviours from the ",
                              "perspective location in a country or city and travel distance and speed")
-      } else if (tool() == "palmsplusr") {
-        explanation = paste0("palmsplusr takes as input PALMSpy output, GIS shape, and a GISlinkage file ",
+      } else if (tool() == "hbGIS") {
+        explanation = paste0("hbGIS takes as input PALMSpy output, GIS shape, and a GISlinkage file ",
                              "and uses these to describe behaviour per domain.")
       } else if (tool() == "hbGPS") {
         explanation = paste0("hbGPS takes as input GGIR output and GPS data and uses them to estimate",
@@ -219,8 +219,8 @@ modConfigServer = function(id, tool, homedir = getwd()) {
         config_explanation2 = "GGIR configuration files are in .csv format. If you do not have one Download a template below."
       } else if (tool() == "PALMSpy") {
         config_explanation2 = "PALMSpy configuration files are in .json. If you do not have one Download a template below."
-      } else if (tool() == "palmsplusr") {
-        config_explanation2 = "palmsplusr configuration files are in .csv. If you do not have one Download a template below."
+      } else if (tool() == "hbGIS") {
+        config_explanation2 = "hbGIS configuration files are in .csv. If you do not have one Download a template below."
       } else if (tool() == "hbGPS") {
         config_explanation2 = "hbGPS configuration files are in .csv. If you do not have one Download a template below."
       }

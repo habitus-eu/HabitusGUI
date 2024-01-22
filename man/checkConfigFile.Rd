@@ -9,7 +9,7 @@ checkConfigFile(file = c(), tool = c())
 \arguments{
 \item{file}{data path to config file}
 
-\item{tool}{either PALMSpy, GGIR, or palmsplusr for now.}
+\item{tool}{either PALMSpy, GGIR, or hbGIS for now.}
 }
 \value{
 message with the result of the check (either ok or the description of a problem)

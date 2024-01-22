@@ -15,10 +15,10 @@ test_that("Parameters can be loaded and updated from config files", {
   params_palmspy = load_params(file = palmspy_config_json, format = "json_palmspy")
   expect_equal(ncol(params_palmspy), 10)
   
-  # Load palmsplusr .csv file
-  palmsplusr_config_csv = system.file("testfiles_palmsplusr/config_palmsplusr.csv", package = "HabitusGUI")[1]
-  params_palmsplusr = load_params(file = palmsplusr_config_csv, format = "csv_palmsplusr")
-  expect_equal(ncol(params_palmsplusr), 10)
+  # Load hbGIS .csv file
+  hbGIS_config_csv = system.file("testfiles_hbGIS/config_hbGIS.csv", package = "HabitusGUI")[1]
+  params_hbGIS = load_params(file = hbGIS_config_csv, format = "csv_hbGIS")
+  expect_equal(ncol(params_hbGIS), 10)
   
   # Load hbGPS .csv file
   hbGPS_config_csv = system.file("testfiles_hbGPS/config_hbGPS.csv", package = "HabitusGUI")[1]
@@ -39,14 +39,14 @@ test_that("Parameters can be loaded and updated from config files", {
   expect_equal(ncol(params_ggir2), 9)
   expect_equal(params_ggir2$value[which(rownames(params_ggir2) == "idloc")] , "3")
 
-  # Update palmsplusr .csv file
-  params_palmsplusr$value[which(rownames(params_palmsplusr) == "trajectory_field__sedentary")] = "sum(activityintensity == 1) * 15"
-  # palmsplusr_config_csv_tmp = gsub(pattern = ".csv", replacement = "2.csv", x = palmsplusr_config_csv)
-  # file.copy(from = palmsplusr_config_csv, to = palmsplusr_config_csv_tmp, overwrite = TRUE)
-  update_params(new_params = params_palmsplusr, file = palmsplusr_config_csv, format = "csv_palmsplusr")
-  params_palmsplusr2 = load_params(file = palmsplusr_config_csv, format = "csv_palmsplusr")
-  expect_equal(ncol(params_palmsplusr2), 10)
-  expect_equal(params_palmsplusr2$value[which(rownames(params_palmsplusr2) == "trajectory_field__sedentary")] ,
+  # Update hbGIS .csv file
+  params_hbGIS$value[which(rownames(params_hbGIS) == "trajectory_field__sedentary")] = "sum(activityintensity == 1) * 15"
+  # hbGIS_config_csv_tmp = gsub(pattern = ".csv", replacement = "2.csv", x = hbGIS_config_csv)
+  # file.copy(from = hbGIS_config_csv, to = hbGIS_config_csv_tmp, overwrite = TRUE)
+  update_params(new_params = params_hbGIS, file = hbGIS_config_csv, format = "csv_hbGIS")
+  params_hbGIS2 = load_params(file = hbGIS_config_csv, format = "csv_hbGIS")
+  expect_equal(ncol(params_hbGIS2), 10)
+  expect_equal(params_hbGIS2$value[which(rownames(params_hbGIS2) == "trajectory_field__sedentary")] ,
                "sum(activityintensity == 1) * 15")
   
 })
