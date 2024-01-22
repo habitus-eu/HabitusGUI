@@ -10,11 +10,6 @@ test_that("Parameters can be loaded and updated from config files", {
   params_ggir = load_params(file = ggir_config_csv, format = "csv_ggir")
   expect_equal(ncol(params_ggir), 9)
 
-  # Load PALMSpy .json file
-  palmspy_config_json = system.file("testfiles_palmspy/palmspy-params.json", package = "HabitusGUI")[1]
-  params_palmspy = load_params(file = palmspy_config_json, format = "json_palmspy")
-  expect_equal(ncol(params_palmspy), 10)
-  
   # Load hbGIS .csv file
   hbGIS_config_csv = system.file("testfiles_hbGIS/config_hbGIS.csv", package = "HabitusGUI")[1]
   params_hbGIS = load_params(file = hbGIS_config_csv, format = "csv_hbGIS")
@@ -25,13 +20,6 @@ test_that("Parameters can be loaded and updated from config files", {
   params_hbGPS = load_params(file = hbGPS_config_csv, format = "csv_hbGPS")
   expect_equal(ncol(params_hbGPS), 9)
   
-  # Update PALMSpy .json file
-  params_palmspy$value[which(rownames(params_palmspy) == "interval")] = "25"
-  update_params(new_params = params_palmspy, file = palmspy_config_json, format = "json_palmspy")
-  params_palmspy2 = load_params(file = palmspy_config_json, format = "json_palmspy")
-  expect_equal(ncol(params_palmspy2), 10)
-  expect_equal(as.character(params_palmspy2$value[which(rownames(params_palmspy2) == "interval")]), "25")
-
   # Update GGIR .csv file
   params_ggir$value[which(rownames(params_ggir) == "idloc")] = "3"
   update_params(new_params = params_ggir, file = ggir_config_csv, format = "csv_ggir")
@@ -41,8 +29,6 @@ test_that("Parameters can be loaded and updated from config files", {
 
   # Update hbGIS .csv file
   params_hbGIS$value[which(rownames(params_hbGIS) == "trajectory_field__sedentary")] = "sum(activityintensity == 1) * 15"
-  # hbGIS_config_csv_tmp = gsub(pattern = ".csv", replacement = "2.csv", x = hbGIS_config_csv)
-  # file.copy(from = hbGIS_config_csv, to = hbGIS_config_csv_tmp, overwrite = TRUE)
   update_params(new_params = params_hbGIS, file = hbGIS_config_csv, format = "csv_hbGIS")
   params_hbGIS2 = load_params(file = hbGIS_config_csv, format = "csv_hbGIS")
   expect_equal(ncol(params_hbGIS2), 10)

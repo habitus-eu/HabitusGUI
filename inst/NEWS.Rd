@@ -4,6 +4,7 @@
 \section{Changes in version 0.3.1 (GitHub-only-release date: 22-01-2024)}{
   \itemize{
     \item Migrate all palmsplusr functionality hbGIS package, see issue #64. 
+    \item Deprecate PALMSpy and count converter, see issue #98
   }
 }
 \section{Changes in version 0.3.0 (GitHub-only-release date: 28-09-2023)}{
