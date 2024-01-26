@@ -1,46 +1,46 @@
 parameter	field	subfield	display	class	minimum	maximum	set	priority	description
-weekday	whenwhat_field		TRUE	formula				0	description missing
-weekend	whenwhat_field		TRUE	formula				0	description missing
-indoors	whenwhat_field		TRUE	formula				0	description missing
-outdoors	whenwhat_field		TRUE	formula				0	description missing
-in_vehicle	whenwhat_field		TRUE	formula				0	description missing
-inserted	whenwhat_field		TRUE	formula				0	description missing
-pedestrian	whenwhat_field		TRUE	formula				0	description missing
-bicycle	whenwhat_field		TRUE	formula				0	description missing
-vehicle	whenwhat_field		TRUE	formula				0	description missing
-nonwear	whenwhat_field		TRUE	formula				0	description missing
-wear	whenwhat_field		TRUE	formula				0	description missing
-sedentary	whenwhat_field		TRUE	formula				0	description missing
-light	whenwhat_field		TRUE	formula				0	description missing
-moderate	whenwhat_field		TRUE	formula				0	description missing
-vigorous	whenwhat_field		TRUE	formula				0	description missing
-mvpa	whenwhat_field		TRUE	formula				0	description missing
-mot	trajectory_field		TRUE	formula				0	description missing
-date	trajectory_field		TRUE	formula				0	description missing
-start	trajectory_field		TRUE	formula				0	description missing
-end	trajectory_field		TRUE	formula				0	description missing
-duration	trajectory_field		TRUE	formula				0	description missing
-nonwear	trajectory_field		TRUE	formula				0	description missing
-wear	trajectory_field		TRUE	formula				0	description missing
-sedentary	trajectory_field		TRUE	formula				0	description missing
-light	trajectory_field		TRUE	formula				0	description missing
-moderate	trajectory_field		TRUE	formula				0	description missing
-vigorous	trajectory_field		TRUE	formula				0	description missing
-mvpa	trajectory_field		TRUE	formula				0	description missing
-length	trajectory_field		TRUE	formula				0	description missing
-speed	trajectory_field		TRUE	formula				0	description missing
-duration	multimodal_field		TRUE	formula				0	description missing
-nonwear	multimodal_field		TRUE	formula				0	description missing
-wear	multimodal_field		TRUE	formula				0	description missing
-sedentary	multimodal_field		TRUE	formula				0	description missing
-light	multimodal_field		TRUE	formula				0	description missing
-moderate	multimodal_field		TRUE	formula				0	description missing
-vigorous	multimodal_field		TRUE	formula				0	description missing
-mvpa	multimodal_field		TRUE	formula				0	description missing
-length	multimodal_field		TRUE	formula				0	description missing
-speed	multimodal_field		TRUE	formula				0	description missing
-groupinglocation	general		TRUE	formula				0	description missing
-baselocation	general		TRUE	formula				0	description missing
-write_shp	general		TRUE	set			TRUE;FALSE	0	description missing
-split_GIS	general		TRUE	set			TRUE;FALSE	0	description missing
-sublocationID	general		TRUE	formula				0	description missing
+weekday	whenwhat_field		TRUE	formula				0	"Formula to classify weekday based on dow number, e.g. dow < 6"
+weekend	whenwhat_field		TRUE	formula				0	"Formula to classify weekend day based on dow number, e.g. dow > 5"
+indoors	whenwhat_field		TRUE	formula				0	"Formula to classify indoor based on iov (indoor, outdoor, vehicle), e.g. iov==2"
+outdoors	whenwhat_field		TRUE	formula				0	"Formula to classify outdoor based on iov (indoor, outdoor, vehicle), e.g. iov==1"
+in_vehicle	whenwhat_field		TRUE	formula				0	"Formula to classify vehicle based on iov (indoor, outdoor, vehicle), e.g. iov==3"
+inserted	whenwhat_field		TRUE	formula				0	Formula to classify what timestamps were inserted based on fixtypecode
+pedestrian	whenwhat_field		TRUE	formula				0	"Formular to specify how tripmot relates to pedestrian state (where walking = 1, bicyle = 2, vehicle = 3)"
+bicycle	whenwhat_field		TRUE	formula				0	"Formular to specify how tripmot relates to pedestrian state (where walking = 1, bicyle = 2, vehicle = 3)"
+vehicle	whenwhat_field		TRUE	formula				0	"Formular to specify how tripmot relates to pedestrian state (where walking = 1, bicyle = 2, vehicle = 3)"
+nonwear	whenwhat_field		TRUE	formula				0	"Formula to define nonwear, e.g. activityintensity < 0"
+wear	whenwhat_field		TRUE	formula				0	"Formula to define wear, e.g. activityintensity >= 0"
+sedentary	whenwhat_field		TRUE	formula				0	"Formula to define sedentary behaviour, e.g. activityintensity==0"
+light	whenwhat_field		TRUE	formula				0	"Formula to define light behaviour, e.g. activityintensity==1"
+moderate	whenwhat_field		TRUE	formula				0	"Formula to define moderate behaviour, e.g. activityintensity==2"
+vigorous	whenwhat_field		TRUE	formula				0	"Formula to define vigorous behaviour, e.g. activityintensity==3"
+mvpa	whenwhat_field		TRUE	formula				0	"Formula to define mvpa, e.g. moderate+vigorous"
+mot	trajectory_field		TRUE	formula				0	"Formula to define mode of transper per trajectory, e.g. first(tripmot)"
+date	trajectory_field		TRUE	formula				0	Formula to define date per trajectory
+start	trajectory_field		TRUE	formula				0	Formula to define start of trajectory
+end	trajectory_field		TRUE	formula				0	Formula to define end of trajectory
+duration	trajectory_field		TRUE	formula				0	Formula to define duration of trajectory
+nonwear	trajectory_field		TRUE	formula				0	Formula to define time in nonwear per trajectory
+wear	trajectory_field		TRUE	formula				0	Formula to define time in wear per trajectory
+sedentary	trajectory_field		TRUE	formula				0	Formula to define time in sedentary behaviour per trajectory
+light	trajectory_field		TRUE	formula				0	Formula to define time in light behaviour per trajectory
+moderate	trajectory_field		TRUE	formula				0	Formula to define time in moderate behaviour per trajectory
+vigorous	trajectory_field		TRUE	formula				0	Formula to define time in vigorous behaviour per trajectory
+mvpa	trajectory_field		TRUE	formula				0	Formula to define time in mvpa behaviour per trajectory
+length	trajectory_field		TRUE	formula				0	Formula to define length of a trajectory
+speed	trajectory_field		TRUE	formula				0	Formula to define speed per trajectory
+duration	multimodal_field		TRUE	formula				0	Formula to define duration of multimodal trip (a trip involving multiple modes of transport)
+nonwear	multimodal_field		TRUE	formula				0	Formula to define nonwear of multimodal trip (a trip involving multiple modes of transport)
+wear	multimodal_field		TRUE	formula				0	Formula to define wear of multimodal trip (a trip involving multiple modes of transport)
+sedentary	multimodal_field		TRUE	formula				0	Formula to define sedentary of multimodal trip (a trip involving multiple modes of transport)
+light	multimodal_field		TRUE	formula				0	Formula to define light of multimodal trip (a trip involving multiple modes of transport)
+moderate	multimodal_field		TRUE	formula				0	Formula to define moderate of multimodal trip (a trip involving multiple modes of transport)
+vigorous	multimodal_field		TRUE	formula				0	Formula to define vigorous of multimodal trip (a trip involving multiple modes of transport)
+mvpa	multimodal_field		TRUE	formula				0	Formula to define mvpa of multimodal trip (a trip involving multiple modes of transport)
+length	multimodal_field		TRUE	formula				0	Formula to define length of multimodal trip (a trip involving multiple modes of transport)
+speed	multimodal_field		TRUE	formula				0	Formula to define speed of multimodal trip (a trip involving multiple modes of transport)
+groupinglocation	general		TRUE	formula				0	Name of location that are linked to multiple participants and used as a grouping location. Leave empty if not available
+baselocation	general		TRUE	formula				0	Name of location that is linked to individual participants and used as reference point. Leave empty if not available.
+write_shp	general		TRUE	set			TRUE;FALSE	0	Whether to store shape files as output
+split_GIS	general		TRUE	set			TRUE;FALSE	0	Whether to split GIS files in sublocations (only for public places)
+sublocationID	general		TRUE	formula				0	"Column name in GIS file to identify sublocation of a public place, e.g. park number"

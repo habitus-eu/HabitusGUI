@@ -1,46 +1,46 @@
-"context","name","formula","is_where_field","after_conversion"
-"whenwhat_field","weekday","dow < 6",FALSE,NA
-"whenwhat_field","weekend","dow > 5",FALSE,NA
-"whenwhat_field","indoors","iov == 3",FALSE,NA
-"whenwhat_field","outdoors","iov == 1",FALSE,NA
-"whenwhat_field","in_vehicle","iov == 2",FALSE,NA
-"whenwhat_field","inserted","fixtypecode == 6",FALSE,NA
-"whenwhat_field","pedestrian","tripmot == 1",FALSE,NA
-"whenwhat_field","bicycle","tripmot == 2",FALSE,NA
-"whenwhat_field","vehicle","tripmot == 3",FALSE,NA
-"whenwhat_field","nonwear","activityintensity < 0",TRUE,NA
-"whenwhat_field","wear","activityintensity >= 0",TRUE,NA
-"whenwhat_field","sedentary","activityintensity == 0",TRUE,NA
-"whenwhat_field","light","activityintensity == 1",TRUE,NA
-"whenwhat_field","moderate","activityintensity == 2",TRUE,NA
-"whenwhat_field","vigorous","activityintensity == 3",TRUE,NA
-"whenwhat_field","mvpa","moderate + vigorous",TRUE,NA
-"trajectory_field","mot","first(tripmot)",NA,FALSE
-"trajectory_field","date","first(as.Date(datetime))",NA,FALSE
-"trajectory_field","start","datetime[triptype==1]",NA,FALSE
-"trajectory_field","end","datetime[triptype==4]",NA,FALSE
-"trajectory_field","duration","as.numeric(difftime(end, start, units = ""secs"") + 30)",NA,FALSE
-"trajectory_field","nonwear","sum(activityintensity < 0) * 15",NA,FALSE
-"trajectory_field","wear","sum(activityintensity >= 0) * 15",NA,FALSE
-"trajectory_field","sedentary","sum(activityintensity == 1) * 15",NA,FALSE
-"trajectory_field","light","sum(activityintensity == 1) * 15",NA,FALSE
-"trajectory_field","moderate","sum(activityintensity == 2) * 15",NA,FALSE
-"trajectory_field","vigorous","sum(activityintensity == 3) * 15",NA,FALSE
-"trajectory_field","mvpa","moderate + vigorous",NA,FALSE
-"trajectory_field","length","as.numeric(st_length(geometry))",NA,TRUE
-"trajectory_field","speed","(length / duration) * 3.6",NA,TRUE
-"multimodal_field","duration","sum",NA,NA
-"multimodal_field","nonwear","sum",NA,NA
-"multimodal_field","wear","sum",NA,NA
-"multimodal_field","sedentary","sum",NA,NA
-"multimodal_field","light","sum",NA,NA
-"multimodal_field","moderate","sum",NA,NA
-"multimodal_field","vigorous","sum",NA,NA
-"multimodal_field","mvpa","sum",NA,NA
-"multimodal_field","length","sum",NA,NA
-"multimodal_field","speed","mean",NA,NA
-"general","groupinglocation","school",NA,NA
-"general","baselocation","home",NA,NA
-"general","write_shp","FALSE",NA,NA
-"general","split_GIS","TRUE",NA,NA
-"general","sublocationID","OBJECTID",NA,NA
+context,name,formula,is_where_field,after_conversion
+whenwhat_field,weekday,dow < 6,FALSE,NA
+whenwhat_field,weekend,dow > 5,FALSE,NA
+whenwhat_field,indoors,iov == 2,FALSE,NA
+whenwhat_field,outdoors,iov == 1,FALSE,NA
+whenwhat_field,in_vehicle,iov == 3,FALSE,NA
+whenwhat_field,inserted,fixtypecode == 6,FALSE,NA
+whenwhat_field,pedestrian,tripmot == 1,FALSE,NA
+whenwhat_field,bicycle,tripmot == 2,FALSE,NA
+whenwhat_field,vehicle,tripmot == 3,FALSE,NA
+whenwhat_field,nonwear,activityintensity < 0,TRUE,NA
+whenwhat_field,wear,activityintensity >= 0,TRUE,NA
+whenwhat_field,sedentary,activityintensity == 0,TRUE,NA
+whenwhat_field,light,activityintensity == 1,TRUE,NA
+whenwhat_field,moderate,activityintensity == 2,TRUE,NA
+whenwhat_field,vigorous,activityintensity == 3,TRUE,NA
+whenwhat_field,mvpa,moderate + vigorous,TRUE,NA
+trajectory_field,mot,first(tripmot),NA,FALSE
+trajectory_field,date,first(as.Date(datetime)),NA,FALSE
+trajectory_field,start,datetime[triptype==1],NA,FALSE
+trajectory_field,end,datetime[triptype==4],NA,FALSE
+trajectory_field,duration,"as.numeric(difftime(end, start, units = ""secs"") + 30)",NA,FALSE
+trajectory_field,nonwear,sum(activityintensity < 0) * 15,NA,FALSE
+trajectory_field,wear,sum(activityintensity >= 0) * 15,NA,FALSE
+trajectory_field,sedentary,sum(activityintensity == 1) * 15,NA,FALSE
+trajectory_field,light,sum(activityintensity == 1) * 15,NA,FALSE
+trajectory_field,moderate,sum(activityintensity == 2) * 15,NA,FALSE
+trajectory_field,vigorous,sum(activityintensity == 3) * 15,NA,FALSE
+trajectory_field,mvpa,moderate + vigorous,NA,FALSE
+trajectory_field,length,as.numeric(st_length(geometry)),NA,TRUE
+trajectory_field,speed,(length / duration) * 3.6,NA,TRUE
+multimodal_field,duration,sum,NA,NA
+multimodal_field,nonwear,sum,NA,NA
+multimodal_field,wear,sum,NA,NA
+multimodal_field,sedentary,sum,NA,NA
+multimodal_field,light,sum,NA,NA
+multimodal_field,moderate,sum,NA,NA
+multimodal_field,vigorous,sum,NA,NA
+multimodal_field,mvpa,sum,NA,NA
+multimodal_field,length,sum,NA,NA
+multimodal_field,speed,mean,NA,NA
+general,groupinglocation,school,NA,NA
+general,baselocation,home,NA,NA
+general,write_shp,FALSE,NA,NA
+general,split_GIS,TRUE,NA,NA
+general,sublocationID,OBJECTID,NA,NA
