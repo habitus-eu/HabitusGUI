@@ -13,7 +13,8 @@
 # pkgload::load_all("."); HabitusGUI::myApp(homedir="~/projects/fontys") 
 # HabitusGUI::myApp(homedir="~/projects")
 # pkgload::load_all("."); myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus")
-# myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/NBBB2010")
+# myApp(homedir="D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing")
+
 
 # roxygen2::roxygenise()
 
@@ -799,38 +800,29 @@ myApp <- function(homedir=getwd(), ...) {
     # Apply GGIR after button is pressed
     #========================================================================
     runGGIR <- eventReactive(input$start_ggir, {
-      GGIRCounts_message = ""
+      GGIR_message = ""
       
       if ("GGIR" %in% input$tools) {
-        GGIRCounts_message = ""
+        GGIR_message = ""
         # Basic check before running function:
-        ready_to_run_ggirCounts = FALSE
+        ready_to_run_ggir = FALSE
         if (dir.exists(global$raw_acc_in)) {
           acc_files_available = length(dir(path = global$raw_acc_in, pattern = "csv|bin|gt3x|bin|cwa|wav", recursive = FALSE, full.names = FALSE)) > 0
           if (acc_files_available == TRUE) {
-            ready_to_run_ggirCounts = TRUE
+            ready_to_run_ggir = TRUE
           } else {
-            GGIRCounts_message = paste0("No count files found in ", global$raw_acc_in)
+            GGIR_message = paste0("No files found in ", global$raw_acc_in)
           }
         } else {
-          GGIRCounts_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", global$raw_acc_in)
+          GGIR_message = paste0("Folder that is supposed to hold acceleration files does not exist: ", global$raw_acc_in)
         }
         # Only run function when checks are met:
-        if (ready_to_run_ggirCounts == TRUE) {
+        if (ready_to_run_ggir == TRUE) {
           shinyjs::hide(id = "start_ggir")
-            # this line makes that if user is trying to use a config defined in a previous
-            # run, the data path is correctly defined
-            config = read.csv(as.character(configfileGGIR()))
-            config.Counts = config$value[which(config$argument == "do.neishabouricounts")]
-            if (as.logical(config.Counts) == TRUE) {
-              # if counts was not selected as a tool, but acc.metric was defined as 
-              # NeishabouriCount, then turn do.Counts to TRUE
-              id_ggir = showNotification("GGIR and CountConverter in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-              do.Counts = TRUE
-            } else {
-              id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
-              do.Counts = FALSE
-            }
+          # this line makes that if user is trying to use a config defined in a previous
+          # run, the data path is correctly defined
+          config = read.csv(as.character(configfileGGIR()))
+          id_ggir = showNotification("GGIR in progress ...", type = "message", duration = NULL, closeButton = FALSE)
           
           if (file.exists(paste0(global$data_out, "/sleepdiary.csv"))) { # because this is not a global variable
             sleepdiaryfile_local = paste0(global$data_out, "/sleepdiary.csv")
@@ -848,16 +840,15 @@ myApp <- function(homedir=getwd(), ...) {
           })
           # Start GGIR
           x_ggir <- r_bg(func = function(GGIRshiny, rawaccdir, outputdir, 
-                                         sleepdiary, configfile, do.Counts){
+                                         sleepdiary, configfile){
             GGIRshiny(rawaccdir, outputdir, 
-                      sleepdiary, configfile, do.Counts)
+                      sleepdiary, configfile)
           },
           args = list(GGIRshiny = GGIRshiny,
                       rawaccdir = isolate(global$raw_acc_in),
                       outputdir = global$data_out, 
                       sleepdiary = sleepdiaryfile_local,
-                      configfile = cleanPath(paste0(global$data_out, "/config.csv")),
-                      do.Counts = do.Counts),
+                      configfile = cleanPath(paste0(global$data_out, "/config.csv"))),
           stdout = "",
           stderr = "")
           
@@ -867,11 +858,15 @@ myApp <- function(homedir=getwd(), ...) {
           observe({
             if (x_ggir$poll_io(0)[["process"]] != "ready") {
               # Copy local log file to server to update progress log
-              if (file.exists(logfile)) file.copy(from = logfile, to = stdout_GGIR_tmp, overwrite = TRUE)
+              if (file.exists(logfile)) {
+                file.copy(from = logfile, to = stdout_GGIR_tmp, overwrite = TRUE)
+              }
               invalidateLater(2000)
             } else {
               # Copy local log file to server to update progress log
-              if (file.exists(logfile)) file.copy(from = logfile, to = stdout_GGIR_tmp, overwrite = TRUE)
+              if (file.exists(logfile)) {
+                file.copy(from = logfile, to = stdout_GGIR_tmp, overwrite = TRUE)
+              }
               on.exit(removeNotification(id_ggir), add = TRUE)
               
               # Delete Rscript that is created by GGIRshiny because user does not need this
@@ -884,14 +879,14 @@ myApp <- function(homedir=getwd(), ...) {
               expected_outputdir_ggir = paste0(global$data_out, "/output_", basename(global$raw_acc_in))
               expected_ggiroutput_file = paste0(global$data_out, "/output_", basename(global$raw_acc_in), "/results/part2_daysummary.csv")
               if (file.exists(expected_ggiroutput_file) == TRUE) { # checks whether ggir output was created
-                GGIRCounts_message = paste0(#"GGIR successfully completed at ", Sys.time(), 
+                GGIR_message = paste0(#"GGIR successfully completed at ", Sys.time(), 
                   "Output is stored in: ",  #<br/>
                   expected_outputdir_ggir,
                   "<br/>The table below shows the content of part2_daysummary.csv:")
                 GGIRpart2 = read.csv(expected_ggiroutput_file, nrow = 100)
                 output$GGIRpart2 <- DT::renderDataTable(GGIRpart2, options = list(scrollX = TRUE))
                 output$ggir_end_message <- renderUI({
-                  HTML(paste0(GGIRCounts_message))
+                  HTML(paste0(GGIR_message))
                 })
               }
             }
@@ -976,6 +971,7 @@ myApp <- function(homedir=getwd(), ...) {
                       configfile =  paste0(global$data_out, "/config_hbGPS.csv")),
           stdout = stdout_hbGPS_tmp,
           stderr = "2>&1")
+          
           observe({
             if (x_hbGPS$poll_io(0)[["process"]] != "ready") {
               invalidateLater(5000)
