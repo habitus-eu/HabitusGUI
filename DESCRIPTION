@@ -10,8 +10,7 @@ Authors@R:
            email = "v.vanhees@accelting.com"))
 License: Apache License version 2.0 | file LICENSE
 Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, 
-    magrittr, shinyjs, callr, hbGPS, hbGIS,  actilifecounts, ActCR, 
-    GGIRread, read.gt3x, readxl
+    magrittr, shinyjs, callr, hbGPS, hbGIS
 Remotes: habitus-eu/hbGPS, habitus-eu/hbGIS
 LazyData: true
 Suggests: testthat, covr, rmarkdown
