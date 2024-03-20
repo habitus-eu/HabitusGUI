@@ -1,6 +1,6 @@
 [![R-CMD-check-new](https://github.com/habitus-eu/HabitusGUI/actions/workflows/r_new.yml/badge.svg)](https://github.com/habitus-eu/HabitusGUI/actions/workflows/r_new.yml)
 
-HabitusGUI is a Shiny app designed to ease processing behavioural data with research software such as GGIR, activityCounts, PALMSpy and PALMSplus. If you want to contribute to HabitusGUI then please find our contributing guidelines [here](https://github.com/wadpac/GGIR/blob/master/CONTRIBUTING.md).
+HabitusGUI is a Shiny app designed to ease processing behavioural data with research software such as GGIR, hbGPS, and hbGIS. If you want to contribute to HabitusGUI then please find our contributing guidelines [here](https://github.com/wadpac/GGIR/blob/master/CONTRIBUTING.md).
 
 ## 1 Instructions for tool contributors
 
@@ -34,13 +34,9 @@ install.packages(remotes); library("remotes"); remotes::install_github("habitus-
 2. In the RStudio console type: `library("HabitusGUI")`
 3. Specify a directory that has all relevant data in it's root or sub-directories:
 
-`data_dir = "/home/vincent/projects/fontys"`
+`data_dir = "/home/vincent/projects"`
 
-4. Tell R to us ignore sp evoluation warnings and use sf instead:
-
-`options("sp_evolution_status" = 2)`
-
-5. Launch HabitusGUI app:
+4. Launch HabitusGUI app:
 
 `HabitusGUI::myApp(homedir=data_dir)`
 
