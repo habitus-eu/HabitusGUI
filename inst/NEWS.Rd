@@ -1,10 +1,12 @@
 \name{NEWS}
 \title{News for Package \pkg{HabitusGUI}}
 \newcommand{\cpkg}{\href{http://CRAN.R-project.org/package=#1}{\pkg{#1}}}
-\section{Changes in version 0.3.2 (GitHub-only-release date: ??-??-2024)}{
+\section{Changes in version 0.3.2 (GitHub-only-release date: 20-03-2024)}{
   \itemize{
-    \item Added all GGIR dependencies that user might need: actilifecounts, ActCR, 
-    GGIRread, read.gt3x, readxl
+    \item Changed default for save_ms5rawlevels in template config.csv to TRUE
+    \item Fix issue with old activityCounts dependency that we was not 
+    correctly deprecated in the previous release
+    \item Add hbGIS parameter documentation for use inside the GUI
   }
 }
 \section{Changes in version 0.3.1 (GitHub-only-release date: 22-01-2024)}{
