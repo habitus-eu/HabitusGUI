@@ -2,7 +2,7 @@ Package: HabitusGUI
 Title: R Shiny App for Processing Behavioural Data
 Description: Shiny app to ease processing behavioural data with research software such as GGIR, hbGPS,and hbGIS.
 Version: 0.3.2
-Date: 2024-03-24
+Date: 2024-03-25
 Authors@R: 
     c(person(given = "Vincent",
            family = "van Hees",
@@ -10,7 +10,7 @@ Authors@R:
            email = "v.vanhees@accelting.com"))
 License: Apache License version 2.0 | file LICENSE
 Imports: shiny, shinyFiles, GGIR, bslib, methods, jsonlite, DT, 
-    magrittr, shinyjs, callr, hbGPS, hbGIS
+    magrittr, shinyjs, callr, hbGPS, hbGIS, data.table
 Remotes: habitus-eu/hbGPS, habitus-eu/hbGIS
 LazyData: true
 Suggests: testthat, covr, rmarkdown

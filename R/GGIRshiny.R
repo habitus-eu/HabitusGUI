@@ -7,12 +7,35 @@
 #' @return no object is returned, only a new file is created in the output directory
 #' @import GGIR
 #' @importFrom utils write.table
+#' @importFrom data.table fread
 #' @export
 #' 
 
 GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c()) {
   if (length(sleepdiary) == 0) sleepdiary = c()
-  if (length(configfile) == 0) configfile = c()
+  if (length(configfile) == 0) {
+    configfile = c()
+    modeIS = ""
+  } else {
+    configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/JosefMarch2024/config_GGIR_counts.csv"
+    # extract mode from config file
+    config = data.table::fread(file = configfile, data.table = FALSE)
+    modeChar = config$value[which(config$argument == "mode")]
+    # check that mode is nothing more than a numeric vector
+    checkMode = suppressWarnings(as.numeric(gsub(x = modeChar, pattern = "c|[(]|[)]|:|,", replacement = "")))
+    if (is.numeric(checkMode) == FALSE) {
+      stop("\nUnexpected value for parameter mode")
+    } else {
+      modeNum = eval(parse(text = modeChar)) 
+    }
+    if (min(modeNum) > 0 && max(modeNum) <= 6) {
+      # use mode value from config file if values are plausible
+      modeIS = paste0(", mode = ", modeChar)
+    } else {
+      # do not use mode value and let GGIR use its default
+      modeIS = ""
+    }
+  }
   
   # create R script with the code to run the data analysis via a command line call
   # in this way turning off or restarting the app will not kill the data analysis
@@ -25,10 +48,10 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c()) {
                "if (length(args) == 4) {",
                "GGIR::GGIR(datadir = args[1], outputdir = args[2], ",
                "configfile = args[3], loglocation = args[4],",
-               "do.parallel = TRUE)",
+               "do.parallel = TRUE", modeIS,")",
                "} else {",
                "GGIR::GGIR(datadir = args[1], outputdir = args[2], ",
-               "configfile = args[3], do.parallel = TRUE)",
+               "configfile = args[3], do.parallel = TRUE", modeIS,")",
                "}"),
              fileConn)
   close(fileConn)
