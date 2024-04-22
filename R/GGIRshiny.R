@@ -17,7 +17,6 @@ GGIRshiny = function(rawaccdir, outputdir, sleepdiary = c(), configfile = c()) {
     configfile = c()
     modeIS = ""
   } else {
-    configfile = "D:/Dropbox/Work/sharedfolder/DATA/Habitus/GPSprocessing/JosefMarch2024/config_GGIR_counts.csv"
     # extract mode from config file
     config = data.table::fread(file = configfile, data.table = FALSE)
     modeChar = config$value[which(config$argument == "mode")]
